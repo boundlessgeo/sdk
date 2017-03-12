@@ -17,21 +17,23 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import classNames from 'classnames';
 import debounce from  'debounce';
 import ReactTable from 'react-table'
-import {Card, CardHeader, CardText} from 'material-ui/Card';
-import RaisedButton from './Button';
+import Button from './Button';
 import ActionSearch from 'material-ui/svg-icons/action/search';
 import ClearIcon from 'material-ui/svg-icons/content/clear';
 import TextField from 'material-ui/TextField';
+import Toggle from 'material-ui/Toggle';
 import Checkbox from 'material-ui/Checkbox';
 import FeatureStore from '../stores/FeatureStore';
 import SelectActions from '../actions/SelectActions';
 import LayerSelector from './LayerSelector';
-import {Toolbar} from 'material-ui/Toolbar';
+import {ToolbarGroup} from 'material-ui/Toolbar';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
 import Snackbar from 'material-ui/Snackbar';
 import FilterService from '../services/FilterService';
-import FilterHelp from './FilterHelp';
 import Paper from 'material-ui/Paper';
+import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
+import IconMenu from 'material-ui/IconMenu';
+import MenuItem from 'material-ui/MenuItem';
 import './react-table.css';
 import './FeatureTable.css';
 
@@ -84,7 +86,7 @@ const messages = defineMessages({
   onlyselected: {
     id: 'featuretable.onlyselected',
     description: 'Label for the show selected features only checkbox',
-    defaultMessage: 'Selected only'
+    defaultMessage: 'Only show selected'
   },
   filterplaceholder: {
     id: 'featuretable.filterplaceholder',
@@ -191,7 +193,6 @@ class FeatureTable extends React.Component {
     this._selectedOnly = false;
     this._pagesLoaded = {};
     this.state = {
-      expanded: !this.props.height,
       pageSize: props.pageSize,
       pages: -1,
       active: false,
@@ -262,8 +263,8 @@ class FeatureTable extends React.Component {
       this.setState(state);
     }
   }
-  _filter(evt) {
-    this._selectedOnly = evt.target.checked;
+  _filter(evt, isInputChecked) {
+    this._selectedOnly = isInputChecked;
     this._updateStoreFilter();
   }
   _filterLayerList(lyr) {
@@ -383,16 +384,6 @@ class FeatureTable extends React.Component {
       });
     }, this, this._proxy, this._requestHeaders);
   }
-  _onExpandChange(expanded) {
-    var me = this;
-    window.setTimeout(function() {
-      me.setState({expanded: expanded}, function() {
-        if (me.props.onUpdate) {
-          me.props.onUpdate();
-        }
-      });
-    });
-  }
   render() {
     const {formatMessage} = this.props.intl;
     var schema, id;
@@ -445,10 +436,8 @@ class FeatureTable extends React.Component {
     }
     var table;
     if (this._element && columns.length > 0 && this.state.features !== null) {
-      var height = this.props.height ? this.props.height : this._element.offsetHeight - this._formNode.offsetHeight;
-      if (this.state.expanded && this.props.height) {
-        height = this.props.height - this._formNode.offsetHeight;
-      }
+      var height = this.props.height ? this.props.height : this._element.offsetHeight;
+      height -= this._formNode.offsetHeight;
       var data;
       if (this._filtered || this._selectedOnly) {
         data = this.state.filter;
@@ -474,7 +463,6 @@ class FeatureTable extends React.Component {
         columns={columns}
       />);
     }
-    var filterHelp = this._layer ? <FilterHelp intl={this.props.intl} /> : undefined;
     return (
       <Paper zDepth={0} className={classNames('sdk-component feature-table', this.props.className)}>
         <Snackbar
@@ -485,26 +473,18 @@ class FeatureTable extends React.Component {
           message={formatMessage(messages.nodatamsg)}
           onRequestClose={this._handleRequestCloseActive.bind(this)}
         />
-        <Card initiallyExpanded={!this.props.height} onExpandChange={this._onExpandChange.bind(this)} ref='form'>
-          <CardHeader title={formatMessage(messages.optionslabel)} actAsExpander={true} showExpandableButton={true} />
-          <CardText expandable={true}>
-            <div className='feature-table-options'>
-              <div className='feature-table-selector' style={{display: this.props.layer ? 'none' : 'block'}}>
-                <LayerSelector {...this.props} id='table-layerSelector' disabled={!this._layer} ref='layerSelector' onChange={this._onLayerSelectChange.bind(this)} filter={this._filterLayerList} map={this.props.map} value={id} />
-              </div>
-              <div className='feature-table-filter' style={{display: this._layer instanceof ol.layer.Vector ? 'block' : 'none'}}>
-                <TextField floatingLabelText={formatMessage(messages.filterlabel)} id='featuretable-filter' disabled={!this._layer} ref='filter' onChange={this._filterByText.bind(this)} hintText={formatMessage(messages.filterplaceholder)} />
-                {filterHelp}
-              </div>
-              <Checkbox label={formatMessage(messages.onlyselected)} id='featuretable-onlyselected' disabled={!this._layer} checked={this._selectedOnly} onCheck={this._filter.bind(this)} disableTouchRipple={true}/>
-            </div>
-            <Toolbar className='feature-table-toolbar'>
-              <RaisedButton disabled={!this._layer} icon={<ActionSearch />} label={formatMessage(messages.zoombuttontext)} tooltip={formatMessage(messages.zoombuttontitle)} onTouchTap={this._zoomSelected.bind(this)} disableTouchRipple={true}/>
-              <RaisedButton disabled={!this._layer} icon={<ClearIcon />} label={formatMessage(messages.clearbuttontext)} tooltip={formatMessage(messages.clearbuttontitle)} onTouchTap={this._clearSelected.bind(this)} disableTouchRipple={true}/>
-            </Toolbar>
-          </CardText>
+        <ToolbarGroup ref='form'>
+          <LayerSelector {...this.props} id='table-layerSelector' disabled={!this._layer} ref='layerSelector' onChange={this._onLayerSelectChange.bind(this)} filter={this._filterLayerList} map={this.props.map} value={id} />
+          <TextField style={{display: this._layer instanceof ol.layer.Vector ? 'block' : 'none'}} floatingLabelText={formatMessage(messages.filterlabel)} id='featuretable-filter' disabled={!this._layer} ref='filter' onChange={this._filterByText.bind(this)} hintText={formatMessage(messages.filterplaceholder)} />
+          <ToolbarGroup style={{justifyContent: 'flex-end'}}>
+            <Button buttonType='Icon' disabled={!this._layer} tooltip={formatMessage(messages.zoombuttontitle)} onTouchTap={this._zoomSelected.bind(this)}><ActionSearch /></Button>
+            <Button disabled={!this._layer} buttonType='Icon' tooltip={formatMessage(messages.clearbuttontitle)} onTouchTap={this._clearSelected.bind(this)}><ClearIcon /></Button>
+            <IconMenu anchorOrigin={{horizontal: 'right', vertical: 'top'}} targetOrigin={{horizontal: 'right', vertical: 'top'}} iconButtonElement={<Button buttonType='Icon'><MoreVertIcon /></Button>}>
+              <MenuItem primaryText={<Toggle label={formatMessage(messages.onlyselected)} disabled={!this._layer} defaultToggled={this._selectedOnly} onToggle={this._filter.bind(this)}/>} />
+            </IconMenu>
+          </ToolbarGroup>
           {error}
-        </Card>
+        </ToolbarGroup>
         {table}
       </Paper>
     );
