@@ -63,6 +63,9 @@ global.EditPopup = EditPopup;
 import FeatureTable from './components/FeatureTable';
 global.FeatureTable = FeatureTable;
 
+import Fullscreen from './components/Fullscreen';
+global.Fullscreen = Fullscreen;
+
 import Geocoding from './components/Geocoding';
 global.Geocoding = Geocoding;
 
