@@ -21,7 +21,7 @@ import ToolUtil from '../toolutil';
 import LayerConstants from '../constants/LayerConstants';
 import MenuItem from 'material-ui/MenuItem';
 import SelectField from 'material-ui/SelectField';
-import {Toolbar} from 'material-ui/Toolbar';
+import {Toolbar, ToolbarGroup} from 'material-ui/Toolbar';
 import Button from './Button';
 import ol from 'openlayers';
 import util from '../util';
@@ -417,8 +417,12 @@ class Edit extends React.PureComponent {
           {options}
         </SelectField>
         <Toolbar>
-          <Button tooltip={formatMessage(messages.newlayertitle)} label={formatMessage(messages.newlayer)} onTouchTap={this._showModal.bind(this)} />
-          {button}
+          <ToolbarGroup>
+            <Button tooltip={formatMessage(messages.newlayertitle)} label={formatMessage(messages.newlayer)} onTouchTap={this._showModal.bind(this)} />
+          </ToolbarGroup>
+          <ToolbarGroup>
+            {button}
+          </ToolbarGroup>
         </Toolbar>
         <Dialog open={this.state.attributeOpen} actions={attributeActions} autoScrollBodyContent={true} onRequestClose={this.closeAttributes.bind(this)} modal={true} title={formatMessage(messages.newfeaturemodaltitle)}>
           {attributeFormItems}

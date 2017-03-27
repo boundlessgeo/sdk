@@ -20,7 +20,7 @@ import LayerSelector from './LayerSelector';
 import SelectActions from '../actions/SelectActions';
 import FilterService from '../services/FilterService';
 import FilterHelp from './FilterHelp';
-import {Toolbar} from 'material-ui/Toolbar';
+import {Toolbar, ToolbarGroup} from 'material-ui/Toolbar';
 import TextField from 'material-ui/TextField';
 import Paper from 'material-ui/Paper';
 import RaisedButton from './Button';
@@ -222,9 +222,15 @@ class QueryBuilder extends React.PureComponent {
         <LayerSelector {...this.props} value={id} onChange={this._onLayerSelectChange.bind(this)} id='layerSelector' ref='layerSelector' filter={this._filterLayerList} map={this.props.map} /><br/>
         <TextField floatingLabelText={formatMessage(messages.filterlabel)} errorText={this.state.errorText} ref='queryExpression' onChange={this._setQueryFilter.bind(this)} /><FilterHelp intl={this.props.intl} /><br/>
         <Toolbar>
-          <RaisedButton label={formatMessage(messages.newbuttontext)} tooltip={formatMessage(messages.newbuttontitle)} onTouchTap={this._newSelection.bind(this)} />
-          <RaisedButton label={formatMessage(messages.addbuttontext)} tooltip={formatMessage(messages.addbuttontitle)}onTouchTap={this._addSelection.bind(this)} />
-          <RaisedButton label={formatMessage(messages.selectintext)} tooltip={formatMessage(messages.selectintitle)} onTouchTap={this._inSelection.bind(this)} />
+          <ToolbarGroup>
+            <RaisedButton label={formatMessage(messages.newbuttontext)} tooltip={formatMessage(messages.newbuttontitle)} onTouchTap={this._newSelection.bind(this)} />
+          </ToolbarGroup>
+          <ToolbarGroup>
+            <RaisedButton label={formatMessage(messages.addbuttontext)} tooltip={formatMessage(messages.addbuttontitle)}onTouchTap={this._addSelection.bind(this)} />
+          </ToolbarGroup>
+          <ToolbarGroup>
+            <RaisedButton label={formatMessage(messages.selectintext)} tooltip={formatMessage(messages.selectintitle)} onTouchTap={this._inSelection.bind(this)} />
+          </ToolbarGroup>
         </Toolbar>
         {count}
       </Paper>
