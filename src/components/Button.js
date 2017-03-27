@@ -98,7 +98,6 @@ class Button extends React.PureComponent {
     } else if (this.props.buttonType === 'Icon') {
       button = (<IconButton disableTouchRipple={true} disabled={this.props.disabled} onTouchTap={this.props.onTouchTap} style={this.props.style} children={this.props.children}/>);
     } else {
-      buttonStyle.margin = '10px 12px';
       button = (<RaisedButton disableTouchRipple={true} disabled={this.props.disabled} style={this.props.style} secondary={this.props.secondary} onTouchTap={this.props.onTouchTap} icon={this.props.icon} children={this.props.children} label={this.props.label} />);
     }
     var className = {
