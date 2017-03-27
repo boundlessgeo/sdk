@@ -13,3 +13,4 @@ locale
 docs/api
 dist
 src/components/AddLayerModal.css
+src/components/LayerList.css
