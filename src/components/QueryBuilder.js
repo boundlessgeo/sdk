@@ -161,7 +161,7 @@ class QueryBuilder extends React.PureComponent {
       }
     }
   }
-  _doQuery(selectIn) {
+  _doQuery(selectIn, add) {
     var selection = [];
     this._setQueryFilter();
     if (this._queryFilter === null) {
@@ -179,7 +179,7 @@ class QueryBuilder extends React.PureComponent {
     if (selectIn === true) {
       count = FeatureStore.selectFeaturesInCurrentSelection(this._layer, selection);
     } else {
-      SelectActions.selectFeatures(this._layer, selection, true);
+      SelectActions.selectFeatures(this._layer, selection, !add);
       count = selection.length;
     }
     this.setState({
@@ -189,10 +189,10 @@ class QueryBuilder extends React.PureComponent {
     });
   }
   _addSelection() {
-    this._doQuery();
+    this._doQuery(false, true);
   }
   _newSelection() {
-    this._doQuery();
+    this._doQuery(false);
   }
   _inSelection() {
     this._doQuery(true);
