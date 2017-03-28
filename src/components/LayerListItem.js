@@ -25,9 +25,6 @@ import WMSService from '../services/WMSService';
 import Slider from 'material-ui/Slider';
 import {ListItem} from 'material-ui/List';
 import {RadioButton} from 'material-ui/RadioButton';
-import LabelIcon from 'material-ui/svg-icons/content/text-format';
-import EditIcon from 'material-ui/svg-icons/editor/mode-edit';
-import TableIcon from 'material-ui/svg-icons/action/view-list';
 import WMSLegend from './WMSLegend';
 import ArcGISRestLegend from './ArcGISRestLegend';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
@@ -552,7 +549,6 @@ static formats = {
     const {connectDragSource, connectDropTarget} = this.props;
     const layer = this.props.layer;
     const source = layer.getSource ? layer.getSource() : undefined;
-    const iconStyle = {'paddingTop':'0px', 'paddingBottom':'0px'};
     const {formatMessage} = this.props.intl;
     var opacity;
     if (this.props.showOpacity && source && layer.get('type') !== 'base') {
@@ -562,7 +558,7 @@ static formats = {
     }
     var table;
     if (this.props.showTable && (this.props.layer instanceof ol.layer.Vector || this.props.layer.get('wfsInfo') !== undefined)) {
-      table = (<Button className='layer-list-item-table' onTouchTap={this._showTable.bind(this)} tooltipPosition='top-center' style={iconStyle} buttonType='Icon' tooltip={formatMessage(messages.tablebuttonlabel)}><TableIcon /></Button>);
+      table = (<MenuItem onTouchTap={this._showTable.bind(this)} primaryText={formatMessage(messages.tablebuttonlabel)} leftIcon={<i className='fa fa-table'></i>} />);
     }
 
     var downArrow = <i className="fa fa-angle-down" onClick={this._toggleNested.bind(this)}></i>;
@@ -595,7 +591,7 @@ static formats = {
     }
     var label;
     if (layer instanceof ol.layer.Vector && this.props.allowLabeling) {
-      label = (<Button className='layer-list-item-label' onTouchTap={this._label.bind(this)} tooltipPosition='top-center' style={iconStyle} buttonType='Icon' tooltip={formatMessage(messages.labelbuttonlabel)} ><LabelIcon /></Button>);
+      label = (<MenuItem primaryText={formatMessage(messages.labelbuttonlabel)} leftIcon={<i className='fa fa-tag'></i>} onTouchTap={this._label.bind(this)} />);
     }
     var remove;
     if (this.props.allowRemove && layer.get('type') !== 'base' && layer.get('isRemovable') === true) {
@@ -603,7 +599,7 @@ static formats = {
     }
     var edit;
     if (this.props.allowEditing && layer.get('isWFST') === true) {
-      edit = (<Button className='layer-list-item-edit' onTouchTap={this._edit.bind(this)} tooltipPosition='top-center' style={iconStyle} buttonType='Icon' tooltip={formatMessage(messages.editbuttonlabel)} ><EditIcon /></Button>);
+      edit = (<MenuItem onTouchTap={this._edit.bind(this)} primaryText={formatMessage(messages.editbuttonlabel)} leftIcon={<i className='fa fa-pencil'></i>} />);
     }
     var tableModal, labelModal, filterModal, styleModal;
     if (this.props.layer instanceof ol.layer.Vector) {
@@ -667,6 +663,9 @@ static formats = {
               {download}
               {filter}
               {remove}
+              {table}
+              {label}
+              {edit}
             </Menu>
           </Popover>
       </div>
@@ -700,9 +699,6 @@ static formats = {
           open={this.state.open}/>
         <div style={{paddingLeft: 72}}>
           {legend}
-          {table}
-          {label}
-          {edit}
           <span>
             {filterModal}
             {labelModal}
