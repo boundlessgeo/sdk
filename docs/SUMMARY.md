@@ -5,7 +5,6 @@ Boundless SDK
 * [Getting started](getting_started.md)
 * [Tutorial](tutorial.md)
 * [Writing components](writing_components.md)
-* [LayerListItem](LayerListItem.md)
 * [For developers](developers.md)
 * [Writing components](writing_components.md)
 * [API](api.md)
