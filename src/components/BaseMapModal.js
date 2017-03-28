@@ -138,7 +138,7 @@ class BaseMapModal extends React.Component {
       <Button buttonType='Flat' label={formatMessage(messages.closebutton)} onTouchTap={this.close.bind(this)} />
     ];
     return (<Dialog autoScrollBodyContent={true} actions={actions} title={formatMessage(messages.title)} modal={true} open={this.state.open} onRequestClose={this.close.bind(this)}>
-      <GridList cols={3} cellHeight={120}>
+      <GridList cols={2} cellHeight={120}>
         {this.props.tileServices.map((tileService) => (
           <GridTile style={{cursor: 'pointer'}} onTouchTap={this._tileClick.bind(this, tileService)}
             key={tileService.name}
