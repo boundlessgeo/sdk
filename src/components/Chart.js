@@ -11,13 +11,13 @@
  */
 
 import React from 'react';
+import Button from './Button';
 import FeatureStore from '../stores/FeatureStore';
+import CloserIcon from 'material-ui/svg-icons/navigation/close';
 import c3 from 'c3-windows';
 import './c3.min.css';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
-import RaisedButton from 'material-ui/RaisedButton';
 import SelectField from 'material-ui/SelectField';
 import Paper from 'material-ui/Paper';
 import classNames from 'classnames';
@@ -33,10 +33,10 @@ const DISPLAY_MODE_CATEGORY = 1;
 const DISPLAY_MODE_COUNT = 2;
 
 const messages = defineMessages({
-  dropdowntext: {
-    id: 'chart.dropdowntext',
+  combotext: {
+    id: 'chart.combotext',
     description: 'Text to use on the Chart drop down',
-    defaultMessage: 'Charts'
+    defaultMessage: 'Chart Name'
   },
   count: {
     id: 'chart.count',
@@ -67,7 +67,7 @@ const messages = defineMessages({
  * ```
  *
  * ```xml
- * <Chart ref='chartPanel' combo={true} charts={charts}/>
+ * <Chart ref='chartPanel' charts={charts}/>
  * ```
  */
 class Chart extends React.Component {
@@ -95,17 +95,13 @@ class Chart extends React.Component {
       operation: React.PropTypes.oneOf([0, 1, 2, 3])
     })).isRequired,
     /**
-     * If true, show a combo box to select charts instead of dropdown button.
-     */
-    combo: React.PropTypes.bool,
-    /**
      * Css class name to apply on the menu or div.
      */
     className: React.PropTypes.string,
     /**
-     * The id of the container to show when a chart is selected.
+     * Callback function when the closer icon is pressed.
      */
-    container: React.PropTypes.string,
+    onClose: React.PropTypes.func.isRequired,
     /**
      * @ignore
      */
@@ -118,10 +114,6 @@ class Chart extends React.Component {
 
   static childContextTypes = {
     muiTheme: React.PropTypes.object.isRequired
-  };
-
-  static defaultProps = {
-    combo: false
   };
 
   constructor(props, context) {
@@ -252,11 +244,8 @@ class Chart extends React.Component {
       }
     }
   }
-  _onClick(evt, value) {
-    if (this.props.container) {
-      document.getElementById(this.props.container).style.display = 'block';
-    }
-    this._selectChart(undefined, undefined, value);
+  _onClose() {
+    this.props.onClose();
   }
   render() {
     const {formatMessage} = this.props.intl;
@@ -282,30 +271,20 @@ class Chart extends React.Component {
         }
       }
     });
-    if (this.props.combo === true) {
-      var options = this.props.charts.map(function(chart, idx) {
-        var title = chart.title;
-        return (<MenuItem key={idx} value={title} primaryText={title} />);
-      });
-      return (
-        <Paper zDepth={0} className={classNames('sdk-component chart', this.props.className)}>
-          <SelectField fullWidth={true} value={this.state.value} onChange={this._selectChart.bind(this)}>
-            {options}
-          </SelectField>
-          <div id='chart'></div>
-        </Paper>
-      );
-    } else {
-      var listitems = this.props.charts.map(function(chart, idx) {
-        var key = chart.title;
-        return (<MenuItem key={idx} value={key} primaryText={key} />);
-      });
-      return (
-        <IconMenu {...this.props} anchorOrigin={{horizontal: 'left', vertical: 'top'}} targetOrigin={{horizontal: 'left', vertical: 'top'}} className={classNames('sdk-component chart', this.props.className)} iconButtonElement={<RaisedButton label={formatMessage(messages.dropdowntext)} />} onChange={this._onClick.bind(this)}>
-          {listitems}
-        </IconMenu>
-      );
-    }
+    var options = this.props.charts.map(function(chart, idx) {
+      var title = chart.title;
+      return (<MenuItem key={idx} value={title} primaryText={title} />);
+    });
+    return (
+      <Paper zDepth={0} className={classNames('sdk-component chart', this.props.className)}>
+        <SelectField style={{width: 350}} floatingLabelText={formatMessage(messages.combotext)} floatingLabelFixed={true} value={this.state.value} onChange={this._selectChart.bind(this)}>
+          {options}
+        </SelectField>
+        <Button buttonType='Icon' buttonStyle={{float: 'right'}} style={{'position':'absolute', 'right':'0px', 'top':'0px', 'zIndex':'1000'}} ref="popupCloser" onTouchTap={this._onClose.bind(this)}><CloserIcon /></Button>
+        <div id='chart'>
+        </div>
+      </Paper>
+    );
   }
 }
 

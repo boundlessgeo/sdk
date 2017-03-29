@@ -58,9 +58,10 @@ describe('Chart', function() {
 
   it('generates the correct combo', function() {
     var container = document.createElement('div');
+    var onClose = function() {};
     ReactDOM.render((
       <MuiThemeProvider muiTheme={getMuiTheme()}>
-        <Chart intl={intl} combo={true} charts={charts} />
+        <Chart intl={intl} onClose={onClose} charts={charts} />
       </MuiThemeProvider>
     ), container);
     var divs = container.querySelectorAll('div');
