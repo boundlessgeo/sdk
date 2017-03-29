@@ -167,7 +167,7 @@ class QGISLegend extends React.PureComponent {
     return (
       <div className={classNames(divClass, this.props.className)}>
         <Button buttonType='Action' mini={true} secondary={true} className='legendbutton' tooltip={formatMessage(messages.buttontitle)} onTouchTap={this._togglePanel.bind(this)}><LegendIcon /></Button>
-        <Paper zDepth={0} className='legend-panel' id='legend'>{items}</Paper>
+        <Paper zDepth={0} className='legend-panel'>{items}</Paper>
       </div>
     );
   }
