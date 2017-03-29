@@ -101,7 +101,7 @@ class Chart extends React.Component {
     /**
      * Callback function when the closer icon is pressed.
      */
-    onClose: React.PropTypes.func.isRequired,
+    onClose: React.PropTypes.func,
     /**
      * @ignore
      */
@@ -267,7 +267,7 @@ class Chart extends React.Component {
             rotate: 70,
             multiline: false
           },
-          height: 80
+          height: 100
         }
       }
     });
@@ -275,12 +275,13 @@ class Chart extends React.Component {
       var title = chart.title;
       return (<MenuItem key={idx} value={title} primaryText={title} />);
     });
+    var closer = this.props.onClose ? (<Button buttonType='Icon' buttonStyle={{float: 'right'}} style={{'position':'absolute', 'right':'0px', 'top':'0px', 'zIndex':'1000'}} ref="popupCloser" onTouchTap={this.props.onClose}><CloserIcon /></Button>) : undefined;
     return (
       <Paper zDepth={0} className={classNames('sdk-component chart', this.props.className)}>
         <SelectField style={{width: 350}} floatingLabelText={formatMessage(messages.combotext)} floatingLabelFixed={true} value={this.state.value} onChange={this._selectChart.bind(this)}>
           {options}
         </SelectField>
-        <Button buttonType='Icon' buttonStyle={{float: 'right'}} style={{'position':'absolute', 'right':'0px', 'top':'0px', 'zIndex':'1000'}} ref="popupCloser" onTouchTap={this._onClose.bind(this)}><CloserIcon /></Button>
+        {closer}
         <div id='chart'>
         </div>
       </Paper>
