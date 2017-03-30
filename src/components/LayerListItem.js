@@ -647,7 +647,7 @@ static formats = {
       disableTouchRipple={true}/>);
 
     var visibility = this.state.checked ? checked : unchecked;
-    var popoverEllipsis = (!(this.props.layer instanceof ol.layer.Group)) ? (
+    var popoverEllipsis = (!(this.props.layer instanceof ol.layer.Group) && (opacity || download || filter || remove || table || label || edit)) ? (
       <div>
         <i className="fa fa-ellipsis-v" onTouchTap={this._handleMenuOpen.bind(this)}></i>
         <Popover
