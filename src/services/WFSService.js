@@ -126,7 +126,7 @@ class WFSService {
       typename: layerName
     });
     util.doGET(util.getProxiedUrl(dftUrl.toString(), opt_proxy), function(xmlhttp) {
-      if (xmlhttp.responseText.indexOf('ServiceExceptionReport') === -1) {
+      if (xmlhttp.responseText.indexOf('<?xml') !== -1 && xmlhttp.responseText.indexOf('ServiceExceptionReport') === -1) {
         var schema = xsdUnmarshaller.unmarshalString(xmlhttp.responseText).value;
         var element = schema.complexType[0].complexContent.extension.sequence.element;
         var geometryType, geometryName;

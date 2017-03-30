@@ -31,9 +31,10 @@ global.getMuiTheme = getMuiTheme;
 import AppBar from 'material-ui/AppBar';
 global.AppBar = AppBar;
 
-import {Toolbar, ToolbarGroup} from 'material-ui/Toolbar';
+import {Toolbar, ToolbarGroup, ToolbarSeparator} from 'material-ui/Toolbar';
 global.Toolbar = Toolbar;
 global.ToolbarGroup = ToolbarGroup;
+global.ToolbarSeparator = ToolbarSeparator;
 
 import IconMenu from 'material-ui/IconMenu';
 global.IconMenu = IconMenu;
