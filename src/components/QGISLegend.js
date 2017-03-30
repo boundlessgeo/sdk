@@ -10,6 +10,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
+/* eslint react/prop-types: 0 */
 import React from 'react';
 import ol from 'openlayers';
 import classNames from 'classnames';
@@ -87,6 +88,10 @@ class QGISLegend extends React.PureComponent {
      */
     className: React.PropTypes.string,
     /**
+     * Size in pixels of the legend icons
+     */
+    size: React.PropTypes.number,
+    /**
      * @ignore
      */
     intl: intlShape.isRequired
@@ -135,9 +140,11 @@ class QGISLegend extends React.PureComponent {
   }
   _renderItems(legendData, legendBasePath) {
     var legendNodes = [];
+    var props = this.props;
     var symbolFunc = function(symbol) {
       var src = legendBasePath + symbol.href;
-      return (<ListItem key={symbol.title} primaryText={symbol.title} leftIcon={<img src={src}></img>} />);
+      var style = props.size ? {width: props.size, height: props.size} : undefined;
+      return (<ListItem disabled={true} key={symbol.title} primaryText={symbol.title} leftIcon={<img style={style} src={src}></img>} />);
     };
     for (var id in legendData) {
       var layer = LayerStore.findLayer(id);
