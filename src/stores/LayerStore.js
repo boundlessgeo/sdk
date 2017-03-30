@@ -86,7 +86,8 @@ class LayerStore extends EventEmitter {
   _getWfsInfo(layer) {
     var source = layer.getSource();
     var url = layer.get('url') || source.getUrls()[0];
-    WFSService.describeFeatureType(url, layer.get('name'), function(wfsInfo) {
+    var name = layer.get('name') ? layer.get('name') : source.getParams().LAYERS;
+    WFSService.describeFeatureType(url, name, function(wfsInfo) {
       this.set('wfsInfo', wfsInfo);
     }, function() {
       this.set('isSelectable', false);
