@@ -122,6 +122,22 @@ describe('LayerStore', function() {
       error = true;
     }
     assert.equal(error, false);
+    error = false;
+    var imageWMS = new ol.layer.Image({
+      id: 'imagewms',
+      source: new ol.source.ImageWMS({
+        url: 'http://localhost/geoserver/wms',
+        params: {
+          LAYERS: 'foo'
+        }
+      })
+    });
+    try {
+      LayerStore._getWfsInfo(imageWMS);
+    } catch (e) {
+      error = true;
+    }
+    assert.equal(error, false);
     // QGIS WAB no featureNS handled
     var wab = new ol.layer.Vector({
       title: 'topp:states',
