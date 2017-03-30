@@ -119,7 +119,6 @@ class WFSService {
   }
   describeFeatureType(url, layerName, onSuccess, onFailure, scope, opt_proxy, opt_requestHeaders) {
     var dftUrl = new URL(url);
-    dftUrl.set('pathname', dftUrl.pathname.replace('wms', 'wfs'));
     dftUrl.set('query', {
       service: 'WFS',
       request: 'DescribeFeatureType',
@@ -153,7 +152,7 @@ class WFSService {
           geometryType: geometryType,
           geometryName: geometryName,
           attributes: attributes,
-          url: url.replace('wms', 'wfs')
+          url: url
         });
       } else {
         onFailure.call(scope || this, xmlhttp);
