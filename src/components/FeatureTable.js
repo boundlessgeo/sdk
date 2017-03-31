@@ -268,7 +268,7 @@ class FeatureTable extends React.Component {
     this._updateStoreFilter();
   }
   _filterLayerList(lyr) {
-    return lyr.get('title') !== null && (lyr instanceof ol.layer.Vector || lyr.get('wfsInfo') !== undefined);
+    return lyr.getVisible() && lyr.get('title') !== null && (lyr instanceof ol.layer.Vector || lyr.get('wfsInfo') !== undefined);
   }
   _updateStoreFilter() {
     var lyr = this._layer;
