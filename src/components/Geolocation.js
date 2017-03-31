@@ -56,6 +56,10 @@ class Geolocation extends React.PureComponent {
      */
     map: React.PropTypes.instanceOf(ol.Map).isRequired,
     /**
+     * Position of the tooltip.
+     */
+    tooltipPosition: React.PropTypes.oneOf(['bottom', 'bottom-right', 'bottom-left', 'right', 'left', 'top-right', 'top', 'top-left']),
+    /**
      * The zoom level used when centering the view.
      */
     zoom: React.PropTypes.number,
@@ -173,7 +177,7 @@ class Geolocation extends React.PureComponent {
         tooltip += ' (' + formatMessage(messages.trackingtitle) + ')';
       }
       return (
-        <Button iconStyle={iconStyle} buttonType='Action' mini={true} secondary={true} className={classNames('sdk-component geolocation', this.props.className)} tooltip={tooltip} onTouchTap={this._geolocate.bind(this)}><MyLocation /></Button>
+        <Button tooltipPosition={this.props.tooltipPosition} iconStyle={iconStyle} buttonType='Action' mini={true} secondary={true} className={classNames('sdk-component geolocation', this.props.className)} tooltip={tooltip} onTouchTap={this._geolocate.bind(this)}><MyLocation /></Button>
       );
     }
   }
