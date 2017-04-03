@@ -214,7 +214,7 @@ class FilterModal extends React.PureComponent {
       <Dialog inline={this.props.inline} className={classNames('sdk-component filter-modal', this.props.className)} actions={actions} title={formatMessage(messages.title, {layer: this.props.layer.get('title')})} modal={true} open={this.props.open} onRequestClose={this.close.bind(this)}>
         <TextField name='filter' errorText={errorText} style={{width: 512}} ref='filterTextBox' />
         <FilterHelp intl={this.props.intl} />
-        <Button style={{float: 'right'}} label={formatMessage(messages.addfiltertext)} onTouchTap={this._addFilter.bind(this)} />
+        <Button buttonStyle={{float: 'right', top: -45}} label={formatMessage(messages.addfiltertext)} onTouchTap={this._addFilter.bind(this)} />
         <List>
           {filters}
         </List>
