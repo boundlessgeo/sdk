@@ -14,13 +14,14 @@ import React from 'react';
 import Dropzone from 'react-dropzone';
 import util from '../util';
 import ol from 'openlayers';
-import Dialog from './Dialog';
 import Snackbar from 'material-ui/Snackbar';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
 import TextField from 'material-ui/TextField';
 import IconButton from 'material-ui/IconButton';
 import Button from './Button';
 import MenuItem from 'material-ui/MenuItem';
+import AppBar from 'material-ui/AppBar';
+import Drawer from 'material-ui/Drawer';
 import SelectField from 'material-ui/SelectField';
 import WMSService from '../services/WMSService';
 import WFSService from '../services/WFSService';
@@ -31,6 +32,7 @@ import CircularProgress from 'material-ui/CircularProgress';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import FillEditor from './FillEditor';
 import StrokeEditor from './StrokeEditor';
+import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
 
 import classNames from 'classnames';
 import './AddLayerModal.css';
@@ -185,12 +187,20 @@ class AddLayerModal extends React.PureComponent {
       url: React.PropTypes.string.isRequired
     })),
     /**
-     * Should be user be able to provide their own url?
+     * If true users can Input new layers
      */
     allowUserInput: React.PropTypes.bool,
     /**
-     * Should we allow people to upload their local vector files?
-     */
+    *  Callback for closing the modal
+    */
+    onRequestClose: React.PropTypes.func,
+    /**
+    *  Controls opening the modal
+    */
+    open : React.PropTypes.bool,
+     /**
+      * Should we allow people to upload their local vector files?
+      */
     allowUpload: React.PropTypes.bool,
     /**
      * @ignore
@@ -210,7 +220,8 @@ class AddLayerModal extends React.PureComponent {
 
   static defaultProps = {
     allowUserInput: false,
-    allowUpload: true
+    allowUpload: true,
+    open: false
   };
 
   static formats = {
@@ -552,7 +563,7 @@ class AddLayerModal extends React.PureComponent {
     var layers, layerMenuItems = [];
     if (this.state.layerInfo) {
       this._getLayersMarkup(this.state.layerInfo, layerMenuItems);
-      layers = <SelectField fullWidth={true} value={this.state.layer} onChange={this._onChangeSelectLayer.bind(this)} floatingLabelText={formatMessage(messages.selectlayercombo)}>{layerMenuItems}</SelectField>;
+      layers = <div className='noBorderPaper'><SelectField fullWidth={true} value={this.state.layer} onChange={this._onChangeSelectLayer.bind(this)} floatingLabelText={formatMessage(messages.selectlayercombo)}>{layerMenuItems}</SelectField></div>;
     }
     var loadingIndicator;
     if (this.state.loading === true) {
@@ -570,8 +581,8 @@ class AddLayerModal extends React.PureComponent {
       />);
     }
     var actions = [
-      <Button buttonType='Flat' label={formatMessage(messages.closebutton)} onTouchTap={this.close.bind(this)} />,
-      <Button buttonType='Flat' primary={true} label={formatMessage(messages.addbutton)} onTouchTap={this.addLayers.bind(this)} />
+      <Button key='closeButton' buttonType='Flat' label={formatMessage(messages.closebutton)} onTouchTap={this.close.bind(this)} />,
+      <Button key='saveButton' buttonType='Flat' primary={true} label={formatMessage(messages.addbutton)} onTouchTap={this.addLayers.bind(this)} />
     ];
     var upload;
     if (this.state.showUpload) {
@@ -590,14 +601,14 @@ class AddLayerModal extends React.PureComponent {
           </IconButton>
           </Dropzone>
         </div>
-        <FillEditor disabled={true} onChange={this._onChangeFill.bind(this)} />
+        <FillEditor className='addLayer-colorPicker' disabled={true} onChange={this._onChangeFill.bind(this)} />
         <StrokeEditor disabled={true} onChange={this._onChangeStroke.bind(this)} />
       </div>);
     }
     var newDialog;
     if (this.state.showNew) {
       newDialog = (
-        <div>
+        <div className='noBorderPaper'>
           <SelectField fullWidth={true} floatingLabelText={formatMessage(messages.servertypelabel)} value={this.state.newType} onChange={this._onNewTypeChange.bind(this)}>{typeOptions}</SelectField>
           <TextField floatingLabelFixed={true} hintText={formatMessage(messages.newservernamehint)} value={this.state.newName} onChange={this._onNewNameChange.bind(this)} fullWidth={true} floatingLabelText={formatMessage(messages.newservername)} />
           <TextField floatingLabelFixed={true} hintText={formatMessage(messages.newserverurlhint)} value={this.state.newUrl} onKeyPress={this._onNewUrlKeyPress.bind(this)} onChange={this._onNewUrlChange.bind(this)} fullWidth={true} floatingLabelText={formatMessage(messages.newserverurl)} />
@@ -605,16 +616,25 @@ class AddLayerModal extends React.PureComponent {
       );
     }
     return (
-      <Dialog bodyStyle={{padding: 20}} inline={this.props.inline} className={classNames('sdk-component add-layer-modal', this.props.className)} actions={actions} autoScrollBodyContent={true} modal={true} title={formatMessage(messages.title)} open={this.props.open} onRequestClose={this.close.bind(this)}>
-        <SelectField fullWidth={true} floatingLabelText={formatMessage(messages.sourcecombo)} value={this.state.source} onChange={this._onSourceChange.bind(this)}>
-          {selectOptions}
-        </SelectField>
+      <Drawer width={360} className={classNames('sdk-component add-layer-modal', this.props.className)} actions={actions} autoScrollBodyContent={true} title={formatMessage(messages.title)} open={this.props.open} onRequestClose={this.close.bind(this)}>
+        <AppBar
+          title={formatMessage(messages.title)}
+          iconElementLeft={<IconButton label={formatMessage(messages.closebutton)} > <NavigationArrowBack/> </IconButton>}
+          onLeftIconButtonTouchTap={this.close.bind(this)}/>
+        <div className='noBorderPaper'>
+          <SelectField fullWidth={true} floatingLabelText={formatMessage(messages.sourcecombo)} value={this.state.source} onChange={this._onSourceChange.bind(this)}>
+            {selectOptions}
+          </SelectField>
+        </div>
         {newDialog}
         {upload}
         {layers}
         {loadingIndicator}
         {error}
-      </Dialog>
+        <div className='footerButtons'>
+          {actions}
+        </div>
+      </Drawer>
     );
   }
 }

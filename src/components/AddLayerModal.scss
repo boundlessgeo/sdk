@@ -7,7 +7,27 @@
     top: 20px;
     padding: 10px;
   }
+  .textField {
+
+  }
 }
-.layer-title-empty {
-  font-style: italic;
+.addLayer-colorPicker {
+  position: relative;
+  padding-top: 20px;
+  .icon {
+    position: absolute !important;
+    right: 0px;
+    top: 0px;
+    padding: 10px 0 10px 10px;
+  }
+  .textField {
+
+  }
+}
+.footerButtons {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: right;
+  margin-bottom: 10px;
 }
