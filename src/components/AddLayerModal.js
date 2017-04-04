@@ -615,6 +615,18 @@ class AddLayerModal extends React.PureComponent {
         </div>
       );
     }
+    // var dialog = (<Dialog bodyStyle={{padding: 20}} inline={this.props.inline} className={classNames('sdk-component add-layer-modal', this.props.className)} actions={actions} autoScrollBodyContent={true} modal={true} title={formatMessage(messages.title)} open={this.props.open} onRequestClose={this.close.bind(this)}>
+    //   <SelectField fullWidth={true} floatingLabelText={formatMessage(messages.sourcecombo)} value={this.state.source} onChange={this._onSourceChange.bind(this)}>
+    //     <div className='noBorderPaper'>
+    //       {selectOptions}
+    //     </div>
+    //   </SelectField>
+    //   {newDialog}
+    //   {upload}
+    //   {layers}
+    //   {loadingIndicator}
+    //   {error}
+    // </Dialog>);
     return (
       <Drawer width={360} className={classNames('sdk-component add-layer-modal', this.props.className)} actions={actions} autoScrollBodyContent={true} title={formatMessage(messages.title)} open={this.props.open} onRequestClose={this.close.bind(this)}>
         <AppBar

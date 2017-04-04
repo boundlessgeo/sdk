@@ -596,7 +596,11 @@
 .fa-folder:before {
   content: "\f07b"; }
 
+<<<<<<< 8bf83001cffa336fc518804f0ac0f179633b2285
 .fa-folder-open:before {
+=======
+.fa-folder-:before {
+>>>>>>> Adding in AddLayer drawer
   content: "\f07c"; }
 
 .fa-arrows-v:before {
