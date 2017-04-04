@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build:babel": "cross-env NODE_ENV=release babel ./src --out-dir ./release",
-    "start": "npm-run-all --parallel build:copy:css babel watch:css",
+    "start": "npm-run-all --parallel build:copy:css babel watch:css watch:scss",
     "watch:css": "onchange 'src/components/*.css' -- npm run build:copy:css",
     "watch:scss": "onchange 'src/components/*.scss' -- npm run build:css",
     "babel": "babel --watch ./src --out-dir ./release",
