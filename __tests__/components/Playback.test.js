@@ -55,4 +55,13 @@ describe('Playback', function() {
     ReactDOM.unmountComponentAtNode(container);
   });
 
+  it ('plays when play button is clicked', function() {
+    var container = document.createElement('div');
+    ReactDOM.render((
+      <MuiThemeProvider muiTheme={getMuiTheme()}>
+        <Playback map={map} intl={intl}/>
+      </MuiThemeProvider>
+    ), container);
+  })
+
 });
