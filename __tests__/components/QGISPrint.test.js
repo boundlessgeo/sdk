@@ -120,20 +120,7 @@ describe('QGISPrint', function() {
     assert.equal(print.state.disabled, true);
     ReactDOM.unmountComponentAtNode(container);
   });
-/*
-  it('closes error', function() {
-    var container = document.createElement('div');
-    var print = ReactDOM.render((
-      <QGISPrint intl={intl} layouts={printLayouts} map={map}/>
-    ), container);
-    print.setState({error: true});
-    print._paintMapInPdf();
-    assert.equal(print.state.errorOpen, true);
-    window.setTimeout(function() {
-      ReactDOM.unmountComponentAtNode(container);
-    }, 100);
-  });
-  */
+
   it('adds elements loaded', function() {
     var container = document.createElement('div');
     var print = ReactDOM.render((
@@ -142,9 +129,6 @@ describe('QGISPrint', function() {
     print._onClick(printLayouts[0]);
     print._print();
     assert.equal(print.state.layout.elements.length, 2);
-    //print._elementLoaded();
-    //print._paintMapInPdf();
-    //assert.equal(print._elementsLoaded, 1);
     ReactDOM.unmountComponentAtNode(container);
   });
 
