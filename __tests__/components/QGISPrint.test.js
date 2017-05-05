@@ -132,4 +132,15 @@ describe('QGISPrint', function() {
     ReactDOM.unmountComponentAtNode(container);
   });
 
+  it('opens on click', function() {
+    var container = document.createElement('div');
+    var print = ReactDOM.render((
+      <QGISPrint intl={intl} layouts={printLayouts} map={map} thumbnailPath={""}/>
+    ), container);
+    assert.equal(print.state.open, false);
+    print._onClick(printLayouts[0]);
+    assert.equal(print.state.open, true);
+    ReactDOM.unmountComponentAtNode(container);
+  });
+
 });
