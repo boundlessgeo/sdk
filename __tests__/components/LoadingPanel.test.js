@@ -6,6 +6,7 @@ import {assert} from 'chai';
 import raf from 'raf';
 import ol from 'openlayers';
 import LoadingPanel from '../../src/components/LoadingPanel';
+import TestUtils from 'react-addons-test-utils';
 
 raf.polyfill();
 
@@ -59,6 +60,14 @@ describe('LoadingPanel', function() {
     layer.getSource().dispatchEvent('tileloadstart');
     assert.equal(lp.state.show, true);
     ReactDOM.unmountComponentAtNode(container);
+  });
+
+  it('renders the loading panel', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<LoadingPanel map={map}/>);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component loading-panel';
+    assert.include(actual, expected);
   });
 
 });

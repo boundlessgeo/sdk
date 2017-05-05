@@ -8,6 +8,7 @@ import ol from 'openlayers';
 import intl from '../mock-i18n';
 import ToolActions from '../../src/actions/ToolActions';
 import Select from '../../src/components/Select';
+import TestUtils from 'react-addons-test-utils';
 
 raf.polyfill();
 
@@ -85,6 +86,14 @@ describe('SelectTool', function() {
     ToolActions.disableAllTools();
     assert.equal(select.state.disabled, true);
     ReactDOM.unmountComponentAtNode(container);
+  });
+
+  it('renders the select tool', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<Select intl={intl} map={map}/>);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component select';
+    assert.equal(actual, expected);
   });
 
 });

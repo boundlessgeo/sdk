@@ -144,12 +144,12 @@ describe('QGISPrint', function() {
     ReactDOM.unmountComponentAtNode(container);
   });
 
-  it('is rendered', function() {
+  it('renders the component', function() {
     const renderer = TestUtils.createRenderer();
     renderer.render(<QGISPrint intl={intl} layouts={printLayouts} map={map} thumbnailPath={""}/>);
     const actual = renderer.getRenderOutput().props.className;
-    const expected = 'sdk-component qgis-print'
-    assert.equal(actual, expected)
+    const expected = 'sdk-component qgis-print';
+    assert.equal(actual, expected);
   });
 
 });

@@ -7,6 +7,7 @@ import raf from 'raf';
 import ol from 'openlayers';
 import intl from '../mock-i18n';
 import ZoomToLatLon from '../../src/components/ZoomToLatLon';
+import TestUtils from 'react-addons-test-utils';
 
 raf.polyfill();
 
@@ -55,6 +56,14 @@ describe('ZoomToLatLon', function() {
       ReactDOM.unmountComponentAtNode(container);
       done();
     }, 500);
+  });
+
+  it('renders the zoom component', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<ZoomToLatLon map={map} intl={intl}/>);
+    const actual = renderer.getRenderOutput().props.children[0].props.className;
+    const expected = 'sdk-component zoom-to-latlon';
+    assert.equal(actual, expected);
   });
 
 });

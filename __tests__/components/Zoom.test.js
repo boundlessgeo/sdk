@@ -10,7 +10,6 @@ import intl from '../mock-i18n';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import 'phantomjs-polyfill-object-assign';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-
 import Zoom from '../../src/components/Zoom';
 
 raf.polyfill();
@@ -64,6 +63,14 @@ describe('Zoom', function() {
       ReactDOM.unmountComponentAtNode(container);
       done();
     }, 1000);
+  });
+
+  it('renders the zoom buttons', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<Zoom intl={intl} map={map}/>);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component zoom';
+    assert.equal(actual, expected);
   });
 
 });

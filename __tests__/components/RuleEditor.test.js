@@ -8,6 +8,7 @@ import 'phantomjs-polyfill-object-assign';
 import RuleEditor from '../../src/components/RuleEditor';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import TestUtils from 'react-addons-test-utils';
 
 describe('RuleEditor', function() {
 
@@ -39,6 +40,16 @@ describe('RuleEditor', function() {
     ), container);
     assert.equal(called, false);
     ReactDOM.unmountComponentAtNode(container);
+  });
+
+  it('renders the rule editor', function() {
+    const renderer = TestUtils.createRenderer();
+    var onChange = function() {};
+    var attributes = ['foo', 'bar'];
+    renderer.render(<RuleEditor attributes={attributes} intl={intl} onChange={onChange}/>);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component rule-editor';
+    assert.equal(actual, expected);
   });
 
 });

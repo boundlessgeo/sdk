@@ -7,6 +7,7 @@ import raf from 'raf';
 import ol from 'openlayers';
 import intl from '../mock-i18n';
 import StyleModal from '../../src/components/StyleModal';
+import TestUtils from 'react-addons-test-utils';
 
 raf.polyfill();
 
@@ -62,6 +63,14 @@ describe('StyleModal', function() {
       ReactDOM.unmountComponentAtNode(container);
       done();
     }, 500);
+  });
+
+  it('renders the style dialog', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<StyleModal intl={intl} layer={layers[0]}/>);
+    const actual = renderer.getRenderOutput().props.children[0].props.className;
+    const expected = 'style-modal';
+    assert.equal(actual, expected);
   });
 
 });

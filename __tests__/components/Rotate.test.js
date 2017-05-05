@@ -10,12 +10,11 @@ import intl from '../mock-i18n';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import 'phantomjs-polyfill-object-assign';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-
 import Rotate from '../../src/components/Rotate';
 
 raf.polyfill();
 
-describe('Zoom', function() {
+describe('Rotate', function() {
   var target, map;
   var width = 360;
   var height = 180;
@@ -63,6 +62,14 @@ describe('Zoom', function() {
       ReactDOM.unmountComponentAtNode(container);
       done();
     }, 1000);
+  });
+
+  it('renders the rotate component', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<Rotate intl={intl} map={map} autoHide={false}/>);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component rotate';
+    assert.equal(actual, expected);
   });
 
 });
