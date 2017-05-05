@@ -443,8 +443,8 @@ class QGISPrint extends React.PureComponent {
         loading = (<LinearProgress mode="indeterminate"/>);
       }
       var actions = [
-        <Button buttonType='Flat' label={formatMessage(messages.printbuttontext)} onTouchTap={this._print.bind(this)} />,
-        <Button buttonType='Flat' label={formatMessage(messages.closebutton)} onTouchTap={this.close.bind(this)} />
+        <Button buttonType='Flat' label={formatMessage(messages.closebutton)} onTouchTap={this.close.bind(this)} />,
+        <Button buttonType='Flat' label={formatMessage(messages.printbuttontext)} onTouchTap={this._print.bind(this)} />
       ];
       dialog = (
         <Dialog actions={actions} title={formatMessage(messages.modaltitle)} modal={true} open={this.state.open} onRequestClose={this.close.bind(this)}>

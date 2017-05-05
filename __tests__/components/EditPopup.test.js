@@ -132,4 +132,12 @@ describe('EditPopup', function() {
     ReactDOM.unmountComponentAtNode(container);
   });
 
+  it('renders the component', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<EditPopup intl={intl} map={map} />);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component edit-popup';
+    assert.equal(actual, expected);
+  });
+
 });

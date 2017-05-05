@@ -99,12 +99,12 @@ describe('InfoPopup', function() {
     ReactDOM.unmountComponentAtNode(container);
   });
 
-  it('is rendered', function() {
+  it('renders the popup', function() {
     const renderer = TestUtils.createRenderer();
     renderer.render(<InfoPopup intl={intl} map={map}/>);
     const actual = renderer.getRenderOutput().props.className;
-    const expected = 'sdk-component info-popup'
-    assert.equal(actual, expected)
+    const expected = 'sdk-component info-popup';
+    assert.equal(actual, expected);
   });
 
 
