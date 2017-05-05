@@ -8,6 +8,7 @@ import ol from 'openlayers';
 import intl from '../mock-i18n';
 import ToolActions from '../../src/actions/ToolActions';
 import QGISPrint from '../../src/components/QGISPrint';
+import TestUtils from 'react-addons-test-utils';
 
 raf.polyfill();
 
@@ -141,6 +142,14 @@ describe('QGISPrint', function() {
     print._onClick(printLayouts[0]);
     assert.equal(print.state.open, true);
     ReactDOM.unmountComponentAtNode(container);
+  });
+
+  it('is rendered', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<QGISPrint intl={intl} layouts={printLayouts} map={map} thumbnailPath={""}/>);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component qgis-print'
+    assert.equal(actual, expected)
   });
 
 });
