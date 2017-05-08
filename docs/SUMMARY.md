@@ -6,7 +6,6 @@ Boundless SDK
 * [Tutorial](tutorial.md)
 * [Writing components](writing_components.md)
 * [For developers](developers.md)
-* [Writing components](writing_components.md)
 * [API](api.md)
     * [AddLayerModal](api/AddLayerModal.md)
     * [BaseMapModal](api/BaseMapModal.md)
