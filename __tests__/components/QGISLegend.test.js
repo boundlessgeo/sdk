@@ -74,7 +74,7 @@ describe('QGISLegend', function() {
 
   it('renders the legend component', function() {
     const renderer = TestUtils.createRenderer();
-    renderer.render(<QGISLegend intl={intl} map={map} />);
+    renderer.render(<QGISLegend intl={intl} map={map} legendData={legendData} />);
     const actual = renderer.getRenderOutput().props.className;
     const expected = 'sdk-component qgis-legend';
     assert.include(actual, expected);
