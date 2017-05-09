@@ -89,6 +89,25 @@ describe('AddLayerModal', function() {
     }, 500);
   });
 
+  it('creates title', function(done) {
+    var source = [{url: wmsUrl, type: 'WMS', title: 'My WMS'}];
+    var container = document.createElement('div');
+    var modal = ReactDOM.render((
+      <AddLayerModal map={map} allowUserInput={true} sources={source} intl={intl} />
+    ), container);
+    var actual = modal.state.createTitle;
+    var expected = '';
+    assert.equal(actual, expected);
+    modal._onChangeCreateTitle(null, 'foo');
+    actual = modal.state.createTitle;
+    expected = 'foo';
+    assert.equal(actual, expected);
+    window.setTimeout(function() {
+      ReactDOM.unmountComponentAtNode(container);
+      done();
+    }, 500);
+  });
+
   it('returns the correct url if no url input field', function(done) {
     var container = document.createElement('div');
     var modal = ReactDOM.render((
