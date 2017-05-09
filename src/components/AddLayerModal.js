@@ -683,7 +683,7 @@ class AddLayerModal extends React.PureComponent {
     }
     var loadingIndicator;
     if (this.state.loading === true) {
-      loadingIndicator = (<CircularProgress size={50} thickness={3} />);
+      loadingIndicator = (<CircularProgress className='loading-indicator' size={50} thickness={3} />);
     }
     var error;
     if (this.state.error === true) {

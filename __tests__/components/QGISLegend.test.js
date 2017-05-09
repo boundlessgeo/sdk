@@ -10,7 +10,6 @@ import 'phantomjs-polyfill-object-assign';
 import QGISLegend from '../../src/components/QGISLegend';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TestUtils from 'react-addons-test-utils';
 
 raf.polyfill();
 
@@ -59,8 +58,7 @@ describe('QGISLegend', function() {
     document.body.removeChild(target);
   });
 
-
-  it('generates the correct legend url', function() {
+  it('generates the correct legend url', function(done) {
     var container = document.createElement('div');
     ReactDOM.render((
       <MuiThemeProvider muiTheme={getMuiTheme()}>
@@ -69,15 +67,10 @@ describe('QGISLegend', function() {
     ), container);
     var image = container.querySelector('img');
     assert.equal(image.getAttribute('src'), './0_0.png');
-    ReactDOM.unmountComponentAtNode(container);
-  });
-
-  it('renders the legend component', function() {
-    const renderer = TestUtils.createRenderer();
-    renderer.render(<QGISLegend intl={intl} map={map} legendData={legendData} />);
-    const actual = renderer.getRenderOutput().props.className;
-    const expected = 'sdk-component qgis-legend';
-    assert.include(actual, expected);
+    window.setTimeout(function() {
+      ReactDOM.unmountComponentAtNode(container);
+      done();
+    }, 1000);
   });
 
 });

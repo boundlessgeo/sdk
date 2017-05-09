@@ -43,7 +43,7 @@ describe('Rotate', function() {
     document.body.removeChild(target);
   });
 
-  it('renders the rotate component', function() {
+  it('renders the rotate query builder', function() {
     const renderer = TestUtils.createRenderer();
     renderer.render(<QueryBuilder intl={intl} map={map} />);
     const actual = renderer.getRenderOutput().props.className;

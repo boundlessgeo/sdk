@@ -8,6 +8,7 @@ import ol from 'openlayers';
 import intl from '../mock-i18n';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import AddLayerModal from '../../src/components/AddLayerModal';
+import TestUtils from 'react-addons-test-utils';
 
 raf.polyfill();
 injectTapEventPlugin();
@@ -52,6 +53,20 @@ describe('AddLayerModal', function() {
     ), container);
     modal._setError('Error');
     assert.equal(modal.state.layerInfo, null);
+    window.setTimeout(function() {
+      ReactDOM.unmountComponentAtNode(container);
+      done();
+    }, 500);
+  });
+
+  it('opens error message on error', function(done) {
+    var container = document.createElement('div');
+    var modal = ReactDOM.render((
+      <AddLayerModal map={map} allowUserInput={true} sources={[{url: wmsUrl, type: 'WMS', title: 'My WMS'}]} intl={intl} />
+    ), container);
+    modal._setError('Error');
+    assert.equal(modal.state.errorOpen, true);
+    assert.equal(modal.state.msg, 'Error');
     window.setTimeout(function() {
       ReactDOM.unmountComponentAtNode(container);
       done();
@@ -127,4 +142,19 @@ describe('AddLayerModal', function() {
       done();
     }, 500);
   });
+  it('renders the add layer component', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<AddLayerModal map={map} intl={intl} sources={[{url: wmsUrl, type: 'WMS', title: 'My WMS'}]}/>);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'add-layer-modal';
+    assert.equal(actual, expected);
+  });
+  it('is intially closed', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<AddLayerModal map={map} intl={intl} sources={[{url: wmsUrl, type: 'WMS', title: 'My WMS'}]}/>);
+    const actual = renderer.getRenderOutput().props.open;
+    const expected = false;
+    assert.equal(actual, expected);
+  });
+
 });
