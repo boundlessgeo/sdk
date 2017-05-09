@@ -89,7 +89,7 @@ describe('AddLayerModal', function() {
     }, 500);
   });
 
-  it('creates title', function(done) {
+  it('creates a title', function(done) {
     var source = [{url: wmsUrl, type: 'WMS', title: 'My WMS'}];
     var container = document.createElement('div');
     var modal = ReactDOM.render((
@@ -174,6 +174,97 @@ describe('AddLayerModal', function() {
     const actual = renderer.getRenderOutput().props.open;
     const expected = false;
     assert.equal(actual, expected);
+  });
+  it('closes error on request close', function(done) {
+    var source = [{url: wmsUrl, type: 'WMS', title: 'My WMS'}];
+    var container = document.createElement('div');
+    var modal = ReactDOM.render((
+      <AddLayerModal map={map} allowUserInput={true} sources={source} intl={intl} />
+    ), container);
+    var actual = modal.state.errorOpen;
+    var expected = false;
+    assert.equal(actual, expected);
+    modal.setState({errorOpen: true});
+    actual = modal.state.errorOpen;
+    expected = true;
+    assert.equal(actual, expected);
+    modal._handleRequestClose();
+    actual = modal.state.errorOpen;
+    expected = false;
+    assert.equal(actual, expected);
+    window.setTimeout(function() {
+      ReactDOM.unmountComponentAtNode(container);
+      done();
+    }, 500);
+  });
+  it('changes new source type', function(done) {
+    var source = [{url: wmsUrl, type: 'WMS', title: 'My WMS'}];
+    var container = document.createElement('div');
+    var modal = ReactDOM.render((
+      <AddLayerModal map={map} allowUserInput={true} sources={source} intl={intl} />
+    ), container);
+    var actual = modal.state.newType;
+    var expected = 'WMS';
+    assert.equal(actual, expected);
+    modal._onNewTypeChange(null, null, 'foo');
+    actual = modal.state.newType;
+    expected = 'foo';
+    assert.equal(actual, expected);
+    window.setTimeout(function() {
+      ReactDOM.unmountComponentAtNode(container);
+      done();
+    }, 500);
+  });
+  it('changes source url', function(done) {
+    var source = [{url: wmsUrl, type: 'WMS', title: 'My WMS'}];
+    var container = document.createElement('div');
+    var modal = ReactDOM.render((
+      <AddLayerModal map={map} allowUserInput={true} sources={source} intl={intl} />
+    ), container);
+    var actual = modal.state.newUrl;
+    var expected = '';
+    assert.equal(actual, expected);
+    modal._onNewUrlChange(null, 'foo');
+    actual = modal.state.newUrl;
+    expected = 'foo';
+    assert.equal(actual, expected);
+    window.setTimeout(function() {
+      ReactDOM.unmountComponentAtNode(container);
+      done();
+    }, 500);
+  });
+  it('changes source name', function(done) {
+    var source = [{url: wmsUrl, type: 'WMS', title: 'My WMS'}];
+    var container = document.createElement('div');
+    var modal = ReactDOM.render((
+      <AddLayerModal map={map} allowUserInput={true} sources={source} intl={intl} />
+    ), container);
+    var actual = modal.state.newName;
+    var expected = '';
+    assert.equal(actual, expected);
+    modal._onNewNameChange(null, 'foo');
+    actual = modal.state.newName;
+    expected = 'foo';
+    assert.equal(actual, expected);
+    window.setTimeout(function() {
+      ReactDOM.unmountComponentAtNode(container);
+      done();
+    }, 500);
+  });
+  it('WORKING TEST', function(done) {
+    var source = [{url: wmsUrl, type: 'WMS', title: 'My WMS'}];
+    var container = document.createElement('div');
+    var modal = ReactDOM.render((
+      <AddLayerModal map={map} allowUserInput={true} sources={source} intl={intl} />
+    ), container);
+    var actual = modal.state.sources;
+    var expected = source;
+    assert.equal(actual, expected);
+    //modal.setState({newName: 'foo', newUrl: 'bar', newType: 'x'})
+    window.setTimeout(function() {
+      ReactDOM.unmountComponentAtNode(container);
+      done();
+    }, 500);
   });
 
 });
