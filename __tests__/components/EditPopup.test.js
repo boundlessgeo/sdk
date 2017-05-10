@@ -110,4 +110,34 @@ describe('EditPopup', function() {
     ReactDOM.unmountComponentAtNode(container);
   });
 
+  it('correct set of layers is taken into consideration', function() {
+    var container = document.createElement('div');
+    var layer = new ol.layer.Tile({
+      name: 'x',
+      visible: false,
+      source: new ol.source.TileWMS({url: 'http://foo', params: {LAYERS: 'y'}})
+    });
+    map.addLayer(layer);
+    var popup = ReactDOM.render((
+      <EditPopup intl={intl} map={map} />
+    ), container);
+    var layers = popup._getLayers();
+    assert.equal(layers.length, 0);
+    layer.set('popupInfo', '[foo]');
+    layers = popup._getLayers();
+    assert.equal(layers.length, 0);
+    layer.setVisible(true);
+    layers = popup._getLayers();
+    assert.equal(layers.length, 1);
+    ReactDOM.unmountComponentAtNode(container);
+  });
+
+  it('renders the component', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<EditPopup intl={intl} map={map} />);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component edit-popup';
+    assert.equal(actual, expected);
+  });
+
 });

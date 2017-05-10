@@ -7,6 +7,7 @@ import raf from 'raf';
 import ol from 'openlayers';
 import parse from 'url-parse';
 import WMSLegend from '../../src/components/WMSLegend';
+import TestUtils from 'react-addons-test-utils';
 
 raf.polyfill();
 
@@ -54,7 +55,6 @@ describe('WMSLegend', function() {
     document.body.removeChild(target);
   });
 
-
   it('generates the correct legend url', function() {
     var container = document.createElement('div');
     ReactDOM.render((
@@ -72,6 +72,14 @@ describe('WMSLegend', function() {
     assert.equal(url.pathname, wmsPath);
     assert.equal(url.host, wmsHost);
     ReactDOM.unmountComponentAtNode(container);
+  });
+
+  it('renders the legend', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<WMSLegend layer={layer}/>);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component wms-legend';
+    assert.equal(actual, expected);
   });
 
 });

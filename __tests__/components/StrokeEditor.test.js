@@ -8,6 +8,7 @@ import 'phantomjs-polyfill-object-assign';
 import StrokeEditor from '../../src/components/StrokeEditor';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import TestUtils from 'react-addons-test-utils';
 
 describe('StrokeEditor', function() {
 
@@ -28,6 +29,15 @@ describe('StrokeEditor', function() {
       </MuiThemeProvider>
     ), container);
     ReactDOM.unmountComponentAtNode(container);
+  });
+
+  it('renders the stroke editor', function() {
+    const renderer = TestUtils.createRenderer();
+    var onChange = function(state) {};
+    renderer.render(<StrokeEditor intl={intl} onChange={onChange}/>);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component stroke-editor';
+    assert.equal(actual, expected);
   });
 
 });

@@ -2,15 +2,12 @@
 
 import TestUtils from 'react-addons-test-utils';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import {assert} from 'chai';
 import raf from 'raf';
 import ol from 'openlayers';
 import intl from '../mock-i18n';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import 'phantomjs-polyfill-object-assign';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import Rotate from '../../src/components/Rotate';
+import QueryBuilder from '../../src/components/QueryBuilder';
 
 raf.polyfill();
 
@@ -46,29 +43,11 @@ describe('Rotate', function() {
     document.body.removeChild(target);
   });
 
-  it('rotates the map back to north', function(done) {
-    var container = document.createElement('div');
-    ReactDOM.render((
-      <MuiThemeProvider muiTheme={getMuiTheme()}>
-        <Rotate intl={intl} map={map} />
-      </MuiThemeProvider>
-    ), container);
-    var buttons = container.querySelectorAll('button');
-    var rotate = buttons[0];
-    assert.equal(map.getView().getRotation(), 0.1);
-    TestUtils.Simulate.touchTap(rotate);
-    window.setTimeout(function() {
-      assert.equal(Math.round(map.getView().getRotation()), 0);
-      ReactDOM.unmountComponentAtNode(container);
-      done();
-    }, 1000);
-  });
-
-  it('renders the rotate component', function() {
+  it('renders the query builder', function() {
     const renderer = TestUtils.createRenderer();
-    renderer.render(<Rotate intl={intl} map={map} autoHide={false}/>);
+    renderer.render(<QueryBuilder intl={intl} map={map} />);
     const actual = renderer.getRenderOutput().props.className;
-    const expected = 'sdk-component rotate';
+    const expected = 'sdk-component query-builder';
     assert.equal(actual, expected);
   });
 

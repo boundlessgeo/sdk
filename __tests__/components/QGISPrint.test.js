@@ -8,6 +8,7 @@ import ol from 'openlayers';
 import intl from '../mock-i18n';
 import ToolActions from '../../src/actions/ToolActions';
 import QGISPrint from '../../src/components/QGISPrint';
+import TestUtils from 'react-addons-test-utils';
 
 raf.polyfill();
 
@@ -119,6 +120,36 @@ describe('QGISPrint', function() {
     ToolActions.disableAllTools();
     assert.equal(print.state.disabled, true);
     ReactDOM.unmountComponentAtNode(container);
+  });
+
+  it('adds elements loaded', function() {
+    var container = document.createElement('div');
+    var print = ReactDOM.render((
+      <QGISPrint intl={intl} layouts={printLayouts} map={map} thumbnailPath={""}/>
+    ), container);
+    print._onClick(printLayouts[0]);
+    print._print();
+    assert.equal(print.state.layout.elements.length, 2);
+    ReactDOM.unmountComponentAtNode(container);
+  });
+
+  it('opens on click', function() {
+    var container = document.createElement('div');
+    var print = ReactDOM.render((
+      <QGISPrint intl={intl} layouts={printLayouts} map={map} thumbnailPath={""}/>
+    ), container);
+    assert.equal(print.state.open, false);
+    print._onClick(printLayouts[0]);
+    assert.equal(print.state.open, true);
+    ReactDOM.unmountComponentAtNode(container);
+  });
+
+  it('renders the component', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<QGISPrint intl={intl} layouts={printLayouts} map={map} thumbnailPath={""}/>);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component qgis-print';
+    assert.equal(actual, expected);
   });
 
 });

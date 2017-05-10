@@ -58,8 +58,7 @@ describe('QGISLegend', function() {
     document.body.removeChild(target);
   });
 
-
-  it('generates the correct legend url', function() {
+  it('generates the correct legend url', function(done) {
     var container = document.createElement('div');
     ReactDOM.render((
       <MuiThemeProvider muiTheme={getMuiTheme()}>
@@ -68,7 +67,10 @@ describe('QGISLegend', function() {
     ), container);
     var image = container.querySelector('img');
     assert.equal(image.getAttribute('src'), './0_0.png');
-    ReactDOM.unmountComponentAtNode(container);
+    window.setTimeout(function() {
+      ReactDOM.unmountComponentAtNode(container);
+      done();
+    }, 1000);
   });
 
 });

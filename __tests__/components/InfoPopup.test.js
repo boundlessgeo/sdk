@@ -7,6 +7,7 @@ import raf from 'raf';
 import ol from 'openlayers';
 import intl from '../mock-i18n';
 import InfoPopup from '../../src/components/InfoPopup';
+import TestUtils from 'react-addons-test-utils';
 
 raf.polyfill();
 
@@ -86,5 +87,25 @@ describe('InfoPopup', function() {
     assert.equal(infoLayers.length, 2);
     ReactDOM.unmountComponentAtNode(container);
   });
+
+  it('deactivates when requested', function() {
+    var container = document.createElement('div');
+    var popup = ReactDOM.render((
+      <InfoPopup intl={intl} map={map} />
+    ), container);
+    assert.equal(popup.active, true);
+    popup.deactivate();
+    assert.equal(popup.active, false);
+    ReactDOM.unmountComponentAtNode(container);
+  });
+
+  it('renders the popup', function() {
+    const renderer = TestUtils.createRenderer();
+    renderer.render(<InfoPopup intl={intl} map={map}/>);
+    const actual = renderer.getRenderOutput().props.className;
+    const expected = 'sdk-component info-popup';
+    assert.equal(actual, expected);
+  });
+
 
 });
