@@ -19,6 +19,7 @@ describe('AddLayerModal', function() {
   var width = 360;
   var height = 180;
   var wmsUrl = 'http://localhost:8080/geoserver/wms';
+  var wfsUrl = 'http://localhost:8080/geoserver/wfs';
 
   beforeEach(function(done) {
     target = document.createElement('div');
@@ -251,16 +252,26 @@ describe('AddLayerModal', function() {
       done();
     }, 500);
   });
-  it('WORKING TEST', function(done) {
-    var source = [{url: wmsUrl, type: 'WMS', title: 'My WMS'}];
+  it('adds sources and updates layer source', function(done) {
+    var sources = [{url: wmsUrl, type: 'WMS', title: 'My WMS'}];
     var container = document.createElement('div');
     var modal = ReactDOM.render((
-      <AddLayerModal map={map} allowUserInput={true} sources={source} intl={intl} />
+      <AddLayerModal map={map} allowUserInput={true} sources={sources} intl={intl} />
     ), container);
-    var actual = modal.state.sources;
-    var expected = source;
+    var actual = modal.state.source;
+    var expected = null;
     assert.equal(actual, expected);
-    //modal.setState({newName: 'foo', newUrl: 'bar', newType: 'x'})
+    actual = modal.state.sources.length;
+    expected = 1;
+    assert.equal(actual, expected);
+    modal.setState({newUrl: wfsUrl, newType: 'WFS', newName: 'My WFS'});
+    modal._onNewUrlBlur();
+    actual = modal.state.sources.length;
+    expected = 2;
+    assert.equal(actual, expected);
+    actual = modal.state.source;
+    expected = 1;
+    assert.equal(actual, expected);
     window.setTimeout(function() {
       ReactDOM.unmountComponentAtNode(container);
       done();
