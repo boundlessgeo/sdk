@@ -1,0 +1,32 @@
+.geocoding-results {
+
+  .locationResult {
+    max-width: 280px;
+    color: #8C8C8C;
+    font-size: 14px;
+    display: flex;
+    margin-bottom: 5px;
+
+    .locationIcon {
+      width: 50px;
+      display: flex;
+      justify-content: center;
+      padding-top: 4px;
+    }
+    .locationDetails {
+      flex: 1;
+      .place {
+        color: #333333;
+        font-weight: bold;
+      }
+      border-bottom: 1px solid #E6E6E6;
+      padding-bottom: 5px;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+    &:last-child .locationDetails {
+      border-bottom: none;
+    }
+  }
+}

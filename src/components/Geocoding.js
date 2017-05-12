@@ -87,7 +87,7 @@ class Geocoding extends React.PureComponent {
     if (value !== '') {
       var cbname = 'fn' + Date.now();
       var script = document.createElement('script');
-      script.src = 'http://nominatim.openstreetmap.org/search?format=json&limit=' + this.props.maxResults + '&q=' + value + '&json_callback=' + cbname;
+      script.src = 'http://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=' + this.props.maxResults + '&q=' + value + '&json_callback=' + cbname;
       global[cbname] = function(jsonData) {
         GeocodingActions.showSearchResult(jsonData);
         delete global[cbname];
