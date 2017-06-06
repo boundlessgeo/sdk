@@ -1,7 +1,7 @@
 Chart to show feature info.
 
 
-Allow for the creation of charts based on selected features of a layer. Features of a given layer may be selected with the [QueryBuilder](../QueryBuilder.js) component.
+Allow for the creation of charts based on selected features of a layer. Features of a given layer may be selected with the [QueryBuilder](../QueryBuilder.html) component.
 
 
 ```javascript

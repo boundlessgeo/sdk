@@ -177,7 +177,7 @@ const messages = defineMessages({
     description: 'Text on label when dragging',
     defaultMessage: 'Moving Layer'
   }
-});
+}) || /*istanbul ignore next: no testing messages */{};
 
 /**
 $$src/components/LayerListItemDetail.md$$
@@ -317,17 +317,17 @@ class LayerListItem extends React.Component {
      * @ignore
      */
     intl: intlShape.isRequired
-  };
+  } || /*istanbul ignore next: no testing PropTypes */ {};
 
   static contextTypes = {
     muiTheme: React.PropTypes.object,
     proxy: React.PropTypes.string,
     requestHeaders: React.PropTypes.object
-  };
+  } || /*istanbul ignore next: no testing ContextTypes */{};
 
   static childContextTypes = {
     muiTheme: React.PropTypes.object.isRequired
-  };
+  } || /*istanbul ignore next: no testing ContextTypes */{};
 
   static defaultProps = {
     connectDragSource: function(a) {
