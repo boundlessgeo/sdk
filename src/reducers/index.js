@@ -1,5 +1,4 @@
 import {combineReducers} from 'redux';
-// import bookmarks from './bookmarks';
 // import geocoding from './geocoding';
 
 import mapState from './map';

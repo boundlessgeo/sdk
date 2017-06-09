@@ -87,20 +87,23 @@
       let view = map.getView();
       // create a "mapAction" and dispatch it.
       // this.props.store.dispatch(mapActions.move(view.getCenter(), view.getResolution()));
-      this.props.setView(view.getCenter(),view.getResolution(),view.getZoom()
-      );
+      this.props.setView(view.getCenter(),view.getResolution(),view.getZoom(), view.calculateExtent());
     });
   }
+
   componentWillUpdate(nextProps, nextState) {
+    console.log(nextProps.mapStore.view)
     const mapView = this.props.map.getView();
     const stateView = nextProps.mapStore.view;
 
     const mapCenter = mapView.getCenter();
     const mapZoom = mapView.getZoom();
+    const mapExtent = mapView.calculateExtent();
 
-    if (mapCenter[0] !== stateView.center[0] || mapCenter[1] !== stateView.center[1] || mapZoom !== stateView.zoom) {
+    if (mapCenter[0] !== stateView.center[0] || mapCenter[1] !== stateView.center[1] || mapZoom !== stateView.zoom || mapExtent[0] !== stateView.extent[0] || mapExtent[1] !== stateView.extent[1]|| mapExtent[2] !== stateView.extent[2]|| mapExtent[3] !== stateView.extent[3]) {
       this.props.map.getView().setCenter(stateView.center);
       this.props.map.getView().setZoom(stateView.zoom);
+      this.props.map.getView().fit(stateView.extent);
     }
 
   }

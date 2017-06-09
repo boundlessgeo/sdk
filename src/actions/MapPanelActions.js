@@ -11,7 +11,7 @@
  */
 
 
-import MapConfigService from '../services/MapConfigService';
+//import MapConfigService from '../services/MapConfigService';
 
 export const getMapLayers = (mapLayers) => {
   return {

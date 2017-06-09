@@ -27,12 +27,6 @@ const mapStateToProps = (state) => {
   }
 };
 
-const mapStateToProps = (state, ownProps) => {
-  return {
-    layers: state.layer.layerlist
-  }
-};
-
 // Maps actions to props
 const mapDispatchToProps = (dispatch) => {
   return {
@@ -41,8 +35,3 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(MapPanelView);
-    addLayer: layer => dispatch(LayerActions.addLayer(layer))
-  }
-};
-
-export default injectIntl(connect(mapStateToProps, mapDispatchToProps)(MapPanel));

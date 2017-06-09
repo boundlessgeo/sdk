@@ -10,7 +10,16 @@ export default (state = [], action) => {
           ...state.view,
           center:action.center,
           zoom:action.zoom,
-          resolution:action.resolution
+          resolution:action.resolution,
+          extent: action.extent
+        }
+      };
+    case  MAP.CHANGE_EXTENT:
+      return {
+        ...state,
+        view:{
+          ...state.view,
+          extent:action.extent
         }
       };
     case MAP.ZOOM_IN:

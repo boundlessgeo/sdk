@@ -7,7 +7,7 @@ import {assert} from 'chai';
 import raf from 'raf';
 import  ol from 'openlayers';
 import intl from '../mock-i18n';
-import {Bookmarks} from '../../src/components/Bookmarks';
+import Bookmarks from '../../src/components/BookmarksView';
 
 raf.polyfill();
 

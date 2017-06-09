@@ -19,9 +19,15 @@
      mapState: MapConfigService.getMapState(map)
    }
  }
- export const setView = (center, resolution, zoom) => {
+ export const setView = (center, resolution, zoom, extent) => {
    return {
      type: MAP.SET_VIEW,
-     center, resolution, zoom
+     center, resolution, zoom, extent
+   }
+ }
+ export const changeExtent = (extent) => {
+   return {
+     type: MAP.CHANGE_EXTENT,
+     extent
    }
  }

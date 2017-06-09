@@ -6,6 +6,7 @@ export const LAYER = {
 export const MAP = {
   GET_CONFIG: 'MAP_GET_CONFIG',
   SET_VIEW: 'MAP_SET_VIEW',
+  CHANGE_EXTENT: 'MAP_CHANGE_EXTENT',
   ZOOM_IN: 'MAP_ZOOM_IN',
   ZOOM_OUT: 'MAP_ZOOM_OUT'
 };
