@@ -1,11 +1,15 @@
 /* global afterEach, beforeEach, describe, it */
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {assert} from 'chai';
 import raf from 'raf';
 import  ol from 'openlayers';
 import intl from '../mock-i18n';
-import {Bookmarks} from '../../src/components/Bookmarks';
+import Bookmarks from '../../src/components/Bookmarks';
+import BoundlessSdk from '../../src/components/BoundlessSdk';
+import Map from '../../src/components/Map';
+import configureStore from '../../src/stores/Store';
 
 raf.polyfill();
 
@@ -16,11 +20,15 @@ describe('Bookmarks Dots', function() {
   var bookmarks = [{
     name: 'Le Grenier Pain',
     description: '<b>Address: </b>38 rue des Abbesses<br><b>Telephone:</b> 33 (0)1 46 06 41 81<br><a href=""http://www.legrenierapain.com"">Website</a>',
-    extent: [259562.7661267497, 6254560.095662868, 260675.9610346824, 6256252.988234103]
+    extent: [259562.7661267497, 6254560.095662868, 260675.9610346824, 6256252.988234103],
+    center: ol.extent.getCenter([259562.7661267497, 6254560.095662868, 260675.9610346824, 6256252.988234103]),
+    zoom: 13
   }, {
     name: 'Poilne',
     description: '<b>Address: </b>8 rue du Cherche-Midi<br><b>Telephone:</b> 33 (0)1 45 48 42 59<br><a href=""http://www.poilane.fr"">Website</a>',
-    extent: [258703.71361629796, 6248811.5276565505, 259816.90852423065, 6250503.271278702]
+    extent: [258703.71361629796, 6248811.5276565505, 259816.90852423065, 6250503.271278702],
+    center: ol.extent.getCenter([258703.71361629796, 6248811.5276565505, 259816.90852423065, 6250503.271278702]),
+    zoom: 13
   }];
 
   beforeEach(function(done) {
@@ -50,8 +58,13 @@ describe('Bookmarks Dots', function() {
   });
   it('are displayed on page', function() {
     var container = document.createElement('div');
+    const store = configureStore();
     ReactDOM.render((
-      <Bookmarks intl={intl} map={map} bookmarks={bookmarks} />
+      <BoundlessSdk store={store}>
+        <Map intl={intl} map={map}>
+          <Bookmarks intl={intl} bookmarks={bookmarks} />
+        </Map>
+      </BoundlessSdk>
     ), container);
     var dots = container.querySelectorAll('.bookmark-dots');
     assert.equal(dots.length, 1);
@@ -59,8 +72,13 @@ describe('Bookmarks Dots', function() {
   });
   it('are not displayed on page', function() {
     var container = document.createElement('div');
+    const store = configureStore();
     ReactDOM.render((
-        <Bookmarks intl={intl} map={map} bookmarks={bookmarks} dots={false}/>
+      <BoundlessSdk store={store}>
+        <Map intl={intl} map={map}>
+          <Bookmarks intl={intl} bookmarks={bookmarks} dots={false}/>
+        </Map>
+      </BoundlessSdk>
     ), container);
     var dots = container.querySelectorAll('.bookmark-dots');
     assert.equal(dots.length, 0);
