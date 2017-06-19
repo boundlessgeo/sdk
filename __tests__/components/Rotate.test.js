@@ -13,7 +13,7 @@ import BoundlessSdk from '../../src/components/BoundlessSdk';
 import Rotate from '../../src/components/Rotate';
 import configureStore from '../../src/stores/Store';
 
-import polyfills from '../polyfills'; // eslint-disable-line no-unused-vars
+import '../polyfills'; 
 
 import * as mapActions from '../../src/actions/MapActions';
 

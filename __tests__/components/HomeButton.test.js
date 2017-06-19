@@ -15,7 +15,7 @@ import {setView} from '../../src/actions/MapActions';
 
 import BoundlessSdk from '../../src/components/BoundlessSdk';
 
-import polyfills from '../polyfills'; // eslint-disable-line no-unused-vars
+import '../polyfills'; 
 
 describe('HomeButton', function() {
 
