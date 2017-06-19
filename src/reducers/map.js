@@ -10,6 +10,15 @@ export default (state = defaultState, action) => {
         ...state,
         layers: action.layers
       }
+    case MAP.GET_MAX_MIN_RESOLUTIONS:
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          maxResolution: action.maxResolution,
+          minResolution: action.minResolution
+        }
+      }
     case  MAP.SET_VIEW:
       const new_view = state.view;
       for (const key of ['center', 'resolution', 'rotation']) {

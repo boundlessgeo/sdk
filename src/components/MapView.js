@@ -68,6 +68,7 @@ class Map extends React.PureComponent {
     if (this.props.hasOwnProperty('getMap')) {
       this.props.getMap(this.props.map);
     }
+    this.props.getMaxMinResolutions(this.props.map)
   }
 
   componentDidMount() {

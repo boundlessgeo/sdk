@@ -19,6 +19,13 @@ export const getMap = (map) => {
     layers: MapConfigService.getMapState(map)
   };
 };
+export const getMaxMinResolutions = (map) => {
+  return {
+    type: MAP.GET_MAX_MIN_RESOLUTIONS,
+    maxResolution: MapConfigService.getMaxMinResolutions(map).maxResolution,
+    minResolution: MapConfigService.getMaxMinResolutions(map).minResolution
+  };
+};
 export function setView(view) {
   return {
     type: MAP.SET_VIEW,

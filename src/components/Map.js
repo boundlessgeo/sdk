@@ -26,6 +26,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     getMap: map => dispatch(MapActions.getMap(map)),
+    getMaxMinResolutions: map => dispatch(MapActions.getMaxMinResolutions(map)),
     setView: (view) => dispatch(MapActions.setView(view)),
     clearLayerDrag: () => dispatch(LayerActions.clearDrag())
   }

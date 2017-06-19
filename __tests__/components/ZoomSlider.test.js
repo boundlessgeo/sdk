@@ -6,7 +6,7 @@ import {assert} from 'chai';
 import raf from 'raf';
 import ol from 'openlayers';
 import 'phantomjs-polyfill-object-assign';
-import ZoomSlider from '../../src/components/ZoomSliderView';
+import ZoomSlider from '../../src/components/ZoomSlider';
 
 raf.polyfill();
 
@@ -43,7 +43,7 @@ describe('ZoomSlider', function() {
 
   it('renders the slider', function() {
     const renderer = TestUtils.createRenderer();
-    renderer.render(<ZoomSlider map={map}/>);
+    renderer.render(<ZoomSlider/>);
     const actual = renderer.getRenderOutput().props.className;
     const expected = 'sdk-component zoom-slider';
     assert.equal(actual, expected);
