@@ -3,15 +3,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {assert} from 'chai';
-import raf from 'raf';
-import  ol from 'openlayers';
+import ol from 'openlayers';
 import intl from '../mock-i18n';
 import Bookmarks from '../../src/components/Bookmarks';
 import BoundlessSdk from '../../src/components/BoundlessSdk';
 import Map from '../../src/components/Map';
 import configureStore from '../../src/stores/Store';
+import '../polyfills';
 
-raf.polyfill();
 
 describe('Bookmarks Dots', function() {
   var target, map;
