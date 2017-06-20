@@ -18,7 +18,9 @@ import * as LayerActions from '../actions/LayerActions';
 // Maps state from store to props
 const mapStateToProps = (state) => {
   return {
-    mapStore: state.mapState || null
+    mapStore: state.mapState || null,
+    lat: state.mapState.view.lat,
+    lon: state.mapState.view.lon
   }
 };
 
@@ -26,6 +28,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     getMap: map => dispatch(MapActions.getMap(map)),
+    getProjection: map => dispatch(MapActions.getProjection(map)),
     setView: (view) => dispatch(MapActions.setView(view)),
     clearLayerDrag: () => dispatch(LayerActions.clearDrag())
   }

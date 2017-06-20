@@ -132,8 +132,7 @@ class ZoomToLatLon extends React.PureComponent {
   };
 
   static contextTypes = {
-    muiTheme: React.PropTypes.object,
-    map: React.PropTypes.instanceOf(ol.Map)
+    muiTheme: React.PropTypes.object
   };
 
   static childContextTypes = {
@@ -150,6 +149,7 @@ class ZoomToLatLon extends React.PureComponent {
     this.map = context.map || this.props.map;
     this.state = {
       dms: false,
+      open: false,
       londirection: 'E',
       latdirection: 'N'
     };
@@ -158,10 +158,10 @@ class ZoomToLatLon extends React.PureComponent {
     return {muiTheme: this._muiTheme};
   }
   openDialog() {
-    this.props.openDialog();
+    this.setState({open: true});
   }
   closeDialog() {
-    this.props.closeDialog();
+    this.setState({open: false});
   }
   _dmsToDegrees(degrees, minutes, seconds, direction) {
     var dd = degrees + minutes / 60 + seconds / (60 * 60);
@@ -189,9 +189,15 @@ class ZoomToLatLon extends React.PureComponent {
         this.state.londirection
       );
     }
-    var view = this.map.getView();
-    view.setCenter(ol.proj.fromLonLat([lon, lat], view.getProjection()));
-    view.setZoom(this.props.zoom);
+    let proj = this.props.projection;
+    let center = this.props.lonLatToCenter(lon, lat, proj);
+    this.props.setView(center);
+    //this.props.setLatLon(lat, lon);
+    //var view = {center: ol.proj.fromLonLat([lon, lat], this.props.projection)}
+    //this.props.setView(view);
+    //var view = this.map.getView();
+    //view.setCenter(ol.proj.fromLonLat([lon, lat], view.getProjection()));
+    //view.setZoom(this.props.zoom);
     this.closeDialog();
   }
   _onNorthSouthChange(evt, idx, value) {
@@ -249,7 +255,7 @@ class ZoomToLatLon extends React.PureComponent {
     return (
       <span style={this.props.style}>
         <Button buttonType='Icon' {...this.props} iconClassName='headerIcons ms ms-zoom-to' className={classNames('sdk-component zoom-to-latlon', this.props.className)} onTouchTap={this.openDialog.bind(this)} tooltip={formatMessage(messages.buttontitle)}/>
-        <Dialog actions={actions} open={this.props.open ? this.props.open : false} autoScrollBodyContent={true} onRequestClose={this.closeDialog.bind(this)} modal={true} title={formatMessage(messages.modaltitle)}>
+        <Dialog actions={actions} open={this.state.open} autoScrollBodyContent={true} onRequestClose={this.closeDialog.bind(this)} modal={true} title={formatMessage(messages.modaltitle)}>
           {body}
         </Dialog>
       </span>

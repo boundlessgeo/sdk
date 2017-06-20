@@ -31,3 +31,15 @@ export function setView(view) {
     view
   }
 }
+export function setLatLon(lat, lon) {
+  return {
+    type: MAP.SET_LAT_LON,
+    lat, lon
+  }
+}
+export function lonLatToCenter(lon, lat, proj) {
+  return {
+    type: MAP.LON_LAT_TO_CENTER,
+    center: MapConfigService.lonLatToCenter(lon, lat, proj)
+  }
+}

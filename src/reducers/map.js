@@ -18,6 +18,15 @@ export default (state = defaultState, action) => {
           projection: action.projection
         }
       }
+    case MAP.SET_LAT_LON:
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          lat: action.lat,
+          lon: action.lon
+        }
+      }
     case  MAP.SET_VIEW:
       const new_view = state.view;
       for (const key of ['center', 'resolution', 'rotation']) {

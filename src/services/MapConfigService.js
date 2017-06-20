@@ -283,7 +283,10 @@ class MapConfigService {
   }
 
   getProjection(map) {
-    return map.getView().getProjection().getCode();
+    return map.getView().getProjection();
+  }
+  lonLatToCenter(lon, lat, proj) {
+    return ol.proj.fromLonLat([lon, lat], proj)
   }
 }
 
