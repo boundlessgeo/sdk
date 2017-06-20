@@ -18,9 +18,7 @@ import * as LayerActions from '../actions/LayerActions';
 // Maps state from store to props
 const mapStateToProps = (state) => {
   return {
-    mapStore: state.mapState || null,
-    lat: state.mapState.view.lat,
-    lon: state.mapState.view.lon
+    mapStore: state.mapState || null
   }
 };
 
