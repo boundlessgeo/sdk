@@ -10,6 +10,14 @@ export default (state = defaultState, action) => {
         ...state,
         layers: action.layers
       }
+    case MAP.GET_PROJECTION:
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          projection: action.projection
+        }
+      }
     case  MAP.SET_VIEW:
       const new_view = state.view;
       for (const key of ['center', 'resolution', 'rotation']) {

@@ -281,6 +281,10 @@ class MapConfigService {
     //return config;
     return layers;
   }
+
+  getProjection(map) {
+    return map.getView().getProjection().getCode();
+  }
 }
 
 export default new MapConfigService();

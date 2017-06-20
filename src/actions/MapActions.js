@@ -19,6 +19,12 @@ export const getMap = (map) => {
     layers: MapConfigService.getMapState(map)
   };
 };
+export const getProjection = (map) => {
+  return {
+    type: MAP.GET_PROJECTION,
+    projection: MapConfigService.getProjection(map)
+  };
+};
 export function setView(view) {
   return {
     type: MAP.SET_VIEW,

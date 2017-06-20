@@ -108,15 +108,11 @@ const messages = defineMessages({
  * Component that allows zooming the map to a lat / lon position.
  *
  * ```xml
- * <ZoomToLatLon map={map} zoom={12} />
+ * <ZoomToLatLon zoom={12} />
  * ```
  */
 class ZoomToLatLon extends React.PureComponent {
   static propTypes = {
-    /**
-     * The map onto which to zoom.
-     */
-    map: React.PropTypes.instanceOf(ol.Map),
     /**
      * Style config.
      */
