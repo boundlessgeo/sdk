@@ -28,11 +28,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     getMap: map => dispatch(MapActions.getMap(map)),
-<<<<<<< HEAD
     getProjection: map => dispatch(MapActions.getProjection(map)),
-=======
     setSize: (size) => dispatch(MapActions.setSize(size)),
->>>>>>> sdk-redux
     setView: (view) => dispatch(MapActions.setView(view)),
     clearLayerDrag: () => dispatch(LayerActions.clearDrag())
   }

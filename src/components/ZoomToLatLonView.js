@@ -1,5 +1,4 @@
 import React from 'react';
-import ol from 'openlayers';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
@@ -108,7 +107,7 @@ const messages = defineMessages({
  * Component that allows zooming the map to a lat / lon position.
  *
  * ```xml
- * <ZoomToLatLon zoom={12} />
+ * <ZoomToLatLon resolution={38} />
  * ```
  */
 class ZoomToLatLon extends React.PureComponent {
@@ -118,9 +117,9 @@ class ZoomToLatLon extends React.PureComponent {
      */
     style: React.PropTypes.object,
     /**
-     * The zoom level used when centering the view.
+     * The resolution level used when centering the view.
      */
-    zoom: React.PropTypes.number,
+    resolution: React.PropTypes.number,
     /**
      * Css class name to apply on the root element of this component.
      */
@@ -140,13 +139,12 @@ class ZoomToLatLon extends React.PureComponent {
   };
 
   static defaultProps = {
-    zoom: 14
+    resolution: 9.5
   };
 
   constructor(props, context) {
     super(props);
     this._muiTheme = context.muiTheme || getMuiTheme();
-    this.map = context.map || this.props.map;
     this.state = {
       dms: false,
       open: false,
@@ -189,15 +187,8 @@ class ZoomToLatLon extends React.PureComponent {
         this.state.londirection
       );
     }
-    let proj = this.props.projection;
-    let center = this.props.lonLatToCenter(lon, lat, proj);
-    this.props.setView(center);
-    //this.props.setLatLon(lat, lon);
-    //var view = {center: ol.proj.fromLonLat([lon, lat], this.props.projection)}
-    //this.props.setView(view);
-    //var view = this.map.getView();
-    //view.setCenter(ol.proj.fromLonLat([lon, lat], view.getProjection()));
-    //view.setZoom(this.props.zoom);
+    let center = this.props.lonLatToCenter(lon, lat, this.props.projection).center;
+    this.props.setView({center: center, resolution: this.props.resolution});
     this.closeDialog();
   }
   _onNorthSouthChange(evt, idx, value) {
