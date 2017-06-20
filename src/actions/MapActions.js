@@ -43,3 +43,15 @@ export function lonLatToCenter(lon, lat, proj) {
     center: MapConfigService.lonLatToCenter(lon, lat, proj)
   }
 }
+export function setSize(size) {
+  return {
+    type: MAP.SET_SIZE,
+    size
+  }
+}
+export function zoomToExtent(extent) {
+  return {
+    type: MAP.FIT_EXTENT,
+    extent
+  }
+}

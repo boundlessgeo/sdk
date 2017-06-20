@@ -1,5 +1,7 @@
 /* global describe, it */
 
+/* global describe, it */
+
 import {expect} from 'chai';
 
 import configureStore from '../../src/stores/Store';
