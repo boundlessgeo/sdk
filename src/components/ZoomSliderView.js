@@ -2,6 +2,7 @@ import React from 'react';
 import debounce from  'debounce';
 import Slider from 'material-ui/Slider';
 import classNames from 'classnames';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 /**
  * Horizontal slider to allow zooming the map. Make sure that the containing div has a size.
@@ -30,9 +31,21 @@ class ZoomSlider extends React.PureComponent {
     refreshRate: 100
   };
 
+  static contextTypes = {
+    muiTheme: React.PropTypes.object
+  };
+
+  static childContextTypes = {
+    muiTheme: React.PropTypes.object.isRequired
+  };
+
   constructor(props, context) {
     super(props);
+    this._muiTheme = context.muiTheme || getMuiTheme();
     this._onChange = debounce(this._onChange, this.props.refreshRate);
+  }
+  getChildContext() {
+    return {muiTheme: this._muiTheme};
   }
 
   _getValue(resolution) {
