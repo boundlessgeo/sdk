@@ -1,112 +1,100 @@
-/* global afterEach, beforeEach, describe, it */
+/* global describe, it */
 
 import TestUtils from 'react-addons-test-utils';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {assert} from 'chai';
-import raf from 'raf';
-import  ol from 'openlayers';
+import {expect} from 'chai';
+import {setView} from '../../src/actions/MapActions';
+import 'phantomjs-polyfill-object-assign';
+import ol from 'openlayers';
 import intl from '../mock-i18n';
-import {Bookmarks} from '../../src/components/Bookmarks';
+import Bookmarks from '../../src/components/Bookmarks';
+import BoundlessSdk from '../../src/components/BoundlessSdk';
+import configureStore from '../../src/stores/Store';
+import '../polyfills';
+import {IntlProvider} from 'react-intl';
 
-raf.polyfill();
 
 describe('Bookmarks', function() {
-  var target, map;
-  var width = 360;
-  var height = 180;
   var bookmarks = [{
     name: 'Le Grenier Pain',
     description: '<b>Address: </b>38 rue des Abbesses<br><b>Telephone:</b> 33 (0)1 46 06 41 81<br><a href="http://www.legrenierapain.com">Website</a>',
-    extent: [259562.7661267497, 6254560.095662868, 260675.9610346824, 6256252.988234103]
+    extent: [259562.7661267497, 6254560.095662868, 260675.9610346824, 6256252.988234103],
+    center: ol.extent.getCenter([259562.7661267497, 6254560.095662868, 260675.9610346824, 6256252.988234103]),
+    resolution: 10
   }, {
     name: 'Poilne',
     description: '<b>Address: </b>8 rue du Cherche-Midi<br><b>Telephone:</b> 33 (0)1 45 48 42 59<br><a href="http://www.poilane.fr">Website</a>',
-    extent: [258703.71361629796, 6248811.5276565505, 259816.90852423065, 6250503.271278702]
+    extent: [258703.71361629796, 6248811.5276565505, 259816.90852423065, 6250503.271278702],
+    center: ol.extent.getCenter([258703.71361629796, 6248811.5276565505, 259816.90852423065, 6250503.271278702]),
+    resolution: 15
   }];
-
-  beforeEach(function(done) {
-    target = document.createElement('div');
-    var style = target.style;
-    style.position = 'absolute';
-    style.left = '-1000px';
-    style.top = '-1000px';
-    style.width = width + 'px';
-    style.height = height + 'px';
-    document.body.appendChild(target);
-    map = new ol.Map({
-      target: target,
-      view: new ol.View({
-        center: [0, 0],
-        zoom: 1
-      })
-    });
-    map.once('postrender', function() {
-      done();
-    });
-  });
-
-  afterEach(function() {
-    map.setTarget(null);
-    document.body.removeChild(target);
-  });
-
 
   it('zooms to the next bookmark', function(done) {
     var container = document.createElement('div');
+    const store = configureStore();
     ReactDOM.render((
-      <Bookmarks intl={intl} map={map} bookmarks={bookmarks} />
+      <div>
+        <IntlProvider locale="en">
+          <BoundlessSdk store={store}>
+              <Bookmarks intl={intl} bookmarks={bookmarks}/>
+          </BoundlessSdk>
+        </IntlProvider>
+      </div>
     ), container);
+
+    store.dispatch(setView({center: [0,0], resolution:100}));
+    expect(store.getState().mapState.view.center[0]).to.equal(0);
+    expect(store.getState().mapState.view.center[1]).to.equal(0);
+    expect(store.getState().mapState.view.resolution).to.equal(100);
+
     var next = container.querySelector('div.navNext');
-    assert.equal(map.getView().getZoom(), 1);
-    assert.equal(map.getView().getCenter()[0], 0);
-    assert.equal(map.getView().getCenter()[1], 0);
     TestUtils.SimulateNative.click(next);
+    expect(store.getState().mapState.view.center[0]).to.equal(260119.36358071605);
+    expect(store.getState().mapState.view.center[1]).to.equal(6255406.541948485);
+    expect(store.getState().mapState.view.resolution).to.equal(10);
+    TestUtils.SimulateNative.click(next);
+    expect(store.getState().mapState.view.center[0]).to.equal(259260.31107026432);
+    expect(store.getState().mapState.view.center[1]).to.equal(6249657.399467627);
+    expect(store.getState().mapState.view.resolution).to.equal(15);
     window.setTimeout(function() {
-      assert.equal(Math.round(map.getView().getZoom()), 14);
-      assert.equal(map.getView().getCenter()[0], 260119.36358071605);
-      assert.equal(map.getView().getCenter()[1], 6255406.541948485);
       ReactDOM.unmountComponentAtNode(container);
       done();
-    }, 1000);
+    }, 500);
   });
 
-  it('zooms to the next bookmark using nav dots [1]', function(done) {
+  it('zooms to the next bookmark using nav dots', function(done) {
     var container = document.createElement('div');
+    const store = configureStore();
+
     ReactDOM.render((
-      <Bookmarks intl={intl} map={map} bookmarks={bookmarks} />
+      <div>
+        <IntlProvider locale="en">
+          <BoundlessSdk store={store}>
+              <Bookmarks intl={intl} bookmarks={bookmarks}/>
+          </BoundlessSdk>
+        </IntlProvider>
+      </div>
     ), container);
+
+    store.dispatch(setView({center: [0,0], resolution:100}));
+    expect(store.getState().mapState.view.center[0]).to.equal(0);
+    expect(store.getState().mapState.view.center[1]).to.equal(0);
+    expect(store.getState().mapState.view.resolution).to.equal(100);
     var buttonOne = container.querySelector('button#dots_1');
-    assert.equal(map.getView().getZoom(), 1);
-    assert.equal(map.getView().getCenter()[0], 0);
-    assert.equal(map.getView().getCenter()[1], 0);
     TestUtils.SimulateNative.click(buttonOne);
-    window.setTimeout(function() {
-      assert.equal(Math.round(map.getView().getZoom()), 14);
-      assert.equal(map.getView().getCenter()[0], 260119.36358071605);
-      assert.equal(map.getView().getCenter()[1], 6255406.541948485);
-      ReactDOM.unmountComponentAtNode(container);
-      done();
-    }, 1000);
-  });
-
-  it('zooms to the next bookmark using nav dots [2]', function(done) {
-    var container = document.createElement('div');
-    ReactDOM.render((
-      <Bookmarks intl={intl} map={map} bookmarks={bookmarks} />
-    ), container);
+    expect(store.getState().mapState.view.center[0]).to.equal(260119.36358071605);
+    expect(store.getState().mapState.view.center[1]).to.equal(6255406.541948485);
+    expect(store.getState().mapState.view.resolution).to.equal(10);
     var buttonTwo = container.querySelector('button#dots_2');
-    assert.equal(map.getView().getZoom(), 1);
-    assert.equal(map.getView().getCenter()[0], 0);
-    assert.equal(map.getView().getCenter()[1], 0);
     TestUtils.SimulateNative.click(buttonTwo);
+    expect(store.getState().mapState.view.center[0]).to.equal(259260.31107026432);
+    expect(store.getState().mapState.view.center[1]).to.equal(6249657.399467627);
+    expect(store.getState().mapState.view.resolution).to.equal(15);
     window.setTimeout(function() {
-      assert.equal(Math.round(map.getView().getZoom()), 14);
-      assert.equal(map.getView().getCenter()[0], 259260.31107026432);
-      assert.equal(map.getView().getCenter()[1], 6249657.399467627);
       ReactDOM.unmountComponentAtNode(container);
       done();
-    }, 1000);
+    }, 500);
   });
 
 });

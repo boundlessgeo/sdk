@@ -82,6 +82,13 @@ class Map extends React.PureComponent {
 
       this.props.setView(view_obj);
     });
+
+    // knowing the map size avoids needing to do
+    //  strange things when zooming to an extent.
+    this.props.setSize(map.getSize());
+    map.on('change:size', () => {
+      this.props.setSize(map.getSize());
+    });
   }
   componentWillUpdate(nextProps, nextState) {
     const mapView = this.props.map.getView();

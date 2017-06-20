@@ -68,7 +68,6 @@
   },
   "dependencies": {
     "@boundlessgeo/jsonix": "^2.4.3",
-    "axios": "^0.16.1",
     "blueimp-canvas-to-blob": "2.2.2",
     "browser-filesaver": "^1.1.0",
     "c3-windows": "^0.4.11-rc4",

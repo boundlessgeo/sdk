@@ -25,3 +25,15 @@ export function setView(view) {
     view
   }
 }
+export function setSize(size) {
+  return {
+    type: MAP.SET_SIZE,
+    size
+  }
+}
+export function zoomToExtent(extent) {
+  return {
+    type: MAP.FIT_EXTENT,
+    extent
+  }
+}

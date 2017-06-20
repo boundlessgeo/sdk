@@ -1,6 +1,25 @@
 import {MAP} from '../actions/ActionTypes';
 import {LAYER} from '../actions/ActionTypes';
 
+import ol from 'openlayers';
+
+/** Take in the size of the map and extent and
+ *   return a new "view" containing center and zoom.
+ */
+
+function convertFromExtent(mapSize, extent, rotation) {
+  const view = new ol.View();
+  view.fit(extent, {
+    size: mapSize
+  });
+
+  return {
+    resolution: view.getResolution(),
+    center: view.getCenter(),
+    rotation: rotation ? rotation : 0
+  }
+}
+
 const defaultState = {view: {}}
 
 export default (state = defaultState, action) => {
@@ -48,6 +67,16 @@ export default (state = defaultState, action) => {
           ...state,
           layers: layers
         };
+      }
+    case MAP.SET_SIZE:
+      return {
+        ...state,
+        size: action.size
+      };
+    case MAP.FIT_EXTENT:
+      return {
+        ...state,
+        view: convertFromExtent(state.size, action.extent, state.rotation)
       }
     default:
       return state
