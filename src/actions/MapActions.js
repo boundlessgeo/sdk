@@ -11,7 +11,6 @@
 */
 
 import {MAP} from './ActionTypes';
-import MapConfigService from '../services/MapConfigService';
 
 export function setView(view) {
   return {
