@@ -13,19 +13,6 @@
 import {MAP} from './ActionTypes';
 import MapConfigService from '../services/MapConfigService';
 
-export const getMap = (map) => {
-  return {
-    type: MAP.GET_CONFIG,
-    layers: MapConfigService.getMapState(map)
-  };
-};
-export const getMaxMinResolutions = (map) => {
-  return {
-    type: MAP.GET_MAX_MIN_RESOLUTIONS,
-    maxResolution: MapConfigService.getMaxMinResolutions(map).maxResolution,
-    minResolution: MapConfigService.getMaxMinResolutions(map).minResolution
-  };
-};
 export function setView(view) {
   return {
     type: MAP.SET_VIEW,
@@ -42,5 +29,11 @@ export function zoomToExtent(extent) {
   return {
     type: MAP.FIT_EXTENT,
     extent
+  }
+}
+export function setProjection(projection) {
+  return {
+    type: MAP.SET_PROJECTION,
+    projection
   }
 }

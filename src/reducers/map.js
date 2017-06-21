@@ -20,14 +20,43 @@ function convertFromExtent(mapSize, extent, rotation) {
   }
 }
 
-const defaultState = {view: {}}
+/** Reproject a point.
+ *
+ */
+function projectPoint(pt, srcProj, destProj) {
+  // Yes, this just wraps the OpenLayers functions but it keeps
+  // library dependent code from being *directly* in the reducer.
+  const p = (new ol.geom.Point(pt)).transform(srcProj, destProj);
+  return p.getCoordinates();
+}
+
+const defaultState = {
+  config: {
+    // default projection for OpenLayers maps.
+    projection: 'EPSG:3857',
+    // bounds are specified in EPSG:4326 for interoperability.
+    bounds: [-180.0, -90.0, 180.0, 90.0]
+  },
+  view: {}
+}
 
 export default (state = defaultState, action) => {
   switch (action.type) {
-    case MAP.GET_CONFIG:
+    case MAP.SET_PROJECTION:
       return {
         ...state,
-        layers: action.layers
+        config: {
+          ...state.config,
+          projection: action.projection
+        }
+      }
+    case MAP.SET_BOUNDS:
+      return {
+        ...state,
+        config: {
+          ...state.config,
+          bounds: action.bounds
+        }
       }
     case MAP.GET_MAX_MIN_RESOLUTIONS:
       return {
@@ -40,6 +69,12 @@ export default (state = defaultState, action) => {
       }
     case  MAP.SET_VIEW:
       const new_view = state.view;
+
+      // if the action specifys a projection when setting the view,
+      //  then pull that out and reproject the center.
+      if (action.projection) {
+        action.center = projectPoint(center, action.projection, state.config.projection);
+      }
       for (const key of ['center', 'resolution', 'rotation']) {
         if (typeof (action.view[key]) !== 'undefined') {
           new_view[key] = action.view[key];
