@@ -100,6 +100,7 @@ class Map extends React.PureComponent {
       mapView.setResolution(stateView.resolution);
       mapView.setRotation(stateView.rotation);
     }
+    /*TODO: Re-apply layer updates
     const mapLayers = this.props.map.getLayers();
     const stateLayers = nextProps.mapStore.layers;
     if (nextProps) {
@@ -111,6 +112,7 @@ class Map extends React.PureComponent {
         }
       })
     }
+    */
   }
   render() {
     return (

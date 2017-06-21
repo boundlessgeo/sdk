@@ -59,19 +59,15 @@ class ZoomSlider extends React.PureComponent {
 
   _getValue(resolution) {
     const rez_fn = this.getResolutionFn();
-    var maxResolution = rez_fn(1);
-    var minResolution = rez_fn(0);
+    var minResolution = rez_fn(1);
+    var maxResolution = rez_fn(0);
     var max = Math.log(maxResolution / minResolution) / Math.log(2);
     return 1 - ((Math.log(maxResolution / resolution) / Math.log(2)) / max);
   }
 
   _onChange(evt, value) {
     const rez_fn = this.getResolutionFn();
-    var maxResolution = rez_fn(1);
-    var minResolution = rez_fn(0);
-    var max = Math.log(maxResolution / minResolution) / Math.log(2);
-    var resolution = maxResolution / Math.pow(2, (value) * max);
-
+    var resolution = rez_fn(value);
     this.props.setView({
       resolution: resolution
     });
@@ -80,7 +76,6 @@ class ZoomSlider extends React.PureComponent {
     if (this.props.map.view.resolution) {
       return (
         <Slider style={this.props.style}
-          axis="y"
           className={classNames('sdk-component zoom-slider', this.props.className)}
           onChange={this._onChange.bind(this)}
           value={this._getValue(this.props.map.view.resolution)} />
