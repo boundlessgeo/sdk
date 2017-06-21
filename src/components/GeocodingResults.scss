@@ -1,0 +1,41 @@
+.geoCodingResults {
+  .locationResult {
+    max-width: 280px;
+    color: #8C8C8C;
+    font-size: 14px;
+    display: flex;
+    margin-bottom: 5px;
+    
+    cursor: pointer;
+    padding: 2px;
+
+    .locationIcon {
+      width: 50px;
+      display: flex;
+      justify-content: center;
+      padding-top: 4px;
+
+      img {
+        max-height: 14px;
+      }
+    }
+    .locationDetails {
+      flex: 1;
+      .place {
+        color: #333333;
+        font-weight: bold;
+      }
+      border-bottom: 1px solid #E6E6E6;
+      padding-bottom: 5px;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+    &:last-child .locationDetails {
+      border-bottom: none;
+    }
+    // &:hover {
+    //   background-color: #c4c4c4;
+    // }
+  }
+}

@@ -9,7 +9,7 @@ import 'phantomjs-polyfill-object-assign';
 import HomeButton from '../../src/components/HomeButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import {addLocaleData, IntlProvider} from 'react-intl';
+import {IntlProvider} from 'react-intl';
 
 import configureStore from '../../src/stores/Store';
 import { setView } from '../../src/actions/MapActions';

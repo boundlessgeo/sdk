@@ -121,5 +121,16 @@ export default {
     }
     xmlhttp.send(data);
     return xmlhttp;
+  },
+  fetch(url, options) {
+    let req_url = url;
+    if (options.params) {
+      const params = [];
+      for (const key of Object.keys(options.params)) {
+        params.push(key + '=' + encodeURIComponent(options.params[key]));
+      }
+      req_url += '?' + params.join('&');
+    }
+    return fetch(req_url, options);
   }
 };
