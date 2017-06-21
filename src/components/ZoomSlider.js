@@ -6,9 +6,7 @@ import * as MapActions from '../actions/MapActions';
 // Maps state from store to props
 const mapStateToProps = (state) => {
   return {
-    maxResolution: state.mapState.view.maxResolution || 0,
-    minResolution: state.mapState.view.minResolution || 0,
-    resolution: state.mapState.view.resolution || 0
+    map: state.mapState
   }
 };
 

@@ -4,6 +4,8 @@ import Slider from 'material-ui/Slider';
 import classNames from 'classnames';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
+import ol from 'openlayers';
+
 /**
  * Horizontal slider to allow zooming the map. Make sure that the containing div has a size.
  *
@@ -48,20 +50,20 @@ class ZoomSlider extends React.PureComponent {
     return {muiTheme: this._muiTheme};
   }
 
+  getResolutionFn() {
+    return (new ol.View({projection: this.props.map.config.projection})).getResolutionForValueFunction();
+  }
+
   _getValue(resolution) {
-    var maxResolution = this.props.maxResolution;
-    var minResolution = this.props.minResolution;
-    var max = Math.log(maxResolution / minResolution) / Math.log(2);
-    return 1 - ((Math.log(maxResolution / resolution) / Math.log(2)) / max);
+    const rez_fn = this.getResolutionFn();
+    return 1 - (resolution / rez_fn(1));
   }
 
   _onChange(evt, value) {
-    var maxResolution = this.props.maxResolution;
-    var minResolution = this.props.minResolution;
-    var max = Math.log(maxResolution / minResolution) / Math.log(2);
-    var resolution = maxResolution / Math.pow(2, (1 - value) * max);
-    var view = {resolution: resolution}
-    this.props.setView(view);
+    const rez_fn = this.getResolutionFn();
+    this.props.setView({
+      resolution: rez_fn(1 - value)
+    });
   }
   render() {
     if (this.props.resolution) {
