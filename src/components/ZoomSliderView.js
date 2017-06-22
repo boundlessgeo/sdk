@@ -53,21 +53,30 @@ class ZoomSlider extends React.PureComponent {
     return {muiTheme: this._muiTheme};
   }
 
-  getResolutionFn() {
-    return (new ol.View({projection: this.props.map.config.projection})).getResolutionForValueFunction();
+  getResolutions() {
+    const v = new ol.View({projection: this.props.map.config.projection});
+    return {
+      min: v.getMinResolution(),
+      max: v.getMaxResolution()
+    }
   }
 
   _getValue(resolution) {
-    const rez_fn = this.getResolutionFn();
-    var minResolution = rez_fn(1);
-    var maxResolution = rez_fn(0);
+    const rez = this.getResolutions();
+    var minResolution = rez.min;
+    var maxResolution = rez.max;
     var max = Math.log(maxResolution / minResolution) / Math.log(2);
-    return 1 - ((Math.log(maxResolution / resolution) / Math.log(2)) / max);
+    return ((Math.log(maxResolution / resolution) / Math.log(2)) / max);
   }
 
   _onChange(evt, value) {
-    const rez_fn = this.getResolutionFn();
-    var resolution = rez_fn(value);
+    const rez = this.getResolutions();
+    var maxResolution = rez.max;
+    var minResolution = rez.min;
+
+    var max = Math.log(maxResolution / minResolution) / Math.log(2);
+    const resolution = maxResolution / Math.pow(2, value * max);
+
     this.props.setView({
       resolution: resolution
     });
@@ -76,6 +85,7 @@ class ZoomSlider extends React.PureComponent {
     if (this.props.map.view.resolution) {
       return (
         <Slider style={this.props.style}
+          axis='y'
           className={classNames('sdk-component zoom-slider', this.props.className)}
           onChange={this._onChange.bind(this)}
           value={this._getValue(this.props.map.view.resolution)} />
