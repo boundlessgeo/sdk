@@ -1,21 +1,19 @@
 import ZoomSliderView from './ZoomSliderView';
 import {connect} from 'react-redux';
-//import * as zoomSliderActions from '../actions/ZoomSliderActions';
+import * as MapActions from '../actions/MapActions';
 
 
 // Maps state from store to props
 const mapStateToProps = (state) => {
   return {
-    //resolution: state.zoomSlider.resolution || 0
-    mapStore: state.mapState || null
-    //zoom: state.mapState.view ? state.mapState.view.zoom : 1
+    map: state.mapState
   }
 };
 
 // Maps actions to props
 const mapDispatchToProps = (dispatch) => {
   return {
-    //getResolutionValue: resolutionValue => dispatch(zoomSliderActions.getResolutionValue(resolutionValue))
+    setView: view => dispatch(MapActions.setView(view))
   }
 };
 

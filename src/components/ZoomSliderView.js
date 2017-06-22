@@ -1,14 +1,16 @@
 import React from 'react';
-//import ol from 'openlayers';
 import debounce from  'debounce';
 import Slider from 'material-ui/Slider';
 import classNames from 'classnames';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
+
+import ol from 'openlayers';
 
 /**
  * Horizontal slider to allow zooming the map. Make sure that the containing div has a size.
  *
  * ```xml
- * <ZoomSlider map={map} />
+ * <ZoomSlider />
  * ```
  */
 class ZoomSlider extends React.PureComponent {
@@ -28,54 +30,69 @@ class ZoomSlider extends React.PureComponent {
   };
 
   static defaultProps = {
-    refreshRate: 100
+    refreshRate: 100,
+    style: {
+      height: 124
+    }
+  };
+
+  static contextTypes = {
+    muiTheme: React.PropTypes.object
+  };
+
+  static childContextTypes = {
+    muiTheme: React.PropTypes.object.isRequired
   };
 
   constructor(props, context) {
     super(props);
-    this.state = {};
-    this.map = this.props.mapStore
+    this._muiTheme = context.muiTheme || getMuiTheme();
     this._onChange = debounce(this._onChange, this.props.refreshRate);
   }
-  /*
-  componentDidMount() {
-    //this.map.getView().on('change:resolution', this._handleChangeResolution, this);
-    //this._handleChangeResolution();
+  getChildContext() {
+    return {muiTheme: this._muiTheme};
   }
-  componentWillUnmount() {
-    //this.map.getView().un('change:resolution', this._handleChangeResolution, this);
+
+  getResolutions() {
+    const v = new ol.View({projection: this.props.map.config.projection});
+    return {
+      min: v.getMinResolution(),
+      max: v.getMaxResolution()
+    }
   }
-  */
-  _handleChangeResolution() {
-    this.setState({
-      value: this._getValue(this.props.map.getView().getResolution())
-    })
-    //var olResolution = this.map.getView().getResolution();
-    //this.props.getResolutionValue(this._getValue(olResolution))
-  }
+
   _getValue(resolution) {
-    //var view = this.map.getView();
-    var view = this.map.view
-    var maxResolution = view.getMaxResolution();
-    var minResolution = view.getMinResolution();
+    const rez = this.getResolutions();
+    var minResolution = rez.min;
+    var maxResolution = rez.max;
     var max = Math.log(maxResolution / minResolution) / Math.log(2);
-    return 1 - ((Math.log(maxResolution / resolution) / Math.log(2)) / max);
+    return ((Math.log(maxResolution / resolution) / Math.log(2)) / max);
   }
+
   _onChange(evt, value) {
-    /*
-    var map = this.map;
-    var view = map.getView();
-    var maxResolution = view.getMaxResolution();
-    var minResolution = view.getMinResolution();
+    const rez = this.getResolutions();
+    var maxResolution = rez.max;
+    var minResolution = rez.min;
+
     var max = Math.log(maxResolution / minResolution) / Math.log(2);
-    var resolution = maxResolution / Math.pow(2, (1 - value) * max);
-    view.setResolution(view.constrainResolution(resolution));
-    */
+    const resolution = maxResolution / Math.pow(2, value * max);
+
+    this.props.setView({
+      resolution: resolution
+    });
   }
   render() {
-    return (
-      <Slider style={this.props.style} className={classNames('sdk-component zoom-slider', this.props.className)} onChange={this._onChange.bind(this)} value={this.state.value} />
-    );
+    if (this.props.map.view.resolution) {
+      return (
+        <Slider style={this.props.style}
+          axis='y'
+          className={classNames('sdk-component zoom-slider', this.props.className)}
+          onChange={this._onChange.bind(this)}
+          value={this._getValue(this.props.map.view.resolution)} />
+      );
+    } else {
+      return false;
+    }
   }
 }
 
