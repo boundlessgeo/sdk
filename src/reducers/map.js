@@ -50,12 +50,12 @@ export default (state = defaultState, action) => {
           projection: action.projection
         }
       }
-    case MAP.SET_BOUNDS:
+    case MAP.SET_MAX_EXTENT:
       return {
         ...state,
         config: {
           ...state.config,
-          bounds: action.bounds
+          maxExtent: action.maxExtent
         }
       }
     case  MAP.SET_VIEW:
