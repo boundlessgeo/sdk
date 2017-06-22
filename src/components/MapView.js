@@ -99,6 +99,7 @@ class Map extends React.PureComponent {
       mapView.setCenter(stateView.center);
       mapView.setResolution(stateView.resolution);
       mapView.setRotation(stateView.rotation);
+
     }
     /*TODO: Re-apply layer updates
     const mapLayers = this.props.map.getLayers();
