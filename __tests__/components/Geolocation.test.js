@@ -1,58 +1,50 @@
-/* global afterEach, beforeEach, describe, it */
+/* global describe, it */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {assert} from 'chai';
-import raf from 'raf';
-import ol from 'openlayers';
 import intl from '../mock-i18n';
-import TestUtils from 'react-addons-test-utils';
 import 'phantomjs-polyfill-object-assign';
 import Geolocation from '../../src/components/Geolocation';
-
-raf.polyfill();
+import BoundlessSdk from '../../src/components/BoundlessSdk';
+import configureStore from '../../src/stores/Store';
+import '../polyfills';
 
 describe('Geolocation', function() {
-  var target, map;
-  var width = 360;
-  var height = 180;
+  /*TODO: Testing if a touchTap on the geolocation button will update the center
+   in the state tree can be done once the addLayer functionality is
+   implempented with Redux changes
+  */
+  // it('geolocation created on click', function() {
+  //   var container = document.createElement('div');
+  //   const store = configureStore();
+  //   ReactDOM.render((
+  //     <BoundlessSdk store={store}>
+  //       <Geolocation intl={intl}/>
+  //     </BoundlessSdk>
+  //   ), container);
+  //   var button = container.querySelector('button');
+  //   const init_center = [0,0];
+  //   const init_resolution = 2000;
+  //   store.dispatch(setView({center: init_center, resolution: init_resolution}));
+  //   TestUtils.Simulate.touchTap(button);
+  //   //assert.equal(geolocation._geolocation !== undefined, true);
+  //   ReactDOM.unmountComponentAtNode(container);
+  // });
 
-  beforeEach(function(done) {
-    target = document.createElement('div');
-    var style = target.style;
-    style.position = 'absolute';
-    style.left = '-1000px';
-    style.top = '-1000px';
-    style.width = width + 'px';
-    style.height = height + 'px';
-    document.body.appendChild(target);
-    map = new ol.Map({
-      target: target,
-      view: new ol.View({
-        center: [0, 0],
-        zoom: 1
-      })
-    });
-    map.once('postrender', function() {
-      done();
-    });
-  });
-
-  afterEach(function() {
-    map.setTarget(null);
-    document.body.removeChild(target);
-  });
-
-
-  it('geolocation created on click', function() {
+  it('renders the Geolocation component', function() {
     var container = document.createElement('div');
-    var geolocation = ReactDOM.render((
-      <Geolocation intl={intl} map={map}/>
+    const store = configureStore();
+    ReactDOM.render((
+      <div>
+        <BoundlessSdk store={store}>
+        <Geolocation intl={intl}/>
+        </BoundlessSdk>
+      </div>
     ), container);
-    var button = container.querySelector('button');
-    TestUtils.Simulate.touchTap(button);
-    assert.equal(geolocation._geolocation !== undefined, true);
+    const actual = container.children[0].innerHTML;
+    const expected = 'sdk-component geolocation';
+    assert.include(actual, expected);
     ReactDOM.unmountComponentAtNode(container);
   });
-
 });
