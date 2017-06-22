@@ -8,6 +8,7 @@ import Button from './Button';
 import Toggle from 'material-ui/Toggle';
 import classNames from 'classnames';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import ol from 'openlayers';
 
 const messages = defineMessages({
   dd: {
@@ -187,7 +188,7 @@ class ZoomToLatLon extends React.PureComponent {
         this.state.londirection
       );
     }
-    let center = this.props.lonLatToCenter(lon, lat, this.props.projection).center;
+    let center = ol.proj.fromLonLat([lon, lat], this.props.map.config.projection)
     this.props.setView({center: center, resolution: this.props.resolution});
     this.closeDialog();
   }

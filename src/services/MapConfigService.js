@@ -281,13 +281,6 @@ class MapConfigService {
     //return config;
     return layers;
   }
-
-  getProjection(map) {
-    return map.getView().getProjection();
-  }
-  lonLatToCenter(lon, lat, proj) {
-    return ol.proj.fromLonLat([lon, lat], proj)
-  }
 }
 
 export default new MapConfigService();

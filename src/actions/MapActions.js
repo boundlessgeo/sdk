@@ -18,12 +18,6 @@ export function setView(view) {
     view
   }
 }
-export function lonLatToCenter(lon, lat, proj) {
-  return {
-    type: MAP.LON_LAT_TO_CENTER
-    //center: MapConfigService.lonLatToCenter(lon, lat, proj)
-  }
-}
 export function setSize(size) {
   return {
     type: MAP.SET_SIZE,
