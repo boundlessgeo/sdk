@@ -11,20 +11,7 @@
 */
 
 import {MAP} from './ActionTypes';
-import MapConfigService from '../services/MapConfigService';
 
-export const getMap = (map) => {
-  return {
-    type: MAP.GET_CONFIG,
-    layers: MapConfigService.getMapState(map)
-  };
-};
-export const getProjection = (map) => {
-  return {
-    type: MAP.GET_PROJECTION,
-    projection: MapConfigService.getProjection(map)
-  };
-};
 export function setView(view) {
   return {
     type: MAP.SET_VIEW,
@@ -33,8 +20,8 @@ export function setView(view) {
 }
 export function lonLatToCenter(lon, lat, proj) {
   return {
-    type: MAP.LON_LAT_TO_CENTER,
-    center: MapConfigService.lonLatToCenter(lon, lat, proj)
+    type: MAP.LON_LAT_TO_CENTER
+    //center: MapConfigService.lonLatToCenter(lon, lat, proj)
   }
 }
 export function setSize(size) {
@@ -47,5 +34,11 @@ export function zoomToExtent(extent) {
   return {
     type: MAP.FIT_EXTENT,
     extent
+  }
+}
+export function setProjection(projection) {
+  return {
+    type: MAP.SET_PROJECTION,
+    projection
   }
 }

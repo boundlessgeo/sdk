@@ -65,10 +65,6 @@ class Map extends React.PureComponent {
     super(props);
     this._proxy = context.proxy;
     this._requestHeaders = context.requestHeaders;
-    if (this.props.hasOwnProperty('getMap')) {
-      this.props.getMap(this.props.map);
-    }
-    this.props.getProjection(this.props.map);
   }
 
   componentDidMount() {
@@ -103,7 +99,9 @@ class Map extends React.PureComponent {
       mapView.setCenter(stateView.center);
       mapView.setResolution(stateView.resolution);
       mapView.setRotation(stateView.rotation);
+
     }
+    /* Removing layer list for now...
     const mapLayers = this.props.map.getLayers();
     const stateLayers = nextProps.mapStore.layers;
     if (nextProps) {
@@ -115,6 +113,7 @@ class Map extends React.PureComponent {
         }
       })
     }
+    */
   }
   render() {
     return (
