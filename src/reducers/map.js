@@ -34,8 +34,8 @@ const defaultState = {
   config: {
     // default projection for OpenLayers maps.
     projection: 'EPSG:3857',
-    // bounds are specified in EPSG:4326 for interoperability.
-    bounds: [-180.0, -90.0, 180.0, 90.0]
+    // maxExtent is specified in EPSG:4326 for interoperability.
+    maxExtent: [-180.0, -90.0, 180.0, 90.0]
   },
   view: {}
 }
@@ -61,7 +61,7 @@ export default (state = defaultState, action) => {
     case  MAP.SET_VIEW:
       const new_view = state.view;
 
-      // if the action specifys a projection when setting the view,
+      // if the action specifies a projection when setting the view,
       //  then pull that out and reproject the center.
       if (action.projection) {
         action.center = projectPoint(center, action.projection, state.config.projection);
