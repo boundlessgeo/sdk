@@ -281,27 +281,6 @@ class MapConfigService {
     //return config;
     return layers;
   }
-  getMaxMinResolutions(map) {
-    var view = {};
-    view.maxResolution = map.getView().getMaxResolution();
-    view.minResolution = map.getView().getMinResolution();
-    //var config = {};
-    //config.layers = layers;
-    /*
-    var view = map.getView();
-    config.view = {
-      projection: view.getProjection().getCode(),
-      center: view.getCenter(),
-      resolution: view.getResolution(),
-      zoom: view.getZoom(),
-      rotation: view.getRotation(),
-      extent: view.calculateExtent()
-      //TODO: Checking min and max
-    };
-    */
-    //return config;
-    return view;
-  }
 }
 
 export default new MapConfigService();
