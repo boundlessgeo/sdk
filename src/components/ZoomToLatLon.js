@@ -1,19 +1,18 @@
 import ZoomToLatLonView from './ZoomToLatLonView';
 import {connect} from 'react-redux';
-import * as zoomToLatLonActions from '../actions/ZoomToLatLonActions';
+import * as MapActions from '../actions/MapActions';
 
 // Maps state from store to props
 const mapStateToProps = (state) => {
   return {
-    open: state.zoomToLatLon.dialogIsOpen
+    map: state.mapState
   }
 };
 
 // Maps actions to props
 const mapDispatchToProps = (dispatch) => {
   return {
-    openDialog: () => dispatch(zoomToLatLonActions.openDialog()),
-    closeDialog: () => dispatch(zoomToLatLonActions.closeDialog())
+    setView: view => dispatch(MapActions.setView(view))
   }
 };
 export default connect(mapStateToProps, mapDispatchToProps)(ZoomToLatLonView);
