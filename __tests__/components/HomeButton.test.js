@@ -1,9 +1,8 @@
-/* global afterEach, beforeEach, describe, it */
+/* global describe, it */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {expect} from 'chai';
-import ol from 'openlayers';
 import TestUtils from 'react-addons-test-utils';
 import 'phantomjs-polyfill-object-assign';
 import HomeButton from '../../src/components/HomeButton';
@@ -12,11 +11,11 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {IntlProvider} from 'react-intl';
 
 import configureStore from '../../src/stores/Store';
-import { setView } from '../../src/actions/MapActions';
+import {setView} from '../../src/actions/MapActions';
 
 import BoundlessSdk from '../../src/components/BoundlessSdk';
 
-import polyfills from '../polyfills';
+import '../polyfills'; 
 
 describe('HomeButton', function() {
 
@@ -38,12 +37,12 @@ describe('HomeButton', function() {
 
 
     const init_center = [0,0];
-    const init_zoom = 11;
+    const init_resolution = 2000;
     // set an initial view
-    store.dispatch(setView(init_center, init_zoom));
+    store.dispatch(setView({center: init_center, resolution: init_resolution}));
 
     // move the map
-    store.dispatch(setView([100, 100], 22));
+    store.dispatch(setView({center: [100, 100], resolution: 1000}));
 
     // "click" the button.
     TestUtils.Simulate.touchTap(button);
@@ -52,7 +51,7 @@ describe('HomeButton', function() {
 
     // ensure the view has returned "home".
     expect(view.center).to.deep.equal(init_center);
-    expect(view.zoom).to.equal(init_zoom);
+    expect(view.resolution).to.equal(init_resolution);
 
     ReactDOM.unmountComponentAtNode(container);
   });

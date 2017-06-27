@@ -10,16 +10,15 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-/* global Cesium */
 import React from 'react';
-import ol from 'openlayers';
-global.ol = ol;
+import {connect} from 'react-redux';
+
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
-import ToolActions from '../actions/ToolActions';
 import classNames from 'classnames';
 import Button from './Button';
 import GlobeIcon from 'material-ui/svg-icons/action/three-d-rotation';
-import olcs from 'ol3-cesium';
+import MapIcon from 'material-ui/svg-icons/maps/map.js';
+import {setRenderer} from '../actions/MapActions';
 
 const messages = defineMessages({
   maptext: {
@@ -36,11 +35,6 @@ const messages = defineMessages({
 
 /**
  * Adds a button to toggle 3D mode.
- * The HTML page of the application needs to include a script tag to cesium:
- *
- * ```html
- * <script src="./resources/ol3-cesium/Cesium.js" type="text/javascript" charset="utf-8"></script>
- * ```
  *
  * ```xml
  * <Globe map={map} />
@@ -57,10 +51,6 @@ class Globe extends React.PureComponent {
      */
     tooltipPosition: React.PropTypes.oneOf(['bottom', 'bottom-right', 'bottom-left', 'right', 'left', 'top-right', 'top', 'top-left']),
     /**
-     * The ol3 map instance to work on.
-     */
-    map: React.PropTypes.instanceOf(ol.Map).isRequired,
-    /**
      * Style config.
      */
     style: React.PropTypes.object,
@@ -74,75 +64,54 @@ class Globe extends React.PureComponent {
     intl: intlShape.isRequired
   };
 
-  static defaultProps = {
-    hideScalebar: 78271
-  };
-
-  constructor(props, context) {
+  constructor(props) {
     super(props);
-    this.state = {
-      globe: false
-    };
+    this.onClick = this.onClick.bind(this);
   }
-  init() {
-    var providerUrl = '//assets.agi.com/stk-terrain/world';
-    this._ol3d = new olcs.OLCesium({map: this.props.map});
-    var scene = this._ol3d.getCesiumScene();
-    scene.terrainProvider = new Cesium.CesiumTerrainProvider({
-      url: providerUrl
-    });
-  }
-  _toggle() {
-    if (!this._ol3d) {
-      this.init();
+
+  onClick() {
+    // TODO: This lets various components know which render
+    //       is intended to be used (3d vs 2d) but this may
+    //       need to be updated in the future to be more explict,
+    //       e.g.: Cesium vs OL vs Leaflet.
+    let next_renderer = '3d';
+    if (this.props.map.renderer === '3d') {
+      next_renderer = '2d';
     }
-    this._ol3d.setEnabled(!this.state.globe);
-    var globe = !this.state.globe;
-    if (globe) {
-      this._hideOrShowScaleBar.call(this, {target: this.props.map.getView()});
-      this.props.map.getView().on('change:resolution', this._hideOrShowScaleBar, this);
-      ToolActions.disableAllTools();
-    } else {
-      this.props.map.getView().un('change:resolution', this._hideOrShowScaleBar, this);
-      this._showScaleBar();
-      ToolActions.enableAllTools();
-    }
-    this.setState({globe: globe});
+    // dispatch the render change
+    this.props.dispatch(setRenderer(next_renderer));
   }
-  _hideOrShowScaleBar(evt) {
-    if (evt.target.getProjection().getCode() === 'EPSG:3857') {
-      if (evt.target.getResolution() > this.props.hideScalebar) {
-        this._hideScaleBar();
-      } else {
-        this._showScaleBar();
-      }
-    }
-  }
-  _hideScaleBar() {
-    var scaleLine = document.getElementsByClassName('ol-scale-line');
-    if (scaleLine.length === 1) {
-      scaleLine[0].style.visibility = 'hidden';
-    }
-  }
-  _showScaleBar() {
-    var scaleLine = document.getElementsByClassName('ol-scale-line');
-    if (scaleLine.length === 1) {
-      scaleLine[0].style.visibility = 'inherit';
-    }
-  }
+
   render() {
     const {formatMessage} = this.props.intl;
-    var icon, tooltip;
-    icon = <GlobeIcon />;
-    if (this.state.globe) {
+    let icon, tooltip;
+
+    if (this.props.map.renderer === '3d') {
       tooltip = formatMessage(messages.maptext);
+      icon = <MapIcon />;
     } else {
       tooltip = formatMessage(messages.globetext);
+      icon = <GlobeIcon />;
     }
+
     return (
-      <Button style={this.props.style} tooltipPosition={this.props.tooltipPosition} buttonType='Action' mini={true} secondary={true} className={classNames('sdk-component globe', this.props.className)} tooltip={tooltip} onTouchTap={this._toggle.bind(this)}>{icon}</Button>
+      <Button style={this.props.style}
+        className={classNames('sdk-component globe', this.props.className)}
+        tooltip={tooltip}
+        tooltipPosition={this.props.tooltipPosition}
+        buttonType='Action'
+        mini={true} secondary={true}
+        onTouchTap={this.onClick}>
+          {icon}
+      </Button>
     );
   }
 }
 
-export default injectIntl(Globe);
+const mapPropsToState = (state) => {
+  return {
+    map: state.mapState
+  }
+}
+
+export default connect(mapPropsToState)(injectIntl(Globe));

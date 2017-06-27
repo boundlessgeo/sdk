@@ -98,7 +98,7 @@ class HomeButton extends React.PureComponent {
       // short hand the view
       const v = this.state.view;
       // set the view using the center and zoom
-      this.props.dispatch(setView(v.center, v.zoom));
+      this.props.dispatch(setView(v));
     }
   }
 

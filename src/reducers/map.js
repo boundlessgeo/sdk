@@ -42,6 +42,11 @@ const defaultState = {
 
 export default (state = defaultState, action) => {
   switch (action.type) {
+    case MAP.SET_RENDERER:
+      return {
+        ...state,
+        renderer: action.renderer
+      }
     case MAP.SET_PROJECTION:
       return {
         ...state,
@@ -56,14 +61,6 @@ export default (state = defaultState, action) => {
         config: {
           ...state.config,
           maxExtent: action.maxExtent
-        }
-      }
-    case MAP.GET_PROJECTION:
-      return {
-        ...state,
-        view: {
-          ...state.view,
-          projection: action.projection
         }
       }
     case  MAP.SET_VIEW:

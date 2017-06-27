@@ -8,7 +8,7 @@ import intl from '../mock-i18n';
 import AddLayerModal from '../../src/components/AddLayerModal';
 import TestUtils from 'react-addons-test-utils';
 
-import polyfills from '../polyfills';
+import '../polyfills';
 
 describe('AddLayerModal', function() {
 

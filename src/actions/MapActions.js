@@ -18,6 +18,12 @@ export function setView(view) {
     view
   }
 }
+export function setRenderer(renderer) {
+  return {
+    type: MAP.SET_RENDERER,
+    renderer
+  }
+}
 export function setSize(size) {
   return {
     type: MAP.SET_SIZE,
