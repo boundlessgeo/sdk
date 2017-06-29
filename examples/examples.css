@@ -1,0 +1,40 @@
+body {
+    padding-top: 50px;
+    font-family: sans-serif;
+}
+
+#header {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 45px;
+    background-color: #ededed;
+    border-bottom: solid 2px #f58d50;
+
+    box-sizing: border-box;
+
+    padding: 5px;
+    padding-left: 100px;
+
+    background-image: url(boundless_sdk_horiz.svg);
+    background-size: 90px;
+    background-repeat: no-repeat;
+    background-position: 5px 5px;
+
+    font-size: 30px;
+}
+
+#map {
+    width: 100%;
+    height: 480px;
+}
+
+.sdk-map {
+    width: 100%;
+    height: 480px;
+}
+
+#controls button {
+    margin: 5px;
+    font-size: .85rem;
+}

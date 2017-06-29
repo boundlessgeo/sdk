@@ -1,0 +1,22 @@
+/*
+ * Basic styling for some form elements.
+ */
+
+input.radius {
+    width: 3em;
+}
+
+span.input {
+    width: 4em;
+    text-align: center;
+}
+
+.control-panel {
+    float: left;
+    margin-right: 15px;
+}
+
+#controls {
+    clear: both;
+    overflow: hidden;
+}

@@ -1,0 +1,37 @@
+dist: trusty
+sudo: required 
+
+language: node_js
+
+node_js:
+  - "6"
+
+cache:
+  directories:
+    - node_modules
+env:
+  global:
+  - ENCRYPTION_LABEL: "d1139ddcac92"
+  - COMMIT_AUTHOR_EMAIL: "bartvde@boundlessgeo.com"
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev g++
+  - "npm prune"
+
+before_script:
+  - "export DISPLAY=:99.0"
+
+script:
+  - "npm run test"
+
+after_success:
+  - "npm run cover"
+  - "cat coverage/lcov.info | ./node_modules/.bin/coveralls"
+
+branches:
+  only:
+    - master
+    - sdk-redux
+    - ultimateredux
+    - /^v\d+\.\d+(\.\d+)?$/

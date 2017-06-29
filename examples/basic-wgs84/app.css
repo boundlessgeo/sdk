@@ -1,0 +1,22 @@
+/* Demo how to over ride the default color of the buttons */
+
+button.sdk-btn.blue {
+    background-color: #29728d;
+}
+
+#controls form {
+  font-size: .85rem;
+}
+
+.mapName {
+  font-weight: 400;
+  line-height: 1.25;
+  text-align: left;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  font-size: 1rem;
+  border-radius: .25rem;
+}
