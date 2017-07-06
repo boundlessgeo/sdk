@@ -240,6 +240,7 @@ export class Map extends React.Component {
       //  from the map.
       if(layer_exists[layer_id] !== true) {
         this.map.removeLayer(this.layers[layer_id]);
+        delete this.layers[layer_id];
       }
     }
   }

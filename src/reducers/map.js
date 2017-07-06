@@ -87,7 +87,7 @@ function addSource(state, action) {
 function removeSource(state, action) {
   const new_sources = Object.assign({}, state.sources);
   delete new_sources[action.sourceName];
-  return Object.assign({}, state, {_sourcesVersion: state._sourcesVersion + 1}, new_sources);
+  return Object.assign({}, state, {_sourcesVersion: state._sourcesVersion + 1}, {sources: new_sources});
 }
 
 
