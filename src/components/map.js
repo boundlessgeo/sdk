@@ -19,6 +19,11 @@ import View from 'ol/view';
 import TileLayer from 'ol/layer/tile';
 import XyzSource from 'ol/source/xyz';
 import TileJSON from 'ol/source/tilejson';
+import TileGrid from 'ol/tilegrid';
+
+import VectorTileLayer from 'ol/layer/vectortile';
+import VectorTileSource from 'ol/source/vectortile';
+import MvtFormat from 'ol/format/mvt';
 
 import ImageLayer from 'ol/layer/image';
 import ImageStaticSource from 'ol/source/imagestatic';
@@ -27,7 +32,6 @@ import VectorLayer from 'ol/layer/vector';
 import VectorSource from 'ol/source/vector';
 
 import GeoJsonFormat from 'ol/format/geojson';
-
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
 
@@ -67,6 +71,18 @@ function configureImageSource(glSource) {
     imageExtent: [coords[0][0], coords[3][1], coords[1][0], coords[0][1]],
     projection: 'EPSG:4326'
   });
+  return source;
+}
+
+function configureMvtSource(glSource) {
+  const source = new VectorTileSource({
+    url: glSource.url,
+    tileGrid: TileGrid.createXYZ({maxZoom: 22}),
+    tilePixelRatio: 16,
+    format: new MvtFormat(),
+    crossOrigin: 'crossOrigin' in glSource ? glSource.crossOrigin : 'anonymous',
+  });
+
   return source;
 }
 
@@ -114,6 +130,8 @@ function configureSource(glSource) {
     return configureGeojsonSouce(glSource);
   } else if (glSource.type === 'image') {
     return configureImageSource(glSource);
+  } else if (glSource.type === 'vector') {
+    return configureMvtSource(glSource);
   }
   return null;
 }
@@ -180,42 +198,70 @@ export class Map extends React.Component {
     }
   }
 
+  /** This is a small bit of trickery that fakes
+   *  `getStyleFunction` into rendering only THIS layer.
+   */
+  fakeStyle(layer) {
+    return getStyleFunction({
+      version: 8,
+      layers: [layer],
+    }, layer.source);
+  }
+
+  /** Convert a GL-defined to an OpenLayers' layer.
+   */
+  configureLayer(sourcesDef, layer) {
+    const layer_src = sourcesDef[layer.source];
+
+    switch(layer_src.type) {
+      case 'raster':
+        return new TileLayer({
+          source: this.sources[layer.source],
+        });
+        break;
+      case 'geojson':
+        return new VectorLayer({
+          source: this.sources[layer.source],
+          style: this.fakeStyle(layer),
+        });
+      case 'vector':
+        return new VectorTileLayer({
+          source: this.sources[layer.source],
+          //source: configureSource(sourcesDef[layer.source]),
+          style: this.fakeStyle(layer),
+        });
+      case 'image':
+        return new ImageLayer({
+          source: this.sources[layer.source],
+          opacity: layer.paint ? layer.paint['raster-opacity'] : undefined,
+        });
+      default:
+        // pass, let the function return null
+    }
+
+    // this didn't work out.
+    return null;
+  }
+
   configureLayers(sourcesDef, layersDef, layerVersion) {
     const layer_exists = {};
 
+    // update the internal version counter.
     this.layersVersion = layerVersion;
+
     // layers is an array.
     for (let i = 0, ii = layersDef.length; i < ii; i++) {
       const layer = layersDef[i];
       const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
       layer_exists[layer.id] = true;
 
-      if (!(layer.id in this.layers)) {
+      // if the layer is not on the map, create it.
+      if(!(layer.id in this.layers)) {
         if (layer.type === 'background') {
           // TODO handle background
         } else {
-          const layer_src = sourcesDef[layer.source];
-          let new_layer = null;
-          if (layer_src.type === 'raster') {
-            new_layer = new TileLayer({
-              source: this.sources[layer.source],
-            });
-          } else if (layer_src.type === 'geojson') {
-            new_layer = new VectorLayer({
-              source: this.sources[layer.source],
-              // this is a small bit of trickery that fakes
-              // `getStyleFunction` into rendering only THIS layer.
-              style: getStyleFunction({
-                version: 8,
-                layers: [layer],
-              }, layer.source)
-            })
-          } else if (layer_src.type === 'image') {
-            new_layer = new ImageLayer({
-              source: this.sources[layer.source],
-              opacity: layer.paint ? layer.paint["raster-opacity"] : undefined,
-            });
-          }
+          const new_layer = this.configureLayer(sourcesDef, layer);
+          new_layer.set('name', layer.id);
           // if the new layer has been defined, add it to the map.
           if (new_layer !== null) {
             this.layers[layer.id] = new_layer;
