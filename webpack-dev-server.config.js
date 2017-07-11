@@ -1,6 +1,8 @@
 const webpack = require('webpack');
 const path = require('path');
 
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+
 const config = {
   resolve: {
     extensions: ['.js', '.jsx'],
@@ -13,6 +15,9 @@ const config = {
     basic: [
       'webpack/hot/only-dev-server',
       './examples/basic/app.jsx'
+    ],
+    wms: [
+      './examples/wms/app.jsx',
     ],
   },
   // Server Configuration options
@@ -30,6 +35,7 @@ const config = {
     filename: 'examples/[name]/[name].bundle.js',
   },
   plugins: [
+    new ExtractTextPlugin('sdk.css'),
     // Enables Hot Modules Replacement
     new webpack.HotModuleReplacementPlugin(),
   ],
@@ -43,9 +49,13 @@ const config = {
           cacheDirectory: true,
         },
       }, {
-        test: /\.css$/,
-        loader: "style-loader!css-loader"
-      },
+        test: /\.s?css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: ['css-loader', 'sass-loader']
+        }),
+
+      }
     ],
   },
 };

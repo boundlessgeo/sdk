@@ -355,6 +355,7 @@ export class Map extends React.Component {
   configureMap() {
     this.map = new OlMap({
       target: this.mapdiv,
+      logo: false,
       view: new View({
         center: this.props.map.center,
         zoom: this.props.map.zoom,

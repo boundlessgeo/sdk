@@ -13,7 +13,8 @@ import ReactDOM from 'react-dom';
 import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
-import 'ol/ol.css';
+
+import '@boundlessgeo/sdk/stylesheet/sdk.css';
 
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
@@ -25,7 +26,7 @@ window.store = store;
 
 function main() {
   // start in the middle of america
-  store.dispatch(mapActions.setView([-10895923.706980927, 4656189.67701237], 4));
+  store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 2));
 
   // add the OSM source
   store.dispatch(mapActions.addSource('osm', {
@@ -190,17 +191,9 @@ function main() {
   // add some buttons to demo some actions.
   ReactDOM.render((
     <div>
-      <button onClick={addLayer}>Add Layer</button>
-      <button onClick={removeLayer}>Remove Layer</button>
-      <button onClick={hideOSM}>Hide OSM</button>
-      <button onClick={showOSM}>Show OSM</button>
-      <button onClick={zoomToNullIsland}>Zoom to Null Island</button>
-      <button onClick={addRandomPoints}>Add 10 random points</button>
-      <button onClick={removeRandomPoints}>Remove random points</button>
-      <button onClick={addOverlay}>Add static image</button>
-      <button onClick={loadContext}>Load context</button>
-      <button onClick={moveBehind}>Move OSM behind Points</button>
-      <button onClick={moveAhead}>Move OSM to the Top</button>
+      <button className='sdk-btn' onClick={zoomToNullIsland}>Zoom to Null Island</button>
+      <button className='sdk-btn' onClick={addRandomPoints}>Add 10 random points</button>
+      <button className='sdk-btn blue' onClick={removeRandomPoints}>Remove random points</button>
     </div>
   ), document.getElementById('controls'));
 }
