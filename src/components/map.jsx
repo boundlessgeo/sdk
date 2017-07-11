@@ -35,6 +35,16 @@ import { dataVersionKey } from '../reducers/map';
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
 
+/** This variant of getVersion differs as it allows
+ *  for undefined values to be returned.
+ */
+function getVersion(obj, key) {
+  if (typeof obj.metadata === 'undefined') {
+    return undefined;
+  }
+  return obj.metadata[key];
+}
+
 function configureXyzSource(glSource) {
   const source = new XyzSource({
     attributions: glSource.attribution,
@@ -184,11 +194,12 @@ export class Map extends React.Component {
     }
 
     // check the sources diff
-    if (this.sourcesVersion !== nextProps.map.metadata[SOURCE_VERSION_KEY]) {
+    const next_sources_version = getVersion(nextProps.map, SOURCE_VERSION_KEY);
+    if (this.sourcesVersion !== next_sources_version) {
       // go through and update the sources.
-      this.configureSources(nextProps.map.sources, nextProps.map.metadata[SOURCE_VERSION_KEY]);
+      this.configureSources(nextProps.map.sources, next_sources_version);
     }
-    const next_layer_version = nextProps.map.metadata[LAYER_VERSION_KEY];
+    const next_layer_version = getVersion(nextProps.map, LAYER_VERSION_KEY);
     if (this.layersVersion !== next_layer_version) {
       // go through and update the layers.
       this.configureLayers(nextProps.map.sources, nextProps.map.layers, next_layer_version);
@@ -243,6 +254,21 @@ export class Map extends React.Component {
     }
   }
 
+  /** Style the background.
+   */
+  configureBackground(layer) {
+    // TODO: Right now there is not a good way of using
+    //       the background-opacity attribute, there is no
+    //       DOM-based backgroundOpacity CSS style and applying
+    //       opacity to the element makes it all "fade".
+    if (layer.paint['background-pattern']) {
+      // TODO: We cannot implement the background pattern
+      //       until glyphs/symbology has been implemented.
+    } else {
+      this.mapdiv.style.backgroundColor = layer.paint['background-color'];
+    }
+  }
+
   /** Convert a GL-defined to an OpenLayers' layer.
    */
   configureLayer(sourcesDef, layer) {
@@ -291,7 +317,7 @@ export class Map extends React.Component {
       // if the layer is not on the map, create it.
       if (!(layer.id in this.layers)) {
         if (layer.type === 'background') {
-          // TODO handle background
+          this.configureBackground(layer);
         } else {
           const new_layer = this.configureLayer(sourcesDef, layer);
           new_layer.set('name', layer.id);

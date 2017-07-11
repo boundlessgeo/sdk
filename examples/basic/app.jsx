@@ -59,6 +59,14 @@ function main() {
   }));
 
   store.dispatch(mapActions.addLayer({
+    id: 'background',
+    type: 'background',
+    paint: {
+      'background-color': '#eee',
+    },
+  }));
+
+  store.dispatch(mapActions.addLayer({
     id: 'sample-points',
     source: 'points',
     type: 'circle',
