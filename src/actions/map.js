@@ -13,11 +13,12 @@ export function setView(center, zoom) {
   };
 }
 
-export function addLayer(layerDef, layerTitle) {
+export function addLayer(layerDef, layerTitle, positionId) {
   return {
     type: MAP.ADD_LAYER,
     layerDef,
     layerTitle,
+    positionId,
   };
 }
 
@@ -117,5 +118,23 @@ export function setContext(options) {
     return new Promise((resolve, reject) => {
       reject('Invalid option for setContext. Specify either json or url.');
     });
+  };
+}
+
+
+/** Rearrange a layer in the list.
+ *
+ *  @param layerId the layer to move.
+ *  @param targetLayerId The ID of the layer id to move the layerId BEFORE.
+ *                       When null or undefined, moves the layer to the end
+ *                       of the list.
+ *
+ * @returns action object.
+ */
+export function orderLayer(layerId, targetLayerId) {
+  return {
+    type: MAP.ORDER_LAYER,
+    layerId,
+    targetId: targetLayerId,
   };
 }

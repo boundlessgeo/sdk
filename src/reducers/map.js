@@ -46,6 +46,60 @@ export function dataVersionKey(sourceName) {
   return `${DATA_VERSION_KEY}:${sourceName}`;
 }
 
+/** Move a layer in the layers list.
+ *
+ */
+function placeLayer(state, layer, targetId) {
+  let placed = false;
+  const new_layers = [];
+
+  // do some sanity checks to prevent extra work
+  //  when the targetId is not valid.
+  for (let i = 0, ii = state.layers.length; i < ii; i++) {
+    const l = state.layers[i];
+
+    // if this is the target id then
+    //  place the layer before adding the target
+    //  back into the layer stack
+    if (l.id === targetId) {
+      new_layers.push(layer);
+      placed = true;
+    }
+
+    // if the layer exists in the list,
+    //  do not add it back inline.
+    if (l.id !== layer.id) {
+      new_layers.push(l);
+    }
+  }
+
+  // whenever the targetId is not found,
+  //  add the layer to the end of the list.
+  if (!placed) {
+    new_layers.push(layer);
+  }
+
+  return Object.assign({}, state, {
+    layers: new_layers,
+  }, incrementVersion(state.metadata, LAYER_VERSION_KEY));
+}
+
+/** Change the order of the layer in the stack.
+ */
+function orderLayer(state, action) {
+  let layer = null;
+  for (let i = 0, ii = state.layers.length; i < ii && layer === null; i++) {
+    if (state.layers[i].id === action.layerId) {
+      layer = state.layers[i];
+    }
+  }
+
+  if (layer !== null) {
+    return placeLayer(state, layer, action.targetId);
+  }
+  return state;
+}
+
 /** Add a layer to the state.
  */
 function addLayer(state, action) {
@@ -62,9 +116,7 @@ function addLayer(state, action) {
     new_layer.metadata[TITLE_KEY] = action.layerTitle;
   }
 
-  return Object.assign({}, state, {
-    layers: state.layers.concat([new_layer]),
-  }, incrementVersion(state.metadata, LAYER_VERSION_KEY));
+  return placeLayer(state, new_layer, action.positionId);
 }
 
 /** Remove a layer from the state.
@@ -298,6 +350,8 @@ export default function MapReducer(state = defaultState, action) {
       return setVisibility(state, action);
     case MAP.RECEIVE_CONTEXT:
       return setContext(state, action);
+    case MAP.ORDER_LAYER:
+      return orderLayer(state, action);
     default:
       return state;
   }

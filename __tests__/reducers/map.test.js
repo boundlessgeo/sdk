@@ -432,4 +432,42 @@ describe('map reducer', () => {
       layers: [],
     });
   });
+
+  it('should re-arrange the layers', () => {
+    const layer_a = {
+      id: 'a',
+      source: 'osm',
+    };
+
+    const layer_b = {
+      id: 'b',
+      source: 'osm',
+    };
+
+    const state = {
+      source: {
+        id: 'osm',
+        type: 'raster',
+      },
+      layers: [
+        layer_a, layer_b,
+      ],
+    };
+
+    deepFreeze(state);
+
+    const action = {
+      type: MAP.ORDER_LAYER,
+      layerId: layer_b.id,
+      targetId: layer_a.id,
+    };
+    expect(reducer(state, action).layers).toEqual([layer_b, layer_a]);
+
+    const top_action = {
+      type: MAP.ORDER_LAYER,
+      layerId: layer_a.id,
+      targetId: undefined,
+    };
+    expect(reducer(state, top_action).layers).toEqual([layer_b, layer_a]);
+  });
 });

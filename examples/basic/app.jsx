@@ -167,6 +167,15 @@ function main() {
     store.dispatch(mapActions.removeFeatures('points', ['==', 'isRandom', true]));
   };
 
+  const moveBehind = () => {
+    store.dispatch(mapActions.moveLayer('osm', 'sample-points'));
+  };
+
+  const moveAhead = () => {
+    store.dispatch(mapActions.moveLayer('osm', null));
+  };
+
+
   // place the map on the page.
   ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
 
@@ -182,6 +191,8 @@ function main() {
       <button onClick={removeRandomPoints}>Remove random points</button>
       <button onClick={addOverlay}>Add static image</button>
       <button onClick={loadContext}>Load context</button>
+      <button onClick={moveBehind}>Move OSM behind Points</button>
+      <button onClick={moveAhead}>Move OSM to the Top</button>
     </div>
   ), document.getElementById('controls'));
 }
