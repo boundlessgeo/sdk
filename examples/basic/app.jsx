@@ -7,6 +7,13 @@
 
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
+/** Basic Application.
+ *
+ *  Creates a map with OSM tiles and a GeoJSON source
+ *  and layer.
+ *
+ */
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -14,6 +21,7 @@ import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
+// This will have webpack include all of the SDK styles.
 import '@boundlessgeo/sdk/stylesheet/sdk.css';
 
 /* eslint-disable no-underscore-dangle */
@@ -22,10 +30,8 @@ const store = createStore(combineReducers({
 }), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
    applyMiddleware(thunkMiddleware));
 
-window.store = store;
-
 function main() {
-  // start in the middle of america
+  // Start with a reasonable global view of hte map.
   store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 2));
 
   // add the OSM source
@@ -40,11 +46,15 @@ function main() {
   }));
 
   // and an OSM layer.
+  // Raster layers need not have any paint styles.
   store.dispatch(mapActions.addLayer({
     id: 'osm',
     source: 'osm',
   }));
 
+  // 'geojson' sources allow rendering a vector layer
+  // with all the features stored as GeoJSON. "data" can
+  // be an individual Feature or a FeatureCollection.
   store.dispatch(mapActions.addSource('points', {
     type: 'geojson',
     data: {
@@ -59,6 +69,8 @@ function main() {
     },
   }));
 
+  // Background layers change the background color of
+  // the map. They are not attached to a source.
   store.dispatch(mapActions.addLayer({
     id: 'background',
     type: 'background',
@@ -67,8 +79,9 @@ function main() {
     },
   }));
 
+  // Show null island as a layer.
   store.dispatch(mapActions.addLayer({
-    id: 'sample-points',
+    id: 'null-island',
     source: 'points',
     type: 'circle',
     paint: {
@@ -78,6 +91,10 @@ function main() {
     },
   }));
 
+  // The points source has both null island
+  // and random points on it. This layer
+  // will style all random points as purple instead
+  // of orange.
   store.dispatch(mapActions.addLayer({
     id: 'random-points',
     source: 'points',
@@ -166,7 +183,10 @@ function main() {
 
   // Add a random point to the map
   const addRandomPoints = () => {
+    // loop over adding a point to the map.
     for (let i = 0; i < 10; i++) {
+      // the feature is a normal GeoJSON feature definition,
+      // 'points' referes to the SOURCE which will get the feature.
       store.dispatch(mapActions.addFeatures('points', [{
         type: 'Feature',
         properties: {
@@ -175,12 +195,14 @@ function main() {
         },
         geometry: {
           type: 'Point',
+          // this generates a point somewhere on the planet, unbounded.
           coordinates: [(Math.random() * 360) - 180, (Math.random() * 180) - 90],
         },
       }]));
     }
   };
 
+  // Removing features uses MapBox GL Spec filters.
   const removeRandomPoints = () => {
     store.dispatch(mapActions.removeFeatures('points', ['==', 'isRandom', true]));
   };
