@@ -78,6 +78,18 @@ function main() {
     },
   }));
 
+  store.dispatch(mapActions.addLayer({
+    id: 'random-points',
+    source: 'points',
+    type: 'circle',
+    paint: {
+      'circle-radius': 5,
+      'circle-color': '#756bb1',
+      'circle-stroke-color': '#756bb1',
+    },
+    filter: ['==', 'isRandom', true],
+  }));
+
   // semaphore to prevent the states layer
   //  from being added twice.
   let sem = true;
