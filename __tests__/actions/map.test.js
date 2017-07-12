@@ -1,4 +1,4 @@
-/* global describe, it, expect, afterEach */
+/* global describe, it, expect, afterEach, spyOn */
 
 import configureMockStore from 'redux-mock-store';
 import nock from 'nock';
@@ -226,5 +226,67 @@ describe('async actions', () => {
       // return of async actions
       expect(store.getActions()).toEqual([expectedAction]);
     });
+  });
+
+  it('setContext action prints error on FetchError', () => {
+    spyOn(console, 'error');
+    nock('http://example.com/')
+      .get('/context')
+      .replyWithError('something awful happened');
+
+    const store = mockStore({});
+
+    return store.dispatch(actions.setContext({ url: 'http://example.com/context' })).then(() => {
+      // return of async actions
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  it('creates RECEIVE_CONTEXT when promise object is resolved', () => {
+    const body = {
+      version: 8,
+      name: 'states-wms',
+      center: [-98.78906130124426, 37.92686191312036],
+      zoom: 4,
+      sources: {
+        osm: {
+          type: 'raster',
+          attribution: '&copy; <a href=\'https://www.openstreetmap.org/copyright\'>OpenStreetMap</a> contributors.',
+          tileSize: 256,
+          tiles: [
+            'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          ],
+        },
+      },
+      layers: [
+        {
+          id: 'background',
+          type: 'background',
+          paint: {
+            'background-color': 'rgba(0,0,0,0)',
+          },
+        },
+        {
+          id: 'osm',
+          source: 'osm',
+        },
+      ],
+    };
+
+    const expectedAction = { type: MAP.RECEIVE_CONTEXT, context: body };
+    const store = mockStore({});
+
+    return store.dispatch(actions.setContext({ json: body })).then(() => {
+      // return of async actions
+      expect(store.getActions()).toEqual([expectedAction]);
+    });
+  });
+
+  it('setContext action rejects argument not containing a url or json', () => {
+    const store = mockStore({});
+
+    return expect(store.dispatch(actions.setContext('foo'))).rejects.toEqual('Invalid option for setContext. Specify either json or url.');
   });
 });

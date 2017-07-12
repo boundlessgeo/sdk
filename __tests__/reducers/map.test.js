@@ -179,7 +179,11 @@ describe('map reducer', () => {
         'background-color': 'rgba(0,0,0,0)',
       },
     };
+    const other_layer = {
+      id: 'other',
+    };
     deepFreeze(layer);
+    deepFreeze(other_layer);
     const action = {
       type: MAP.REMOVE_LAYER,
       layerId: 'background',
@@ -194,11 +198,11 @@ describe('map reducer', () => {
         'bnd:source-version': 0,
         'bnd:layer-version': 0,
       },
-      layers: [layer],
+      layers: [layer, other_layer],
     };
     deepFreeze(state);
     deepFreeze(action);
-    expect(reducer(undefined, action)).toEqual({
+    expect(reducer(state, action)).toEqual({
       version: 8,
       name: 'default',
       center: [0, 0],
@@ -208,7 +212,7 @@ describe('map reducer', () => {
         'bnd:source-version': 0,
         'bnd:layer-version': 1,
       },
-      layers: [],
+      layers: [other_layer],
     });
   });
 
@@ -220,6 +224,9 @@ describe('map reducer', () => {
         'background-color': 'rgba(0,0,0,0)',
       },
     };
+    const other_layer = {
+      id: 'other',
+    };
     const newLayer = {
       id: 'background',
       type: 'background',
@@ -228,6 +235,7 @@ describe('map reducer', () => {
       },
     };
     deepFreeze(layer);
+    deepFreeze(other_layer);
     deepFreeze(newLayer);
     const action = {
       type: MAP.UPDATE_LAYER,
@@ -244,7 +252,7 @@ describe('map reducer', () => {
         'bnd:source-version': 0,
         'bnd:layer-version': 0,
       },
-      layers: [layer],
+      layers: [layer, other_layer],
     };
     deepFreeze(state);
     deepFreeze(action);
@@ -258,12 +266,12 @@ describe('map reducer', () => {
         'bnd:source-version': 0,
         'bnd:layer-version': 1,
       },
-      layers: [newLayer],
+      layers: [newLayer, other_layer],
     });
   });
 
   it('should handle ADD_SOURCE', () => {
-    const source = {
+    const raster_source = {
       type: 'raster',
       attribution: '&copy; <a href=\'https://www.openstreetmap.org/copyright\'>OpenStreetMap</a> contributors.',
       tileSize: 256,
@@ -273,20 +281,51 @@ describe('map reducer', () => {
         'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
       ],
     };
-    deepFreeze(source);
-    const action = {
+    const image_source = {
+      type: 'image',
+      url: 'https://www.mapbox.com/mapbox-gl-js/assets/radar.gif',
+      coordinates: [
+        [-80.425, 46.437],
+        [-71.516, 46.437],
+        [-71.516, 37.936],
+        [-80.425, 37.936],
+      ],
+    };
+    deepFreeze(raster_source);
+    deepFreeze(image_source);
+    const raster_action = {
       type: MAP.ADD_SOURCE,
       sourceName: 'osm',
-      sourceDef: source,
+      sourceDef: raster_source,
     };
-    deepFreeze(action);
-    expect(reducer(undefined, action)).toEqual({
+    deepFreeze(raster_action);
+    expect(reducer(undefined, raster_action)).toEqual({
       version: 8,
       name: 'default',
       center: [0, 0],
       zoom: 3,
       sources: {
-        osm: source,
+        osm: raster_source,
+      },
+      metadata: {
+        'bnd:source-version': 1,
+        'bnd:layer-version': 0,
+      },
+      layers: [],
+    });
+    const image_action = {
+      type: MAP.ADD_SOURCE,
+      sourceName: 'radar',
+      sourceDef: image_source,
+    };
+    deepFreeze(image_action);
+    expect(reducer(undefined, image_action)).toEqual({
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {
+        radar: { ...image_source, data: {} },
       },
       metadata: {
         'bnd:source-version': 1,
@@ -342,7 +381,7 @@ describe('map reducer', () => {
     });
   });
 
-  it('should handle ADD_FEATURES', () => {
+  it('should handle ADD_FEATURES to add action features to a source featureCollection', () => {
     // since we do not go through ADD_SOURCE we need to set _dataVersion
     // eslint-disable-next-line
     const source = {data: {type:'FeatureCollection',crs:{type:'name',properties:{'name':'urn:ogc:def:crs:OGC:1.3:CRS84'}},features:[{type:'Feature',properties:{'n':2,'cat':1},geometry:{type:'Point',coordinates:[0.5,0.5]}},{type:'Feature',properties:{'n':3,'cat':2},'geometry':{type:'Point',coordinates:[0.5,1.5]}}]}};
@@ -384,6 +423,104 @@ describe('map reducer', () => {
       },
       sources: {
         points: newSource,
+      },
+      layers: [],
+    });
+  });
+
+  it('should handle ADD_FEATURES to add action features to a source feature', () => {
+    // since we do not go through ADD_SOURCE we need to set _dataVersion
+    // eslint-disable-next-line
+    const source = {data: {type:'Feature'}};
+    deepFreeze(source);
+    const action = {
+      type: MAP.ADD_FEATURES,
+      sourceName: 'points',
+      // eslint-disable-next-line
+      features: [{type:'Feature',properties:{'n':27,'cat':2},geometry:{type:'Point',coordinates:[2.5,5.5]}},{type:'Feature',properties:{'n':28,'cat':1},'geometry':{type:'Point',coordinates:[2.5,6.5]}}]
+    };
+    deepFreeze(action);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {
+        points: source,
+      },
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+      },
+      layers: [],
+    };
+    deepFreeze(state);
+    // eslint-disable-next-line
+    const newSource = {data: {type:'FeatureCollection', features: [source.data].concat(action.features)}};
+    deepFreeze(newSource);
+    expect(reducer(state, action)).toEqual({
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+        'bnd:data-version:points': 1,
+      },
+      sources: {
+        points: newSource,
+      },
+      layers: [],
+    });
+  });
+
+  it('should handle ADD_FEATURES to add action features to a source with no data', () => {
+    // since we do not go through ADD_SOURCE we need to set _dataVersion
+    const source = {};
+    deepFreeze(source);
+    const action = {
+      type: MAP.ADD_FEATURES,
+      sourceName: 'points',
+      // eslint-disable-next-line
+      features: [{type:'Feature',properties:{'n':27,'cat':2},geometry:{type:'Point',coordinates:[2.5,5.5]}},{type:'Feature',properties:{'n':28,'cat':1},'geometry':{type:'Point',coordinates:[2.5,6.5]}}]
+    };
+    deepFreeze(action);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {
+        points: source,
+      },
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+      },
+      layers: [],
+    };
+    deepFreeze(state);
+    expect(reducer(state, action)).toEqual({
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+        'bnd:data-version:points': 1,
+      },
+      sources: {
+        points: {
+          ...source,
+          data: {
+            features: [
+              ...action.features,
+            ],
+            type: 'FeatureCollection',
+          },
+        },
       },
       layers: [],
     });
@@ -469,5 +606,12 @@ describe('map reducer', () => {
       targetId: undefined,
     };
     expect(reducer(state, top_action).layers).toEqual([layer_b, layer_a]);
+
+    const null_action = {
+      type: MAP.ORDER_LAYER,
+      layerId: 4,
+      targetId: layer_a.id,
+    };
+    expect(reducer(state, null_action).layers).toEqual([layer_a, layer_b]);
   });
 });
