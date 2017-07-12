@@ -90,6 +90,12 @@ function main() {
     filter: ['==', 'isRandom', true],
   }));
 
+  /*
+   * These are some example calls that were earlier prototyped in
+   *  the basic demo. They've been commented out for now but have been
+   *  saved for propsperity (and future porting).
+   *
+
   // semaphore to prevent the states layer
   //  from being added twice.
   let sem = true;
@@ -149,17 +155,8 @@ function main() {
     store.dispatch(mapActions.setContext({ url }));
   };
 
-  const toggleVisibility = (vis) => {
-    store.dispatch(mapActions.setLayerVisibility('osm', vis));
-  };
-
-  const showOSM = () => {
-    toggleVisibility('visible');
-  };
-
-  const hideOSM = () => {
-    toggleVisibility('none');
-  };
+  * End of old demo functions.
+  */
 
   // This doesn't do anything particularly impressive
   // other than recenter the map on null-island.
@@ -188,24 +185,15 @@ function main() {
     store.dispatch(mapActions.removeFeatures('points', ['==', 'isRandom', true]));
   };
 
-  const moveBehind = () => {
-    store.dispatch(mapActions.moveLayer('osm', 'sample-points'));
-  };
-
-  const moveAhead = () => {
-    store.dispatch(mapActions.moveLayer('osm', null));
-  };
-
-
   // place the map on the page.
   ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
 
   // add some buttons to demo some actions.
   ReactDOM.render((
     <div>
-      <button className='sdk-btn' onClick={zoomToNullIsland}>Zoom to Null Island</button>
-      <button className='sdk-btn' onClick={addRandomPoints}>Add 10 random points</button>
-      <button className='sdk-btn blue' onClick={removeRandomPoints}>Remove random points</button>
+      <button className="sdk-btn" onClick={zoomToNullIsland}>Zoom to Null Island</button>
+      <button className="sdk-btn" onClick={addRandomPoints}>Add 10 random points</button>
+      <button className="sdk-btn blue" onClick={removeRandomPoints}>Remove random points</button>
     </div>
   ), document.getElementById('controls'));
 }

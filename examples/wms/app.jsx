@@ -10,6 +10,8 @@ import thunkMiddleware from 'redux-thunk';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+
 
 import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
@@ -22,16 +24,13 @@ class LayerCheckboxComponent extends React.Component {
 
   // TODO: Move this to map actions
   isLayerVisible(layerId) {
-    const state = this.props.map;
-
-    for (let i = 0, ii = state.layers.length; i < ii; i++) { 
-      if (state.layers[i].id === layerId) {
-        const layer = state.layers[i];
+    for (let i = 0, ii = this.props.layers.length; i < ii; i++) {
+      if (this.props.layers[i].id === layerId) {
+        const layer = this.props.layers[i];
         if (typeof layer.layout !== 'undefined') {
           return (layer.layout.visibility !== 'none');
-        } else {
-          return true;
         }
+        return true;
       }
     }
 
@@ -39,25 +38,49 @@ class LayerCheckboxComponent extends React.Component {
     return false;
   }
 
-  toggleVisibility(shown) {
-    store.dispatch(mapActions.setLayerVisibility(this.props.layerId, shown ? 'none' : 'visible'));
-  }
-
-
   render() {
     const is_checked = this.isLayerVisible(this.props.layerId);
     return (
       <div>
-        <input type='checkbox' onChange={ () => { }}
-          onClick={() => { this.toggleVisibility(is_checked); }} 
-          checked={is_checked} />
+        <input
+          type="checkbox"
+          onChange={() => { }}
+          onClick={() => { this.props.toggleVisibility(this.props.layerId, is_checked); }}
+          checked={is_checked}
+        />
         { this.props.label }
       </div>
-    )
+    );
   }
 }
 
-const LayerCheckbox = connect((state) => { return {map: state.map}})(LayerCheckboxComponent);
+LayerCheckboxComponent.propTypes = {
+  layerId: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  layers: PropTypes.arrayOf(PropTypes.object),
+  toggleVisibility: PropTypes.func,
+};
+
+LayerCheckboxComponent.defaultProps = {
+  layers: [],
+  toggleVisibility: () => { },
+};
+
+function mapStateLayers(state) {
+  return {
+    layers: state.map.layers,
+  };
+}
+
+function mapDispatch(dispatch) {
+  return {
+    toggleVisibility: (layerId, shown) => {
+      dispatch(mapActions.setLayerVisibility(layerId, shown ? 'none' : 'visible'));
+    },
+  };
+}
+
+const LayerCheckbox = connect(mapStateLayers, mapDispatch)(LayerCheckboxComponent);
 
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
@@ -87,7 +110,7 @@ function main() {
   }));
 
   // set the background color.
- store.dispatch(mapActions.addLayer({
+  store.dispatch(mapActions.addLayer({
     id: 'background',
     type: 'background',
     paint: {
@@ -108,9 +131,6 @@ function main() {
     source: 'states',
   }));
 
-  const toggleVisibility = (shown) => {
-  };
-
   // place the map on the page.
   ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
 
@@ -118,7 +138,7 @@ function main() {
   ReactDOM.render((
     <div>
       <h4>Layers</h4>
-      <LayerCheckbox store={store} layerId={'states'} label='U.S. States' />
+      <LayerCheckbox store={store} layerId="states" label="U.S. States" />
     </div>
   ), document.getElementById('controls'));
 }
