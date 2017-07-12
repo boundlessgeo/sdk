@@ -12,11 +12,13 @@ const config = {
   },
   // Entry points to the project
   entry: {
+    // each example is it's own entry point.
     basic: [
       'webpack/hot/only-dev-server',
       './examples/basic/app.jsx'
     ],
     wms: [
+      'webpack/hot/only-dev-server',
       './examples/wms/app.jsx',
     ],
   },
@@ -32,10 +34,11 @@ const config = {
   node: {fs: "empty"},
   output: {
     path: __dirname, // Path of output file
+    // [name] refers to the entry point's name.
     filename: 'examples/[name]/[name].bundle.js',
   },
   plugins: [
-    new ExtractTextPlugin('sdk.css'),
+    new ExtractTextPlugin('dist/sdk.css'),
     // Enables Hot Modules Replacement
     new webpack.HotModuleReplacementPlugin(),
   ],
