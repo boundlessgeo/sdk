@@ -1,0 +1,38 @@
+/*
+ * Include the SDK stylesheet
+ */
+@import '~ol/ol.css';
+
+$sdk-orange: #f58d50;
+$sdk-blue: #29728d;
+$sdk-green: #bbd34a;
+$sdk-grey: #ededed;
+
+/** SDK button. */
+button.sdk-btn {
+  background-color: $sdk-orange;
+  color: #fff;
+
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  padding: .5rem 1rem;
+  font-size: 1rem;
+  border-radius: .25rem;
+}
+
+/** some OpenLayers styling tweaks */
+.ol-control button {
+    background-color: rgba($sdk-blue, .8);
+
+    &:hover {
+        background-color: rgba($sdk-blue, .9);
+    }
+}
+

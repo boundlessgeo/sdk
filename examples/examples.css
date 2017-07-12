@@ -23,3 +23,13 @@ body {
 
     font-size: 30px;
 }
+
+#map {
+    width: 100%;
+    height: 480px;
+}
+
+#controls button {
+    margin: 5px;
+    font-size: .85rem;
+}

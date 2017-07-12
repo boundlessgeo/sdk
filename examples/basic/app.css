@@ -1,0 +1,5 @@
+/* Demo how to over ride the default color of the buttons */
+
+button.sdk-btn.blue {
+    background-color: #29728d;
+}
