@@ -189,6 +189,10 @@ function main() {
       // 'points' referes to the SOURCE which will get the feature.
       store.dispatch(mapActions.addFeatures('points', [{
         type: 'Feature',
+        properties: {
+          title: 'Random Point',
+          isRandom: true,
+        },
         geometry: {
           type: 'Point',
           // this generates a point somewhere on the planet, unbounded.
@@ -196,22 +200,7 @@ function main() {
         },
       }]));
     }
-    // for (let i = 0; i < 10; i++) {
-    //   var randomCords = [(Math.random() * 360) - 180, (Math.random() * 180) - 90];
-    //   store.dispatch(mapActions.addFeatures('points', [{
-    //     type: 'Feature',
-    //     properties: {
-    //       title: 'Random Point',
-    //       isRandom: true,
-    //     },
-    //     geometry: {
-    //       type: 'Point',
-    //       coordinates: randomCords,
-    //     },
-    //   }]));
-    // }
   };
-//          coordinates: [2 * 4500000 * Math.random() - 4500000, 2 * 4500000 * Math.random() - 4500000],
 
   // Cluster points on the map
   const clusterPoints = () => {
