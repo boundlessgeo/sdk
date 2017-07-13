@@ -100,25 +100,17 @@ function updateGeojsonSource(olSource, glSource) {
   const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: 'EPSG:3857' });
   var count = features.length
 
-  console.log(features.length, count);
-  var testFeatures = new Array(count);
-  var e = 4500000;
-  for (var i = 0, ii = count; i < ii; ++i) {
-    var randCoordinates = [2 * e * Math.random() - e, 2 * e * Math.random() - e];
-    // var coordinates = features[i].getGeometry().flatCoordinates;
-    //features[i] = f;
-    // if(i % 2){
-    //   testFeatures[i] = new Feature(new Point(coordinates));
-    // }else{
-    //    testFeatures[i] = new Feature(new Point(randCoordinates));
-    // }
-    testFeatures[i] = new Feature(new Point(randCoordinates));
-
-  }
+  // console.log(features.length, count);
+  // var testFeatures = new Array(count);
+  // var e = 4500000;
+  // for (var i = 0, ii = count; i < ii; ++i) {
+  //   var randCoordinates = [2 * e * Math.random() - e, 2 * e * Math.random() - e];
+  //   testFeatures[i] = new Feature(new Point(randCoordinates));
+  // }
   // clear the layer WITHOUT dispatching remove events.
   olSource.clear(true);
   // bulk load the feature data.
-  olSource.addFeatures(testFeatures);
+  olSource.addFeatures(features);
 }
 
 /** Create a vector source based on a
