@@ -244,6 +244,19 @@ function addFeatures(state, action) {
   }
   return state;
 }
+/** Cluster points.
+ */
+function clusterPoints(state, action) {
+  const source = state.sources[action.layerId];
+  // const data = source.data;
+  var src_mixin = [];
+  src_mixin[action.layerId] = Object.assign({}, source, {cluster:action.cluster});
+  var newState = Object.assign({}, state, {
+    sources: Object.assign({}, state.sources, src_mixin),
+  }, incrementVersion(state.metadata, SOURCE_VERSION_KEY));
+
+  return newState;
+}
 
 /** Remove features from a source.
  *
@@ -352,6 +365,8 @@ export default function MapReducer(state = defaultState, action) {
       return setContext(state, action);
     case MAP.ORDER_LAYER:
       return orderLayer(state, action);
+    case MAP.CLUSTER_POINTS:
+      return clusterPoints(state, action);
     default:
       return state;
   }
