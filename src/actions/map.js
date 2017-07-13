@@ -51,6 +51,13 @@ export function updateLayer(layerId, layerDef) {
   };
 }
 
+export function clusterPoints(layerId, isClustered) {
+  return {
+    type: MAP.CLUSTER_POINTS,
+    layerId,
+    cluster: isClustered,
+  };
+}
 
 export function addFeatures(sourceName, features) {
   return {

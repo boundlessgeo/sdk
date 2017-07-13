@@ -149,18 +149,35 @@ function main() {
   // Add a random point to the map
   const addRandomPoints = () => {
     for (let i = 0; i < 10; i++) {
+      var randomCords = [(Math.random() * 360) - 180, (Math.random() * 180) - 90];
       store.dispatch(mapActions.addFeatures('points', [{
         type: 'Feature',
-        properties: {
-          title: 'Random Point',
-          isRandom: true,
-        },
         geometry: {
           type: 'Point',
-          coordinates: [(Math.random() * 360) - 180, (Math.random() * 180) - 90],
+          coordinates: randomCords,
         },
       }]));
     }
+    // for (let i = 0; i < 10; i++) {
+    //   var randomCords = [(Math.random() * 360) - 180, (Math.random() * 180) - 90];
+    //   store.dispatch(mapActions.addFeatures('points', [{
+    //     type: 'Feature',
+    //     properties: {
+    //       title: 'Random Point',
+    //       isRandom: true,
+    //     },
+    //     geometry: {
+    //       type: 'Point',
+    //       coordinates: randomCords,
+    //     },
+    //   }]));
+    // }
+  };
+//          coordinates: [2 * 4500000 * Math.random() - 4500000, 2 * 4500000 * Math.random() - 4500000],
+
+  // Cluster points on the map
+  const clusterPoints = () => {
+      store.dispatch(mapActions.clusterPoints('points', true));
   };
 
   const removeRandomPoints = () => {
@@ -182,6 +199,7 @@ function main() {
       <button onClick={removeRandomPoints}>Remove random points</button>
       <button onClick={addOverlay}>Add static image</button>
       <button onClick={loadContext}>Load context</button>
+      <button onClick={clusterPoints}>Cluster Points</button>
     </div>
   ), document.getElementById('controls'));
 }

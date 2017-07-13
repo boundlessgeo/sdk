@@ -25,6 +25,10 @@ import ImageStaticSource from 'ol/source/imagestatic';
 
 import VectorLayer from 'ol/layer/vector';
 import VectorSource from 'ol/source/vector';
+import ClusterSource from 'ol/source/cluster';
+
+import Feature from 'ol/feature';
+import Point from 'ol/geom/point';
 
 import GeoJsonFormat from 'ol/format/geojson';
 
@@ -55,7 +59,7 @@ function configureXyzSource(glSource) {
     // disabled the linter below as this is how
     //  OpenLayers documents this operation.
     // eslint-disable-next-line
-    tile.getImage().src = img_src; 
+    tile.getImage().src = img_src;
   });
 
   return source;
@@ -94,11 +98,27 @@ function updateGeojsonSource(olSource, glSource) {
   // parse the new features,
   // TODO: This should really check the map for the correct projection.
   const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: 'EPSG:3857' });
+  var count = features.length
 
+  console.log(features.length, count);
+  var testFeatures = new Array(count);
+  var e = 4500000;
+  for (var i = 0, ii = count; i < ii; ++i) {
+    var randCoordinates = [2 * e * Math.random() - e, 2 * e * Math.random() - e];
+    // var coordinates = features[i].getGeometry().flatCoordinates;
+    //features[i] = f;
+    // if(i % 2){
+    //   testFeatures[i] = new Feature(new Point(coordinates));
+    // }else{
+    //    testFeatures[i] = new Feature(new Point(randCoordinates));
+    // }
+    testFeatures[i] = new Feature(new Point(randCoordinates));
+
+  }
   // clear the layer WITHOUT dispatching remove events.
   olSource.clear(true);
   // bulk load the feature data.
-  olSource.addFeatures(features);
+  olSource.addFeatures(testFeatures);
 }
 
 /** Create a vector source based on a
@@ -108,20 +128,25 @@ function updateGeojsonSource(olSource, glSource) {
  *
  * @returns ol.source.vector instance.
  */
-function configureGeojsonSouce(glSource) {
+function configureGeojsonSouce(glSource, isClustered) {
   const vector_src = new VectorSource({
-    useSpatialIndex: false,
+    useSpatialIndex: true,
     wrapX: false,
   });
 
   // see the vector source with the first update
   //  before returning it.
+
   updateGeojsonSource(vector_src, glSource);
 
-  return vector_src;
+  var clusterSource = new ClusterSource({distance: 50, source: vector_src});
+  //updateGeojsonSource(clusterSource, glSource);
+
+  // return clusterSource;
+  return clusterSource;
 }
 
-function configureSource(glSource) {
+function configureSource(glSource, isClustered) {
   // tiled raster layer.
   if (glSource.type === 'raster') {
     if ('tiles' in glSource) {
@@ -130,7 +155,7 @@ function configureSource(glSource) {
       return configureTileJSONSource(glSource);
     }
   } else if (glSource.type === 'geojson') {
-    return configureGeojsonSouce(glSource);
+    return configureGeojsonSouce(glSource, isClustered);
   } else if (glSource.type === 'image') {
     return configureImageSource(glSource);
   } else if (glSource.type === 'vector') {
@@ -227,6 +252,9 @@ export class Map extends React.Component {
       const src_name = src_names[i];
       // Add the source because it's not in the current
       //  list of sources.
+      // if(sourcesDef[src_name].cluster){
+      //   this.sources[src_name] = configureSource(sourcesDef[src_name], true);
+      // }
       if (!(src_name in this.sources)) {
         this.sources[src_name] = configureSource(sourcesDef[src_name]);
       }
