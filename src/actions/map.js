@@ -13,6 +13,13 @@ export function setView(center, zoom) {
   };
 }
 
+export function addMapName(name) {
+  return {
+    type: MAP.ADD_NAME,
+    name: { name },
+  };
+}
+
 export function addLayer(layerDef, layerTitle, positionId) {
   return {
     type: MAP.ADD_LAYER,

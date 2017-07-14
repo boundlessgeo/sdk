@@ -31,8 +31,10 @@ const store = createStore(combineReducers({
    applyMiddleware(thunkMiddleware));
 
 function main() {
-  // Start with a reasonable global view of hte map.
+  // Start with a reasonable global view of the map.
   store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 2));
+
+  store.dispatch(mapActions.addMapName('Basic Map Example'));
 
   // add the OSM source
   store.dispatch(mapActions.addSource('osm', {
@@ -207,6 +209,36 @@ function main() {
     store.dispatch(mapActions.removeFeatures('points', ['==', 'isRandom', true]));
   };
 
+  // Component to update map name from user input.
+  class InputField extends React.PureComponent {
+    constructor(props) {
+      super(props);
+      this.state = { value: store.getState().map.name };
+    }
+    updateMapName = (event) => {
+      this.setState({ value: event.target.value });
+    };
+    handleSubmit = (event) => {
+      event.preventDefault();
+      store.dispatch(mapActions.addMapName(this.state.value));
+      this.setState({ value: '' });
+    }
+    render() {
+      return (
+        <div className="mapName">
+          <form onSubmit={this.handleSubmit}>
+            <div className="mapForm">
+              <label className="nameLabel" htmlFor="nameField">Change Name:</label>
+              <input className="nameField" placeholder="Enter new map name here" type="text" id="nameField" value={this.state.value} onChange={this.updateMapName} />
+              <button className="sdk-btn" type="submit">Change Map Name</button>
+            </div>
+          </form>
+          <div className="newName">New Map Name: {store.getState().map.name}</div>
+        </div>
+      );
+    }
+  }
+
   // place the map on the page.
   ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
 
@@ -216,6 +248,7 @@ function main() {
       <button className="sdk-btn" onClick={zoomToNullIsland}>Zoom to Null Island</button>
       <button className="sdk-btn" onClick={addRandomPoints}>Add 10 random points</button>
       <button className="sdk-btn blue" onClick={removeRandomPoints}>Remove random points</button>
+      <InputField />
     </div>
   ), document.getElementById('controls'));
 }
