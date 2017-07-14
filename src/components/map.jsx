@@ -67,7 +67,6 @@ function configureXyzSource(glSource) {
     // eslint-disable-next-line
     tile.getImage().src = img_src;
   });
-
   return source;
 }
 

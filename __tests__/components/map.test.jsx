@@ -5,7 +5,9 @@ import { shallow, mount } from 'enzyme';
 
 import olMap from 'ol/map';
 import TileLayer from 'ol/layer/tile';
+import VectorLayer from 'ol/layer/vector';
 import ImageLayer from 'ol/layer/image';
+import VectorTileLayer from 'ol/layer/vectortile';
 import ImageStaticSource from 'ol/source/imagestatic';
 import TileJSONSource from 'ol/source/tilejson';
 
@@ -36,6 +38,23 @@ describe('Map component', () => {
         tileSize: 256,
         tiles: ['https://ahocevar.com/geoserver/gwc/service/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/png&SRS=EPSG:900913&LAYERS=topp:states&STYLES=&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}'],
       },
+      points: {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [0, 0],
+          },
+          properties: {
+            title: 'Null Island',
+          },
+        },
+      },
+      mvt: {
+        type: 'vector',
+        url: 'https://{a-d}.tiles.mapbox.com/v4/mapbox.mapbox-streets-v6/{z}/{x}/{y}.vector.pbf?access_token=test_key',
+      },
     };
     const layers = [
       {
@@ -44,6 +63,18 @@ describe('Map component', () => {
       }, {
         id: 'states',
         source: 'states-wms',
+      }, {
+        id: 'sample-points',
+        source: 'points',
+        type: 'circle',
+        paint: {
+          'circle-radius': 5,
+          'circle-color': '#feb24c',
+          'circle-stroke-color': '#f03b20',
+        },
+      }, {
+        id: 'mvt-layer',
+        source: 'mvt',
       },
     ];
     const metadata = {
@@ -59,6 +90,8 @@ describe('Map component', () => {
     expect(map).toBeDefined();
     expect(map).toBeInstanceOf(olMap);
     expect(map.getLayers().item(0)).toBeInstanceOf(TileLayer);
+    expect(map.getLayers().item(2)).toBeInstanceOf(VectorLayer);
+    expect(map.getLayers().item(3)).toBeInstanceOf(VectorTileLayer);
 
     // move the map.
     wrapper.setProps({
@@ -229,7 +262,40 @@ describe('Map component', () => {
     expect(map.getLayers().getLength()).toBe(1);
   });
 
-  it('should created a connected map', () => {
+  it('removes sources version definition when excluded from map spec', () => {
+    const sources = {
+      tilejson: {
+        type: 'raster',
+        url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure',
+      },
+    };
+    const layers = [{
+      id: 'tilejson-layer',
+      source: 'tilejson',
+    }];
+    const center = [0, 0];
+    const zoom = 2;
+    const metadata = {
+      'bnd:source-version': 0,
+      'bnd:layer-version': 0,
+    };
+    const wrapper = shallow(<Map map={{ sources, layers, center, zoom, metadata }} />);
+    const instance = wrapper.instance();
+    instance.componentDidMount();
+    expect(instance.sourcesVersion).toEqual(0);
+    const nextProps = {
+      map: {
+        center,
+        zoom,
+        sources,
+        layers: [],
+      },
+    };
+    instance.shouldComponentUpdate.call(instance, nextProps);
+    expect(instance.sourcesVersion).toEqual(undefined);
+  });
+
+  it('should create a connected map', () => {
     const store = createStore(combineReducers({
       map: MapReducer,
     }));
