@@ -431,7 +431,7 @@ describe('map reducer', () => {
   it('should handle ADD_FEATURES to add action features to a source feature', () => {
     // since we do not go through ADD_SOURCE we need to set _dataVersion
     // eslint-disable-next-line
-    const source = {data: {type:'Feature'}};
+    const source = {data: {type:'Feature', properties:{'n':29,'cat':4}, geometry:{type:'Point', coordinates:[1.0,7.5]}}};
     deepFreeze(source);
     const action = {
       type: MAP.ADD_FEATURES,
