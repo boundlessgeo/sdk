@@ -149,17 +149,6 @@ function configureGeojsonSouce(glSource) {
   return new_src;
 }
 
-function swapClusterSource(olSource, isClustered){
-  // console.log(olSource);
-  if(isClustered){
-    let cluster = new ClusterSource({source:olSource});
-    console.log("do stuff");
-    return cluster;
-  }else{
-
-  }
-}
-
 function configureSource(glSource) {
   // tiled raster layer.
   if (glSource.type === 'raster') {
@@ -269,7 +258,6 @@ export class Map extends React.Component {
       const src_name = src_names[i];
       // Add the source because it's not in the current
       //  list of sources.
-
       if (!(src_name in this.sources)) {
         this.sources[src_name] = configureSource(sourcesDef[src_name]);
       }
