@@ -85,12 +85,12 @@ function main() {
     source: 'points',
     type: 'circle',
     paint: {
-      'circle-radius' : {
+      'circle-radius': {
         type: 'interval',
         default: 3,
         property: 'point_count',
         stops: [
-          [0, 5], [2, 10], [3, 30]
+          [0, 5], [2, 10], [3, 30],
         ],
       },
       'circle-color': '#feb24c',
@@ -211,7 +211,7 @@ function main() {
 
   // Cluster points on the map
   const clusterPoints = () => {
-      store.dispatch(mapActions.clusterPoints('points', !store.getState().map.sources.points.cluster));
+    store.dispatch(mapActions.clusterPoints('points', !store.getState().map.sources.points.cluster));
   };
 
   // Removing features uses MapBox GL Spec filters.

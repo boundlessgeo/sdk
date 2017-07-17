@@ -26,9 +26,6 @@ import ImageStaticSource from 'ol/source/imagestatic';
 import VectorLayer from 'ol/layer/vector';
 import VectorSource from 'ol/source/vector';
 
-import Feature from 'ol/feature';
-import Point from 'ol/geom/point';
-
 import GeoJsonFormat from 'ol/format/geojson';
 
 import { setView } from '../actions/map';
@@ -141,7 +138,7 @@ function configureGeojsonSouce(glSource) {
   // "switch" of source-class.
   let new_src = vector_src;
   if (glSource.cluster) {
-    new_src = new ClusterSource({source: vector_src});
+    new_src = new ClusterSource({ source: vector_src });
   }
 
   // seed the vector source with the first update
@@ -204,8 +201,6 @@ export class Map extends React.Component {
    *  what needs to be updated on the map.
    */
   shouldComponentUpdate(nextProps) {
-
-
     // compare the centers
     if (nextProps.map.center[0] !== this.props.map.center[0]
       || nextProps.map.center[1] !== this.props.map.center[1]
@@ -267,7 +262,7 @@ export class Map extends React.Component {
       // Because OpenLayers requires a *different* source to handle clustering,
       // this handles update the named source and then subsequently updating
       // the layers.
-      if(this.props.map.sources[src_name].cluster !== sourcesDef[src_name].cluster) {
+      if (this.props.map.sources[src_name].cluster !== sourcesDef[src_name].cluster) {
         // reconfigure the source for clustering.
         this.sources[src_name] = configureSource(sourcesDef[src_name]);
         // tell all the layers about it.
@@ -335,11 +330,8 @@ export class Map extends React.Component {
   }
 
   updateLayerSource(sourceName, layersDef) {
-    // build a list of layers effected by the source change.
-    const changed_layers = {};
     for (let i = 0, ii = layersDef.length; i < ii; i++) {
       if (layersDef[i].source === sourceName) {
-        console.log('found a layer that needs changing!', layersDef[i].id, this.sources[sourceName]);
         this.layers[layersDef[i].id].setSource(this.sources[sourceName]);
       }
     }
