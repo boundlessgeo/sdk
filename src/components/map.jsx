@@ -60,6 +60,7 @@ const WGS84_SPHERE = new Sphere(6378137);
 /** This variant of getVersion differs as it allows
  *  for undefined values to be returned.
  */
+
 function getVersion(obj, key) {
   if (obj.metadata === undefined) {
     return undefined;
@@ -122,10 +123,20 @@ function configureMvtSource(glSource) {
 }
 
 
-function updateGeojsonSource(olSource, glSource) {
+function updateGeojsonSource(olSource, glSource, mapProjection) {
   // parse the new features,
-  // TODO: This should really check the map for the correct projection.
-  const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: 'EPSG:3857' });
+
+  let features;
+  let glSourceCrs = undefined;
+  if(glSource.crs && glSource.crs.properties && glSource.crs.properties.name){
+    glSourceCrs = glSource.crs.properties.name;
+  }
+
+  if(glSource.data.features){
+    const readFeatureOptions = { featureProjection: mapProjection || 'EPSG:3857',
+      dataProjection: glSourceCrs}
+    features = GEOJSON_FORMAT.readFeatures(glSource.data,readFeatureOptions);
+  }
 
   let vector_src = olSource;
 
@@ -138,10 +149,14 @@ function updateGeojsonSource(olSource, glSource) {
       olSource.setDistance(glSource.clusterRadius);
     }
   }
-  // clear the layer WITHOUT dispatching remove events.
-  vector_src.clear(true);
-  // bulk load the feature data.
-  vector_src.addFeatures(features);
+
+  if(features){
+    // clear the layer WITHOUT dispatching remove events.
+    vector_src.clear(true);
+    // bulk load the feature data
+    vector_src.addFeatures(features || null);
+
+  }
 }
 
 /** Create a vector source based on a
@@ -199,6 +214,13 @@ function getResolutionForZoom(map, zoom) {
   const max_rez = view.getMaxResolution();
   return view.constrainResolution(max_rez, zoom - view.getMinZoom());
 }
+
+function getResolutionForZoom(map, zoom) {
+  const view = map.getView();
+  const max_rez = view.getMaxResolution();
+  return view.constrainResolution(max_rez, zoom - view.getMinZoom());
+}
+
 
 export class Map extends React.Component {
 
@@ -267,7 +289,7 @@ export class Map extends React.Component {
 
         if (this.props.map.metadata[version_key] !== nextProps.map.metadata[version_key]) {
           const next_src = nextProps.map.sources[src_name];
-          updateGeojsonSource(this.sources[src_name], next_src);
+          updateGeojsonSource(this.sources[src_name], next_src, this.map.getView().getProjection().getCode());
         }
       }
     }
