@@ -25,7 +25,6 @@ import ImageStaticSource from 'ol/source/imagestatic';
 
 import VectorLayer from 'ol/layer/vector';
 import VectorSource from 'ol/source/vector';
-import ClusterSource from 'ol/source/cluster';
 
 import Feature from 'ol/feature';
 import Point from 'ol/geom/point';
@@ -35,6 +34,8 @@ import GeoJsonFormat from 'ol/format/geojson';
 import { setView } from '../actions/map';
 import { LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
 import { dataVersionKey } from '../reducers/map';
+
+import ClusterSource from '../source/cluster';
 
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
