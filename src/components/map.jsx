@@ -149,6 +149,17 @@ function configureGeojsonSouce(glSource) {
   return new_src;
 }
 
+function swapClusterSource(olSource, isClustered){
+  // console.log(olSource);
+  if(isClustered){
+    let cluster = new ClusterSource({source:olSource});
+    console.log("do stuff");
+    return cluster;
+  }else{
+
+  }
+}
+
 function configureSource(glSource) {
   // tiled raster layer.
   if (glSource.type === 'raster') {
@@ -258,6 +269,7 @@ export class Map extends React.Component {
       const src_name = src_names[i];
       // Add the source because it's not in the current
       //  list of sources.
+
       if (!(src_name in this.sources)) {
         this.sources[src_name] = configureSource(sourcesDef[src_name]);
       }
@@ -284,8 +296,6 @@ export class Map extends React.Component {
       }
     }
   }
-<<<<<<< 8329060807ebc603399049519bfdf77145f94b80
-<<<<<<< b0be7b652e497d677ca13e17ed9df4dcb0488f50
 
   /** Style the background.
    */
@@ -302,11 +312,6 @@ export class Map extends React.Component {
     }
   }
 
-=======
->>>>>>> Working with clustering
-=======
-
->>>>>>> Fix clustering-source support.
   /** Convert a GL-defined to an OpenLayers' layer.
    */
   configureLayer(sourcesDef, layer) {
