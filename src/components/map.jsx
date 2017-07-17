@@ -291,7 +291,11 @@ export class Map extends React.Component {
 
         if (this.props.map.metadata[version_key] !== nextProps.map.metadata[version_key]) {
           const next_src = nextProps.map.sources[src_name];
+<<<<<<< 7f56704a85e3665770ee069381061e298c8c8e54
           updateGeojsonSource(this.sources[src_name], next_src, map_proj);
+=======
+          updateGeojsonSource(this.sources[src_name], next_src, this.map.getView().getProjection().getCode());
+>>>>>>> Building new example
         }
       }
     }
