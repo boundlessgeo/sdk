@@ -215,6 +215,13 @@ function getResolutionForZoom(map, zoom) {
   return view.constrainResolution(max_rez, zoom - view.getMinZoom());
 }
 
+function getResolutionForZoom(map, zoom) {
+  const view = map.getView();
+  const max_rez = view.getMaxResolution();
+  return view.constrainResolution(max_rez, zoom - view.getMinZoom());
+}
+
+
 export class Map extends React.Component {
 
   constructor(props) {
