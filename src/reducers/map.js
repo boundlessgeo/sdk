@@ -247,10 +247,10 @@ function addFeatures(state, action) {
 /** Cluster points.
  */
 function clusterPoints(state, action) {
-  const source = state.sources[action.layerId];
+  const source = state.sources[action.sourceName];
   // const data = source.data;
   var src_mixin = [];
-  src_mixin[action.layerId] = Object.assign({}, source, {cluster:action.cluster});
+  src_mixin[action.sourceName] = Object.assign({}, source, {cluster:action.cluster});
   var newState = Object.assign({}, state, {
     sources: Object.assign({}, state.sources, src_mixin),
   }, incrementVersion(state.metadata, SOURCE_VERSION_KEY));

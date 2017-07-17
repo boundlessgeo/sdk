@@ -204,7 +204,7 @@ function main() {
 
   // Cluster points on the map
   const clusterPoints = () => {
-      store.dispatch(mapActions.clusterPoints('points', true));
+      store.dispatch(mapActions.clusterPoints('points', !store.getState().map.sources.points.cluster));
   };
 
   // Removing features uses MapBox GL Spec filters.

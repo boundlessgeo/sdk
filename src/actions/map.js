@@ -52,10 +52,10 @@ export function updateLayer(layerId, layerDef) {
   };
 }
 
-export function clusterPoints(layerId, isClustered) {
+export function clusterPoints(sourceName, isClustered) {
   return {
     type: MAP.CLUSTER_POINTS,
-    layerId,
+    sourceName,
     cluster: isClustered,
   };
 }
