@@ -39,9 +39,6 @@ import { dataVersionKey } from '../reducers/map';
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
 
-let pointsSource = [];
-let clusterSource = [];
-
 function configureXyzSource(glSource) {
   const source = new XyzSource({
     attributions: glSource.attribution,
@@ -103,15 +100,16 @@ function updateGeojsonSource(olSource, glSource) {
   const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: 'EPSG:3857' });
 
   let vector_src = olSource;
+
+  // if the source is clustered then
+  //  the actual data is stored on the source's source.
   if (glSource.cluster) {
     vector_src = olSource.getSource();
-
   }
   // clear the layer WITHOUT dispatching remove events.
   vector_src.clear(true);
   // bulk load the feature data.
   vector_src.addFeatures(features);
-
 }
 
 /** Create a vector source based on a
@@ -127,25 +125,18 @@ function configureGeojsonSouce(glSource) {
     wrapX: false,
   });
 
-  // see the vector source with the first update
-  //  before returning it.
-
-  updateGeojsonSource(vector_src, glSource);
+  // GeoJson sources can be clustered but OpenLayers
+  // uses a special source type for that. This handles the
+  // "switch" of source-class.
+  let new_src = vector_src;
   if (glSource.cluster) {
-    //swap the sources if clustery
+    new_src = new ClusterSource({source: vector_src});
   }
-  return vector_src;
-}
 
-function swapClusterSource(olSource, isClustered){
-  // console.log(olSource);
-  if(isClustered){
-    let cluster = new ClusterSource({source:olSource});
-    console.log("do stuff");
-    return cluster;
-  }else{
-
-  }
+  // seed the vector source with the first update
+  //  before returning it.
+  updateGeojsonSource(new_src, glSource);
+  return new_src;
 }
 
 function configureSource(glSource) {
@@ -256,16 +247,19 @@ export class Map extends React.Component {
       const src_name = src_names[i];
       // Add the source because it's not in the current
       //  list of sources.
-
       if (!(src_name in this.sources)) {
         this.sources[src_name] = configureSource(sourcesDef[src_name]);
       }
 
-      if(!!this.props.map.sources[src_name].cluster !== !!sourcesDef[src_name].cluster)
-      {
-        this.sources[src_name] = swapClusterSource(this.sources[src_name], sourcesDef[src_name].cluster);
-        //this.map.removeLayer
-
+      // Check to see if there was a clustering change.
+      // Because OpenLayers requires a *different* source to handle clustering,
+      // this handles update the named source and then subsequently updating
+      // the layers.
+      if(this.props.map.sources[src_name].cluster !== sourcesDef[src_name].cluster) {
+        // reconfigure the source for clustering.
+        this.sources[src_name] = configureSource(sourcesDef[src_name]);
+        // tell all the layers about it.
+        this.updateLayerSource(src_name, this.props.map.layers);
       }
     }
 
@@ -279,6 +273,7 @@ export class Map extends React.Component {
       }
     }
   }
+
   /** Convert a GL-defined to an OpenLayers' layer.
    */
   configureLayer(sourcesDef, layer) {
@@ -310,6 +305,17 @@ export class Map extends React.Component {
 
     // this didn't work out.
     return null;
+  }
+
+  updateLayerSource(sourceName, layersDef) {
+    // build a list of layers effected by the source change.
+    const changed_layers = {};
+    for (let i = 0, ii = layersDef.length; i < ii; i++) {
+      if (layersDef[i].source === sourceName) {
+        console.log('found a layer that needs changing!', layersDef[i].id, this.sources[sourceName]);
+        this.layers[layersDef[i].id].setSource(this.sources[sourceName]);
+      }
+    }
   }
 
   configureLayers(sourcesDef, layersDef, layerVersion) {
