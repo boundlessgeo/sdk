@@ -39,6 +39,9 @@ import { dataVersionKey } from '../reducers/map';
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
 
+let pointsSource = [];
+let clusterSource = [];
+
 function configureXyzSource(glSource) {
   const source = new XyzSource({
     attributions: glSource.attribution,
@@ -98,19 +101,17 @@ function updateGeojsonSource(olSource, glSource) {
   // parse the new features,
   // TODO: This should really check the map for the correct projection.
   const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: 'EPSG:3857' });
-  var count = features.length
 
-  // console.log(features.length, count);
-  // var testFeatures = new Array(count);
-  // var e = 4500000;
-  // for (var i = 0, ii = count; i < ii; ++i) {
-  //   var randCoordinates = [2 * e * Math.random() - e, 2 * e * Math.random() - e];
-  //   testFeatures[i] = new Feature(new Point(randCoordinates));
-  // }
+  let vector_src = olSource;
+  if (glSource.cluster) {
+    vector_src = olSource.getSource();
+
+  }
   // clear the layer WITHOUT dispatching remove events.
-  olSource.clear(true);
+  vector_src.clear(true);
   // bulk load the feature data.
-  olSource.addFeatures(features);
+  vector_src.addFeatures(features);
+
 }
 
 /** Create a vector source based on a
@@ -120,7 +121,7 @@ function updateGeojsonSource(olSource, glSource) {
  *
  * @returns ol.source.vector instance.
  */
-function configureGeojsonSouce(glSource, isClustered) {
+function configureGeojsonSouce(glSource) {
   const vector_src = new VectorSource({
     useSpatialIndex: true,
     wrapX: false,
@@ -130,15 +131,24 @@ function configureGeojsonSouce(glSource, isClustered) {
   //  before returning it.
 
   updateGeojsonSource(vector_src, glSource);
-
-  var clusterSource = new ClusterSource({distance: 50, source: vector_src});
-  //updateGeojsonSource(clusterSource, glSource);
-
-  // return clusterSource;
-  return clusterSource;
+  if (glSource.cluster) {
+    //swap the sources if clustery
+  }
+  return vector_src;
 }
 
-function configureSource(glSource, isClustered) {
+function swapClusterSource(olSource, isClustered){
+  // console.log(olSource);
+  if(isClustered){
+    let cluster = new ClusterSource({source:olSource});
+    console.log("do stuff");
+    return cluster;
+  }else{
+
+  }
+}
+
+function configureSource(glSource) {
   // tiled raster layer.
   if (glSource.type === 'raster') {
     if ('tiles' in glSource) {
@@ -147,7 +157,7 @@ function configureSource(glSource, isClustered) {
       return configureTileJSONSource(glSource);
     }
   } else if (glSource.type === 'geojson') {
-    return configureGeojsonSouce(glSource, isClustered);
+    return configureGeojsonSouce(glSource);
   } else if (glSource.type === 'image') {
     return configureImageSource(glSource);
   } else if (glSource.type === 'vector') {
@@ -192,6 +202,8 @@ export class Map extends React.Component {
    *  what needs to be updated on the map.
    */
   shouldComponentUpdate(nextProps) {
+
+
     // compare the centers
     if (nextProps.map.center[0] !== this.props.map.center[0]
       || nextProps.map.center[1] !== this.props.map.center[1]
@@ -244,11 +256,16 @@ export class Map extends React.Component {
       const src_name = src_names[i];
       // Add the source because it's not in the current
       //  list of sources.
-      // if(sourcesDef[src_name].cluster){
-      //   this.sources[src_name] = configureSource(sourcesDef[src_name], true);
-      // }
+
       if (!(src_name in this.sources)) {
         this.sources[src_name] = configureSource(sourcesDef[src_name]);
+      }
+
+      if(!!this.props.map.sources[src_name].cluster !== !!sourcesDef[src_name].cluster)
+      {
+        this.sources[src_name] = swapClusterSource(this.sources[src_name], sourcesDef[src_name].cluster);
+        //this.map.removeLayer
+
       }
     }
 
@@ -262,7 +279,6 @@ export class Map extends React.Component {
       }
     }
   }
-
   /** Convert a GL-defined to an OpenLayers' layer.
    */
   configureLayer(sourcesDef, layer) {

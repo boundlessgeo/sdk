@@ -166,7 +166,7 @@ function main() {
 
   // Cluster points on the map
   const clusterPoints = () => {
-      store.dispatch(mapActions.clusterPoints('points', true));
+      store.dispatch(mapActions.clusterPoints('points', !store.getState().map.sources.points.cluster));
   };
 
   const removeRandomPoints = () => {
@@ -188,7 +188,7 @@ function main() {
       <button onClick={removeRandomPoints}>Remove random points</button>
       <button onClick={addOverlay}>Add static image</button>
       <button onClick={loadContext}>Load context</button>
-      <button onClick={clusterPoints}>Cluster Points</button>
+      <button onClick={clusterPoints}>Toggle Cluster Points</button>
     </div>
   ), document.getElementById('controls'));
 }
