@@ -102,6 +102,7 @@ function configureMvtSource(glSource) {
   return source;
 }
 
+
 function updateGeojsonSource(olSource, glSource) {
   // parse the new features,
   // TODO: This should really check the map for the correct projection.
@@ -113,6 +114,10 @@ function updateGeojsonSource(olSource, glSource) {
   //  the actual data is stored on the source's source.
   if (glSource.cluster) {
     vector_src = olSource.getSource();
+
+    if (glSource.clusterRadius !== olSource.getDistance()) {
+      olSource.setDistance(glSource.clusterRadius);
+    }
   }
   // clear the layer WITHOUT dispatching remove events.
   vector_src.clear(true);
@@ -138,7 +143,12 @@ function configureGeojsonSouce(glSource) {
   // "switch" of source-class.
   let new_src = vector_src;
   if (glSource.cluster) {
-    new_src = new ClusterSource({ source: vector_src });
+    new_src = new ClusterSource({
+      source: vector_src,
+      // default the distance to 50 as that's what
+      //  is specified by MapBox.
+      distance: glSource.clusterRadius ? glSource.clusterRadius : 50,
+    });
   }
 
   // seed the vector source with the first update
@@ -262,7 +272,9 @@ export class Map extends React.Component {
       // Because OpenLayers requires a *different* source to handle clustering,
       // this handles update the named source and then subsequently updating
       // the layers.
-      if (this.props.map.sources[src_name].cluster !== sourcesDef[src_name].cluster) {
+      const src = this.props.map.sources[src_name];
+      if (src.cluster !== sourcesDef[src_name].cluster
+          || src.clusterRadius !== sourcesDef[src_name].clusterRadius) {
         // reconfigure the source for clustering.
         this.sources[src_name] = configureSource(sourcesDef[src_name]);
         // tell all the layers about it.

@@ -249,7 +249,21 @@ function addFeatures(state, action) {
 function clusterPoints(state, action) {
   const source = state.sources[action.sourceName];
   const src_mixin = [];
-  src_mixin[action.sourceName] = Object.assign({}, source, { cluster: action.cluster });
+  const cluster_settings = {};
+
+  if (typeof action.cluster !== 'undefined') {
+    cluster_settings.cluster = action.cluster;
+    // MapBox GL style spec defaults to 50,
+    //  whereas OpenLayers defaults to 20px.
+    cluster_settings.clusterRadius = source.clusterRadius ? source.clusterRadius : 50;
+  }
+
+  // The radius can be overridden at any time.
+  if (typeof action.radius !== 'undefined') {
+    cluster_settings.clusterRadius = action.radius;
+  }
+  src_mixin[action.sourceName] = Object.assign({}, source, cluster_settings);
+
   const newState = Object.assign({}, state, {
     sources: Object.assign({}, state.sources, src_mixin),
   }, incrementVersion(state.metadata, SOURCE_VERSION_KEY));
@@ -364,6 +378,7 @@ export default function MapReducer(state = defaultState, action) {
     case MAP.ORDER_LAYER:
       return orderLayer(state, action);
     case MAP.CLUSTER_POINTS:
+    case MAP.SET_CLUSTER_RADIUS:
       return clusterPoints(state, action);
     default:
       return state;

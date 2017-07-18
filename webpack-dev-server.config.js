@@ -21,6 +21,10 @@ const config = {
       'webpack/hot/only-dev-server',
       './examples/wms/app.jsx',
     ],
+    clustering: [
+      'webpack/hot/only-dev-server',
+      './examples/clustering/app.jsx',
+    ],
   },
   // Server Configuration options
   devServer: {
