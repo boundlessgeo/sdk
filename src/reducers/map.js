@@ -201,7 +201,7 @@ function changeData(state, sourceName, data) {
 
   // update the individual source.
   src_mixin[sourceName] = Object.assign({}, source, {
-    data: Object.assign({}, source.data, data),
+    data,
   });
 
   // kick back the new state.
@@ -233,10 +233,10 @@ function addFeatures(state, action) {
       features: [data].concat(action.features),
     };
   } else if (data.type === 'FeatureCollection') {
-    new_data = {
-      type: 'FeatureCollection',
-      features: data.features.concat(action.features),
-    };
+    new_data = Object.assign({},
+      data,
+      { features: data.features.concat(action.features) },
+    );
   }
 
   if (new_data !== null) {
@@ -277,10 +277,10 @@ function removeFeatures(state, action) {
       }
     }
 
-    const new_data = {
-      type: 'FeatureCollection',
-      features: new_features,
-    };
+    const new_data = Object.assign({},
+      data,
+      { features: new_features },
+    );
 
     return changeData(state, action.sourceName, new_data);
   }
