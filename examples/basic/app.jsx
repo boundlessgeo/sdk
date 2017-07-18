@@ -34,7 +34,7 @@ function main() {
   // Start with a reasonable global view of the map.
   store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 2));
 
-  store.dispatch(mapActions.addMapName('Basic Map Example'));
+  store.dispatch(mapActions.setMapName('Basic Map Example'));
 
   // add the OSM source
   store.dispatch(mapActions.addSource('osm', {
@@ -220,7 +220,7 @@ function main() {
     };
     handleSubmit = (event) => {
       event.preventDefault();
-      store.dispatch(mapActions.addMapName(this.state.value));
+      store.dispatch(mapActions.setMapName(this.state.value));
       this.setState({ value: '' });
     }
     render() {

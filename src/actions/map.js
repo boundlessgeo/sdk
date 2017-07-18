@@ -13,9 +13,9 @@ export function setView(center, zoom) {
   };
 }
 
-export function addMapName(name) {
+export function setMapName(name) {
   return {
-    type: MAP.ADD_NAME,
+    type: MAP.SET_NAME,
     name: { name },
   };
 }
