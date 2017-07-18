@@ -216,7 +216,7 @@ describe('map reducer', () => {
     });
   });
 
-  it('should handle UPDATE_LAYER', () => {
+  it('should handle UPDATE_LAYER (background type)', () => {
     const layer = {
       id: 'background',
       type: 'background',
@@ -267,6 +267,62 @@ describe('map reducer', () => {
         'bnd:layer-version': 1,
       },
       layers: [newLayer, other_layer],
+    });
+  });
+
+  it('should handle UPDATE_LAYER (circle type)', () => {
+    const layer = {
+      id: 'random-points',
+      source: 'points',
+      type: 'circle',
+      paint: {
+        'circle-radius': 5,
+        'circle-color': '#756bb1',
+        'circle-stroke-color': '#756bb1',
+      },
+    };
+    const newLayer = {
+      id: 'random-points',
+      source: 'points',
+      type: 'circle',
+      paint: {
+        'circle-radius': 10,
+        'circle-color': '#756bb1',
+        'circle-stroke-color': '#756bb1',
+      },
+    };
+    deepFreeze(layer);
+    deepFreeze(newLayer);
+    const action = {
+      type: MAP.UPDATE_LAYER,
+      layerId: 'random-points',
+      layerDef: newLayer,
+    };
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {},
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+      },
+      layers: [layer],
+    };
+    deepFreeze(state);
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual({
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {},
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 1,
+      },
+      layers: [newLayer],
     });
   });
 
