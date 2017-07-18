@@ -24,6 +24,15 @@ describe('actions', () => {
     expect(actions.setView(center, zoom)).toEqual(expectedAction);
   });
 
+  it('should create an action to set the map name', () => {
+    const name = 'New Name';
+    const expectedAction = {
+      type: MAP.SET_NAME,
+      name: { name },
+    };
+    expect(actions.setMapName(name)).toEqual(expectedAction);
+  });
+
   it('should create an action to add a layer', () => {
     const layerDef = {
       id: 'osm',
