@@ -87,7 +87,14 @@ function main() {
     source: 'points',
     type: 'circle',
     paint: {
-      'circle-radius': 5,
+      'circle-radius': {
+        type: 'interval',
+        default: 3,
+        property: 'point_count',
+        stops: [
+          [0, 5], [2, 10], [3, 30],
+        ],
+      },
       'circle-color': '#feb24c',
       'circle-stroke-color': '#f03b20',
     },
@@ -202,6 +209,11 @@ function main() {
         },
       }]));
     }
+  };
+
+  // Cluster points on the map
+  const clusterPoints = () => {
+    store.dispatch(mapActions.clusterPoints('points', !store.getState().map.sources.points.cluster));
   };
 
   // Removing features uses MapBox GL Spec filters.

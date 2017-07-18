@@ -59,6 +59,27 @@ export function updateLayer(layerId, layerDef) {
   };
 }
 
+export function clusterPoints(sourceName, isClustered) {
+  return {
+    type: MAP.CLUSTER_POINTS,
+    sourceName,
+    cluster: isClustered,
+  };
+}
+
+/** Set the radius of a clustering layer.
+ *
+ *  When set to a layer without clustering this will
+ *  have no effect.
+ *
+ */
+export function setClusterRadius(sourceName, radius) {
+  return {
+    type: MAP.SET_CLUSTER_RADIUS,
+    sourceName,
+    radius,
+  };
+}
 
 export function addFeatures(sourceName, features) {
   return {
