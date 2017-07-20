@@ -2,14 +2,21 @@
  *  state of the  store.
  */
 
+import uuid from 'uuid';
+
 import PropTypes from 'prop-types';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 
 import getStyleFunction from 'mapbox-to-ol-style';
 
 import OlMap from 'ol/map';
 import View from 'ol/view';
+import Overlay from 'ol/overlay';
+
+import Proj from 'ol/proj';
+import Coordinate from 'ol/coordinate';
 
 import TileLayer from 'ol/layer/tile';
 import XyzSource from 'ol/source/xyz';
@@ -131,7 +138,7 @@ function updateGeojsonSource(olSource, glSource) {
  *
  * @returns ol.source.vector instance.
  */
-function configureGeojsonSouce(glSource) {
+function configureGeojsonSource(glSource) {
   const vector_src = new VectorSource({
     useSpatialIndex: true,
     wrapX: false,
@@ -165,7 +172,7 @@ function configureSource(glSource) {
       return configureTileJSONSource(glSource);
     }
   } else if (glSource.type === 'geojson') {
-    return configureGeojsonSouce(glSource);
+    return configureGeojsonSource(glSource);
   } else if (glSource.type === 'image') {
     return configureImageSource(glSource);
   } else if (glSource.type === 'vector') {
@@ -184,7 +191,6 @@ function fakeStyle(layer) {
   }, layer.source);
 }
 
-
 export class Map extends React.Component {
 
   constructor(props) {
@@ -199,6 +205,9 @@ export class Map extends React.Component {
 
     // hash of the openlayers layers in the map.
     this.layers = [];
+
+    // popups are stored as an ID managed hash.
+    this.popups = {};
   }
 
   componentDidMount() {
@@ -244,6 +253,10 @@ export class Map extends React.Component {
         }
       }
     }
+
+    // do a quick sweep to remove any popups
+    //  that have been closed.
+    this.updatePopups();
 
     // This should always return false to keep
     // render() from being called.
@@ -397,6 +410,96 @@ export class Map extends React.Component {
     }
   }
 
+  updatePopups() {
+    const overlays = this.map.getOverlays();
+    const overlays_to_remove = [];
+
+    overlays.forEach((overlay) => {
+      const id = overlay.get('popupId');
+      if (this.popups[id].state.closed !== false) {
+        // mark this for removal
+        overlays_to_remove.push(overlay);
+        // umount the component from the DOM
+        ReactDOM.unmountComponentAtNode(overlay.getElement());
+        // remove the component from the popups hash
+        delete this.popups[id];
+      }
+    });
+
+    // remove the old/closed overlays from the map.
+    for (let i = 0, ii = overlays_to_remove.length; i < ii; i++) {
+      this.map.removeOverlay(overlays_to_remove[i]);
+    }
+  }
+
+  removePopup(popupId) {
+    this.popups[popupId].close();
+    this.updatePopups();
+  }
+
+  /** Add a Popup to the map.
+   *
+   *  @param {SdkPopup} popup - Instance of SdkPopop or a subclass.
+   *  @param {boolean}  [silent] - When true, do not call updatePopups after adding.
+   *
+   */
+  addPopup(popup, silent = false) {
+    // each popup uses a unique id to relate what is
+    //  in openlayers vs what we have in the react world.
+    const id = uuid.v4();
+
+    const elem = document.createElement('div');
+
+    const overlay = new Overlay({
+      // create an empty div element for the Popup
+      element: elem,
+      // allow events to pass through, using the default stopevent
+      // container does not allow react to check for events.
+      stopEvent: false,
+      // put the popup into view
+      autoPan: true,
+      autoPanAnimation: {
+        duration: 250,
+      },
+    });
+
+    // Editor's note:
+    // I hate using the self = this construction but
+    //  there were few options when needing to get the
+    //  instance of the react component using the callback
+    //  method recommened by eslint and the react team.
+    // See here:
+    // - https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/no-render-return-value.md
+    const self = this;
+    // render the element into the popup's DOM.
+    ReactDOM.render(popup, elem, (function addInstance() {
+      self.popups[id] = this;
+    }));
+
+    // move the element up a level to ensure
+    //  the rects are calculated correctly.
+    overlay.setElement(elem.firstChild);
+
+    // set the popup id so we can match the component
+    //  to the overlay.
+    overlay.set('popupId', id);
+
+    // Add the overlay to the map,
+    this.map.addOverlay(overlay);
+
+    // reset the position after the popup has been added to the map.
+    // assumes the popups coordinate is 4326
+    const wgs84 = [popup.props.coordinate[0], popup.props.coordinate[1]];
+    const xy = Proj.transform(wgs84, 'EPSG:4326', this.map.getView().getProjection());
+    overlay.setPosition(xy);
+
+    // do not trigger an update if silent is
+    //  set to true.  Useful for bulk popup additions.
+    if (silent === true) {
+      this.updatePopups();
+    }
+  }
+
   /** Initialize the map */
   configureMap() {
     this.map = new OlMap({
@@ -413,10 +516,64 @@ export class Map extends React.Component {
       this.props.setView(this.map.getView());
     });
 
+    // when the map is clicked, handle the event.
+    this.map.on('singleclick', (evt) => {
+      // React listens to events on the document, OpenLayers places their
+      // event listeners on the element themselves. The only element
+      // the map should care to listen to is the actual rendered map
+      // content. This work-around allows the popups and React-based
+      // controls to be placed on the ol-overlaycontainer instead of
+      // ol-overlaycontainer-stop-event
+
+      // eslint-disable-next-line no-underscore-dangle
+      if (this.map.getRenderer().canvas_ === evt.originalEvent.target) {
+        const map_prj = this.map.getView().getProjection();
+
+        // if includeFeaturesOnClick is true then query for the
+        //  features on the map.
+        const click_features = [];
+        if (this.props.includeFeaturesOnClick) {
+          this.map.forEachFeatureAtPixel(evt.pixel, (feature) => {
+            // ship the working projection for the features back to the
+            //  caller as 4326 for consistency sake.
+            click_features.push(GEOJSON_FORMAT.writeFeatureObject(feature, {
+              featureProjection: map_prj,
+              dataProjection: 'EPSG:4326',
+            }));
+          });
+        }
+
+        // ensure the coordinate is also in 4326
+        const pt = Proj.transform(evt.coordinate, map_prj, 'EPSG:4326');
+        const coordinate = {
+          0: pt[0],
+          1: pt[1],
+          xy: evt.coordinate,
+          hms: Coordinate.toStringHDMS(pt),
+        };
+
+        // send the clicked-on coordinate and the list of features
+        this.props.onClick(this, coordinate, click_features);
+      }
+    });
+
+
     // bootstrap the map with the current configuration.
     this.configureSources(this.props.map.sources, this.props.map.metadata[SOURCE_VERSION_KEY]);
     this.configureLayers(this.props.map.sources, this.props.map.layers,
                          this.props.map.metadata[LAYER_VERSION_KEY]);
+
+    // this is done after the map composes itself for the first time.
+    //  otherwise the map was not always ready for the initial popups.
+    this.map.once('postcompose', () => {
+      // add the initial popups from the user.
+      for (let i = 0, ii = this.props.initialPopups.length; i < ii; i++) {
+        // set silent to true since updatePopups is called after the loop
+        this.addPopup(this.props.initialPopups[i], true);
+      }
+
+      this.updatePopups();
+    });
   }
 
   render() {
@@ -434,7 +591,10 @@ Map.propTypes = {
     layers: PropTypes.array,
     sources: PropTypes.object,
   }),
+  initialPopups: PropTypes.arrayOf(PropTypes.object),
   setView: PropTypes.func,
+  includeFeaturesOnClick: PropTypes.bool,
+  onClick: PropTypes.func,
 };
 
 Map.defaultProps = {
@@ -445,8 +605,12 @@ Map.defaultProps = {
     layers: [],
     sources: {},
   },
+  initialPopups: [],
   setView: () => {
     // swallow event.
+  },
+  includeFeaturesOnClick: false,
+  onClick: () => {
   },
 };
 
