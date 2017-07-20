@@ -28,9 +28,7 @@ import VectorSource from 'ol/source/vector';
 
 import GeoJsonFormat from 'ol/format/geojson';
 
-// import { setView } from '../actions/map';
-// import { updateLayer } from '../actions/map';
-import * as mapActions from '../actions/map';
+import { setView } from '../actions/map';
 import { LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
 import { dataVersionKey } from '../reducers/map';
 
@@ -479,7 +477,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     setView: (view) => {
-      dispatch(mapActions.setView(view.getCenter(), view.getZoom()));
+      dispatch(setView(view.getCenter(), view.getZoom()));
     },
   };
 }
