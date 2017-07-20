@@ -245,6 +245,18 @@ function main() {
       );
     }
   }
+  // Updates max zoom level on Null Island layer.
+  const updateMaxZoom = () => {
+    store.dispatch(mapActions.updateLayer('null-island', {
+      source: 'points',
+      type: 'circle',
+      paint: {
+        'circle-radius': 10,
+        'circle-color': '#f03b20',
+        'circle-stroke-color': '#f03b20',
+      },
+    }));
+  };
 
   // place the map on the page.
   ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
@@ -256,6 +268,7 @@ function main() {
       <button className="sdk-btn" onClick={addRandomPoints}>Add 10 random points</button>
       <button className="sdk-btn blue" onClick={removeRandomPoints}>Remove random points</button>
       <InputField />
+      <button className="sdk-btn" onClick={updateMaxZoom}>Update Max Zoom</button>
     </div>
   ), document.getElementById('controls'));
 }

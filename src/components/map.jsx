@@ -184,6 +184,13 @@ function fakeStyle(layer) {
   }, layer.source);
 }
 
+/** Convert a zoom level to resolution,
+    given Spherical Mercator projection.
+ */
+function zoomToResolution(zoomLevel) {
+  return (156543.03392804097 / (2 ** zoomLevel));
+}
+
 
 export class Map extends React.Component {
 
@@ -311,26 +318,36 @@ export class Map extends React.Component {
    */
   configureLayer(sourcesDef, layer) {
     const layer_src = sourcesDef[layer.source];
+    const maxResolution = layer.minZoom ? Math.round(zoomToResolution(layer.minZoom)) : 156544;
+    const minResolution = layer.maxZoom ? zoomToResolution(layer.maxZoom) : 0.0005831682455839253;
 
     switch (layer_src.type) {
       case 'raster':
         return new TileLayer({
           source: this.sources[layer.source],
+          maxResolution,
+          minResolution,
         });
       case 'geojson':
         return new VectorLayer({
           source: this.sources[layer.source],
           style: fakeStyle(layer),
+          maxResolution,
+          minResolution,
         });
       case 'vector':
         return new VectorTileLayer({
           source: this.sources[layer.source],
           style: fakeStyle(layer),
+          maxResolution,
+          minResolution,
         });
       case 'image':
         return new ImageLayer({
           source: this.sources[layer.source],
           opacity: layer.paint ? layer.paint['raster-opacity'] : undefined,
+          maxResolution,
+          minResolution,
         });
       default:
         // pass, let the function return null
@@ -388,7 +405,7 @@ export class Map extends React.Component {
     for (let i = 0, ii = layer_ids.length; i < ii; i++) {
       const layer_id = layer_ids[i];
       // if the layer_id was not set to true then
-      //  it has been removed the state and needs to be removed
+      //  it has been removed from the state and needs to be removed
       //  from the map.
       if (layer_exists[layer_id] !== true) {
         this.map.removeLayer(this.layers[layer_id]);
@@ -407,6 +424,7 @@ export class Map extends React.Component {
         zoom: this.props.map.zoom,
       }),
     });
+
 
     // when the map moves update the location in the state
     this.map.on('moveend', () => {
