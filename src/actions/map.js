@@ -166,3 +166,16 @@ export function orderLayer(layerId, targetLayerId) {
     targetId: targetLayerId,
   };
 }
+
+/** Update the map's metadata.
+ *
+ *  @param metadata - An object containing new/updated metadata.
+ *
+ * @returns action object.
+ */
+export function updateMetadata(metadata) {
+  return {
+    type: MAP.UPDATE_METADATA,
+    metadata
+  };
+}

@@ -350,6 +350,14 @@ function setContext(state, action) {
   return Object.assign({}, action.context);
 }
 
+/** Update the map's metadata.
+ */
+function updateMetadata(state, action) {
+  return Object.assign({}, state, {
+    metadata: Object.assign({}, state.metadata, action.metadata),
+  });
+}
+
 /** Main reducer.
  */
 export default function MapReducer(state = defaultState, action) {
@@ -382,6 +390,8 @@ export default function MapReducer(state = defaultState, action) {
     case MAP.CLUSTER_POINTS:
     case MAP.SET_CLUSTER_RADIUS:
       return clusterPoints(state, action);
+    case MAP.SET_METADATA:
+      return updateMetadata(state, action);
     default:
       return state;
   }
