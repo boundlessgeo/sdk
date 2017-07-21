@@ -176,6 +176,6 @@ export function orderLayer(layerId, targetLayerId) {
 export function updateMetadata(metadata) {
   return {
     type: MAP.UPDATE_METADATA,
-    metadata
+    metadata,
   };
 }
