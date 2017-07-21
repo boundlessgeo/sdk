@@ -75,7 +75,15 @@ describe('Map component', () => {
       }, {
         id: 'mvt-layer',
         source: 'mvt',
-      },
+      }, {
+        id: 'purple-points',
+        ref: 'sample-points',
+        paint: {
+          'circle-radius': 5,
+          'circle-color': '#cc00cc',
+        },
+        filter: ['==', 'isPurple', true],
+      }
     ];
     const metadata = {
       'bnd:source-version': 0,
