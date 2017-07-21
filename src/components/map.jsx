@@ -82,12 +82,10 @@ function configureXyzSource(glSource) {
 }
 
 function configureTileJSONSource(glSource) {
-  const test = new TileJSON({
+  return new TileJSON({
     url: glSource.url,
     crossOrigin: 'anonymous',
   });
-  console.log(test)
-  return test;
 }
 
 function configureImageSource(glSource) {
@@ -441,50 +439,15 @@ export class Map extends React.Component {
       // handle updating the layer.
       if (layer !== null && layer.id in this.layers) {
         const ol_layer = this.layers[layer.id];
-        const layer_src = sourcesDef[layer.source];
 
-        if (layer_src.type === 'raster' || layer_src.type === 'vector') {
-          const tileGrid = ol_layer.getSource().getTileGrid();
-          const src_min = tileGrid.minZoom;
-          const src_max = tileGrid.maxZoom;
-          if (layer.minzoom) {
-            const maxmin = Math.max(src_min, layer.minzoom);
-            const maxResolution = getResolutionForZoom(this.map, maxmin);
-            ol_layer.setMaxResolution(maxResolution);
-          } else {
-            const maxResolution = getResolutionForZoom(this.map, src_min);
-            ol_layer.setMaxResolution(maxResolution);
-          }
-          if (layer.maxzoom) {
-            const minmax = Math.min(src_max, layer.maxzoom);
-            const minResolution = getResolutionForZoom(this.map, minmax);
-            ol_layer.setMinResolution(minResolution);
-          } else {
-            const minResolution = getResolutionForZoom(this.map, src_max);
-            ol_layer.setMinResolution(minResolution);
-          }
-          console.log(ol_layer.getSource().getTileGrid())
-        } else if (layer_src.type === 'geojson') {
-          if (layer_src.maxzoom) {
-            if (layer.maxzoom) {
-              const minmax = Math.min(layer_src.maxzoom, layer.maxzoom);
-              const minResolution = getResolutionForZoom(this.map, minmax);
-              ol_layer.setMinResolution(minResolution);
-            } else {
-              const minResolution = getResolutionForZoom(this.map, layer_src.maxzoom);
-              ol_layer.setMinResolution(minResolution);
-            }
-          }
+        if (layer.maxzoom) {
+          const minResolution = getResolutionForZoom(this.map, layer.maxzoom);
+          ol_layer.setMinResolution(minResolution);
         }
-
-        // if (layer.maxzoom) {
-        //   const minResolution = getResolutionForZoom(this.map, layer.maxzoom);
-        //   ol_layer.setMinResolution(minResolution);
-        // }
-        // if (layer.minzoom) {
-        //   const maxResolution = getResolutionForZoom(this.map, layer.minzoom);
-        //   ol_layer.setMaxResolution(maxResolution);
-        // }
+        if (layer.minzoom) {
+          const maxResolution = getResolutionForZoom(this.map, layer.minzoom);
+          ol_layer.setMaxResolution(maxResolution);
+        }
 
         // check for style changes, the OL style
         // is defined by filter and paint elements.
