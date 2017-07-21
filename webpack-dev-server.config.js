@@ -21,6 +21,10 @@ const config = {
       'webpack/hot/only-dev-server',
       './examples/wms/app.jsx',
     ],
+    popups: [
+      'webpack/hot/only-dev-server',
+      './examples/popups/app.jsx',
+    ],
     clustering: [
       'webpack/hot/only-dev-server',
       './examples/clustering/app.jsx',
