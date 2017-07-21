@@ -331,8 +331,8 @@ export class Map extends React.Component {
    */
   configureLayer(sourcesDef, layer) {
     const layer_src = sourcesDef[layer.source];
-    const maxResolution = layer.minZoom ? Math.round(zoomToResolution(layer.minZoom)) : 156544;
-    const minResolution = layer.maxZoom ? zoomToResolution(layer.maxZoom) : 0.0005831682455839253;
+    const maxResolution = layer.minzoom ? Math.round(zoomToResolution(layer.minzoom)) : 156544;
+    const minResolution = layer.maxzoom ? zoomToResolution(layer.maxzoom) : 0.0005831682455839253;
 
     switch (layer_src.type) {
       case 'raster':
@@ -388,8 +388,8 @@ export class Map extends React.Component {
     for (let i = 0, ii = layersDef.length; i < ii; i++) {
       const layer = layersDef[i];
       const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
-      const maxResolution = layer.minZoom ? Math.round(zoomToResolution(layer.minZoom)) : 156544;
-      const minResolution = layer.maxZoom ? zoomToResolution(layer.maxZoom) : 0.0005831682455839253;
+      const maxResolution = layer.minzoom ? Math.round(zoomToResolution(layer.minzoom)) : 156544;
+      const minResolution = layer.maxzoom ? zoomToResolution(layer.maxzoom) : 0.0005831682455839253;
       layer_exists[layer.id] = true;
 
       // if the layer is not on the map, create it.

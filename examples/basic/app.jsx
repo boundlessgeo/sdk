@@ -98,7 +98,7 @@ function main() {
       'circle-color': '#feb24c',
       'circle-stroke-color': '#f03b20',
     },
-    minZoom: 1,
+    minzoom: 1,
   }));
 
   // The points source has both null island
@@ -246,8 +246,8 @@ function main() {
       );
     }
   }
-  // Updates max zoom level on Null Island layer.
-  const updateMaxZoom = () => {
+  // Updates minzoom level on Null Island layer.
+  const updateMinzoom = () => {
     store.dispatch(mapActions.updateLayer('null-island', {
       source: 'points',
       type: 'circle',
@@ -256,7 +256,7 @@ function main() {
         'circle-color': '#f03b20',
         'circle-stroke-color': '#f03b20',
       },
-      minZoom: 2,
+      minzoom: 2,
     }));
   };
 
@@ -269,7 +269,7 @@ function main() {
       <button className="sdk-btn" onClick={zoomToNullIsland}>Zoom to Null Island</button>
       <button className="sdk-btn" onClick={addRandomPoints}>Add 10 random points</button>
       <button className="sdk-btn blue" onClick={removeRandomPoints}>Remove random points</button>
-      <button className="sdk-btn" onClick={updateMaxZoom}>Update Max Zoom</button>
+      <button className="sdk-btn" onClick={updateMinzoom}>Update Min Zoom</button>
       <InputField />
     </div>
   ), document.getElementById('controls'));

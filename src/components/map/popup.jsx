@@ -43,7 +43,7 @@ class Popup extends React.PureComponent {
 }
 
 Popup.propTypes = {
-  // this unused prop warning is ignored becasue the cooredinate is
+  // this unused prop warning is ignored because the coordinate is
   //  a required prop to rightly render the popup on the map.
   // eslint-disable-next-line
   coordinate: PropTypes.oneOfType([

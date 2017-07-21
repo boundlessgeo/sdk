@@ -220,7 +220,7 @@ describe('Map component', () => {
     const layers = [{
       id: 'tilejson-layer',
       source: 'tilejson',
-      minZoom: 2,
+      minzoom: 2,
     }];
 
     const metadata = {
@@ -248,7 +248,7 @@ describe('Map component', () => {
         layers: [{
           id: 'tilejson-layer',
           source: 'tilejson',
-          minZoom: 3,
+          minzoom: 3,
         }],
       },
     };
