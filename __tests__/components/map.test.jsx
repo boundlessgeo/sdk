@@ -83,7 +83,7 @@ describe('Map component', () => {
           'circle-color': '#cc00cc',
         },
         filter: ['==', 'isPurple', true],
-      }
+      },
     ];
     const metadata = {
       'bnd:source-version': 0,
@@ -243,7 +243,10 @@ describe('Map component', () => {
     instance.componentDidMount();
     const map = instance.map;
     const layer = map.getLayers().item(0);
-    expect(layer.getMaxResolution()).toEqual(39136);
+    const view = map.getView();
+    let max_rez = view.constrainResolution(
+      view.getMaxResolution(), layers[0].minzoom - view.getMinZoom());
+    expect(layer.getMaxResolution()).toEqual(max_rez);
     const nextProps = {
       map: {
         center,
@@ -261,7 +264,9 @@ describe('Map component', () => {
       },
     };
     instance.shouldComponentUpdate.call(instance, nextProps);
-    expect(layer.getMaxResolution()).toEqual(19568);
+    max_rez = view.constrainResolution(
+      view.getMaxResolution(), nextProps.map.layers[0].minzoom - view.getMinZoom());
+    expect(layer.getMaxResolution()).toEqual(max_rez);
   });
 
   it('should handle layer removal and re-adding', () => {

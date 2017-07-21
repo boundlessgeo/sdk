@@ -191,13 +191,6 @@ function fakeStyle(layer) {
   }, layer.source);
 }
 
-/** Convert a zoom level to resolution,
-    given Spherical Mercator projection.
- */
-function zoomToResolution(zoomLevel) {
-  return (156543.03392804097 / (2 ** zoomLevel));
-}
-
 export class Map extends React.Component {
 
   constructor(props) {
@@ -372,6 +365,11 @@ export class Map extends React.Component {
   }
 
   configureLayers(sourcesDef, layersDef, layerVersion) {
+    const view = this.map.getView();
+    function getResolutionForZoom(zoom) {
+      const max_rez = view.getMaxResolution();
+      return view.constrainResolution(max_rez, zoom - view.getMinZoom());
+    }
     const layer_exists = {};
 
     // update the internal version counter.
@@ -433,11 +431,11 @@ export class Map extends React.Component {
         this.layers[layer.id].setVisible(is_visible);
         this.layers[layer.id].setZIndex(i);
         if (layer.maxzoom) {
-          const minResolution = zoomToResolution(layer.maxzoom);
+          const minResolution = getResolutionForZoom(layer.maxzoom);
           this.layers[layer.id].setMinResolution(minResolution);
         }
         if (layer.minzoom) {
-          const maxResolution = Math.round(zoomToResolution(layer.minzoom));
+          const maxResolution = getResolutionForZoom(layer.minzoom);
           this.layers[layer.id].setMaxResolution(maxResolution);
         }
       }
