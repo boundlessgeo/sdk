@@ -369,9 +369,35 @@ export class Map extends React.Component {
 
     // layers is an array.
     for (let i = 0, ii = layersDef.length; i < ii; i++) {
-      const layer = layersDef[i];
-      const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
+      let layer = layersDef[i];
       layer_exists[layer.id] = true;
+
+      // check to see if this layer references another.
+      if (typeof layer.ref !== 'undefined') {
+        // find the source layer
+        let layer_def = null;
+        for (let x = 0, xx = layersDef.length; x < xx && layer_def === null; x++) {
+          if (layersDef[x].id === layer.ref) {
+            // layersDef[x] will contain objects which need to be
+            // copied by value and not by reference which is why
+            // Object.assign is not used.
+            let src_layer = JSON.parse(JSON.stringify(layersDef[x]));
+            // now use Object.assign to do the mixin.
+            // src_layer is a new object and the original layer
+            //  is not being mutated here.
+            layer_def = Object.assign(src_layer, layer);
+          }
+        }
+
+        // move on with the loop if the layer
+        //  could not be defined.
+        if (layer_def === null) {
+          continue;
+        }
+        // change the working definition of the layer.
+        layer = layer_def;
+      }
+
 
       // if the layer is not on the map, create it.
       if (!(layer.id in this.layers)) {
@@ -388,6 +414,8 @@ export class Map extends React.Component {
           }
         }
       }
+
+      const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
 
       // handle visibility and z-ordering.
       if (layer.id in this.layers) {

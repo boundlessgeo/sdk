@@ -106,8 +106,7 @@ function main() {
   // of orange.
   store.dispatch(mapActions.addLayer({
     id: 'random-points',
-    source: 'points',
-    type: 'circle',
+    ref: 'null-island',
     paint: {
       'circle-radius': 5,
       'circle-color': '#756bb1',
