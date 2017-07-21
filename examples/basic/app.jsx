@@ -221,10 +221,10 @@ function main() {
       super(props);
       this.state = { value: store.getState().map.name };
     }
-    updateMapName = (event) => {
+    updateMapName(event) {
       this.setState({ value: event.target.value });
-    };
-    handleSubmit = (event) => {
+    }
+    handleSubmit(event) {
       event.preventDefault();
       store.dispatch(mapActions.setMapName(this.state.value));
       this.setState({ value: '' });

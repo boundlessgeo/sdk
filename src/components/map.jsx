@@ -41,6 +41,8 @@ import { dataVersionKey } from '../reducers/map';
 
 import ClusterSource from '../source/cluster';
 
+import { jsonEquals } from '../util';
+
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
 
@@ -190,6 +192,18 @@ function fakeStyle(layer) {
     layers: [layer],
   }, layer.source);
 }
+
+/** Get a layer by it's id
+ */
+function getLayerById(layers, id) {
+  for (let i = 0, ii = layers.length; i < ii; i++) {
+    if (layers[i].id === id) {
+      return layers[i];
+    }
+  }
+  return null;
+}
+
 
 export class Map extends React.Component {
 
@@ -361,16 +375,33 @@ export class Map extends React.Component {
     }
   }
 
-  configureLayers(sourcesDef, layersDef, layerVersion) {
+  cleanupLayers(layersDef) {
     const layer_exists = {};
+    for (let i = 0, ii = layersDef.length; i < ii; i++) {
+      layer_exists[layersDef[i].id] = true;
+    }
 
+    // check for layers which should be removed.
+    const layer_ids = Object.keys(this.layers);
+    for (let i = 0, ii = layer_ids.length; i < ii; i++) {
+      const layer_id = layer_ids[i];
+      // if the layer_id was not set to true then
+      //  it has been removed the state and needs to be removed
+      //  from the map.
+      if (layer_exists[layer_id] !== true) {
+        this.map.removeLayer(this.layers[layer_id]);
+        delete this.layers[layer_id];
+      }
+    }
+  }
+
+  configureLayers(sourcesDef, layersDef, layerVersion) {
     // update the internal version counter.
     this.layersVersion = layerVersion;
 
     // layers is an array.
     for (let i = 0, ii = layersDef.length; i < ii; i++) {
       let layer = layersDef[i];
-      layer_exists[layer.id] = true;
 
       // check to see if this layer references another.
       if (typeof layer.ref !== 'undefined') {
@@ -381,7 +412,7 @@ export class Map extends React.Component {
             // layersDef[x] will contain objects which need to be
             // copied by value and not by reference which is why
             // Object.assign is not used.
-            let src_layer = JSON.parse(JSON.stringify(layersDef[x]));
+            const src_layer = JSON.parse(JSON.stringify(layersDef[x]));
             // now use Object.assign to do the mixin.
             // src_layer is a new object and the original layer
             //  is not being mutated here.
@@ -392,6 +423,9 @@ export class Map extends React.Component {
         // move on with the loop if the layer
         //  could not be defined.
         if (layer_def === null) {
+          // WARNING! Continue is used to short circuit
+          //          the rest of this loop.
+          // eslint-disable-next-line no-continue
           continue;
         }
         // change the working definition of the layer.
@@ -415,27 +449,33 @@ export class Map extends React.Component {
         }
       }
 
-      const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
-
-      // handle visibility and z-ordering.
+      // handle updating the layer.
       if (layer.id in this.layers) {
-        this.layers[layer.id].setVisible(is_visible);
-        this.layers[layer.id].setZIndex(i);
+        const ol_layer = this.layers[layer.id];
+
+        // check for style changes, the OL style
+        // is defined by filter and paint elements.
+        const current_layer = getLayerById(this.props.map.layers, layer.id);
+
+        if (current_layer !== null) {
+          const diff_filter = !jsonEquals(current_layer.filter, layer.filter);
+          const diff_paint = !jsonEquals(current_layer.paint, layer.paint);
+          if (diff_filter || diff_paint) {
+            ol_layer.setStyle(fakeStyle(layer));
+          }
+        }
+
+        // check for visibility changes.
+        const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
+        ol_layer.setVisible(is_visible);
+
+        // ensure the display order hasn't changed.
+        ol_layer.setZIndex(i);
       }
     }
 
-    // check for layers which should be removed.
-    const layer_ids = Object.keys(this.layers);
-    for (let i = 0, ii = layer_ids.length; i < ii; i++) {
-      const layer_id = layer_ids[i];
-      // if the layer_id was not set to true then
-      //  it has been removed the state and needs to be removed
-      //  from the map.
-      if (layer_exists[layer_id] !== true) {
-        this.map.removeLayer(this.layers[layer_id]);
-        delete this.layers[layer_id];
-      }
-    }
+    // clean up layers which should be removed.
+    this.cleanupLayers(layersDef);
   }
 
   updatePopups() {

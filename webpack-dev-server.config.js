@@ -29,6 +29,10 @@ const config = {
       'webpack/hot/only-dev-server',
       './examples/clustering/app.jsx',
     ],
+    'paint-change': [
+      'webpack/hot/only-dev-server',
+      './examples/paint-change/app.jsx',
+    ]
   },
   // Server Configuration options
   devServer: {
