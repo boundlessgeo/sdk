@@ -371,11 +371,6 @@ export class Map extends React.Component {
   }
 
   configureLayers(sourcesDef, layersDef, layerVersion) {
-    // const view = this.map.getView();
-    // function getResolutionForZoom(zoom) {
-    //   const max_rez = view.getMaxResolution();
-    //   return view.constrainResolution(max_rez, zoom - view.getMinZoom());
-    // }
     const layer_exists = {};
 
     // update the internal version counter.
@@ -395,7 +390,7 @@ export class Map extends React.Component {
             // layersDef[x] will contain objects which need to be
             // copied by value and not by reference which is why
             // Object.assign is not used.
-            let src_layer = JSON.parse(JSON.stringify(layersDef[x]));
+            const src_layer = JSON.parse(JSON.stringify(layersDef[x]));
             // now use Object.assign to do the mixin.
             // src_layer is a new object and the original layer
             //  is not being mutated here.
