@@ -637,6 +637,5 @@ describe('map reducer', () => {
     };
 
     expect(reducer(state, sprite_action).sprites).toEqual(sprite_root);
-
   });
 });

@@ -181,16 +181,6 @@ function configureSource(glSource) {
   return null;
 }
 
-/** This is a small bit of trickery that fakes
- *  `getStyleFunction` into rendering only THIS layer.
- */
-function fakeStyle(layer) {
-  return getStyleFunction({
-    version: 8,
-    layers: [layer],
-  }, layer.source);
-}
-
 export class Map extends React.Component {
 
   constructor(props) {
@@ -213,6 +203,9 @@ export class Map extends React.Component {
   componentDidMount() {
     // put the map into the DOM
     this.configureMap();
+
+    // check to see if ther are any sprites in the state.
+    this.configureSprites(this.props.map);
   }
 
   /** This will check nextProps and nextState to see
@@ -257,6 +250,11 @@ export class Map extends React.Component {
     // do a quick sweep to remove any popups
     //  that have been closed.
     this.updatePopups();
+
+    // update the sprites, this could happen BEFORE the map
+    if (this.props.map.sprites !== nextProps.map.sprites) {
+      this.configureSprites(nextProps.map);
+    }
 
     // This should always return false to keep
     // render() from being called.
@@ -320,6 +318,17 @@ export class Map extends React.Component {
     }
   }
 
+  /** This is a small bit of trickery that fakes
+   *  `getStyleFunction` into rendering only THIS layer.
+   */
+  fakeStyle(layer) {
+    // getStyleFunction(glStyle, source, resolutions, spriteData, spriteImageUrl, fonts) {
+    return getStyleFunction({
+      version: 8,
+      layers: [layer],
+    }, layer.source, undefined, this.spriteData, this.spriteImageUrl);
+  }
+
   /** Convert a GL-defined to an OpenLayers' layer.
    */
   configureLayer(sourcesDef, layer) {
@@ -333,12 +342,12 @@ export class Map extends React.Component {
       case 'geojson':
         return new VectorLayer({
           source: this.sources[layer.source],
-          style: fakeStyle(layer),
+          style: this.fakeStyle(layer),
         });
       case 'vector':
         return new VectorTileLayer({
           source: this.sources[layer.source],
-          style: fakeStyle(layer),
+          style: this.fakeStyle(layer),
         });
       case 'image':
         return new ImageLayer({
@@ -381,7 +390,7 @@ export class Map extends React.Component {
             // layersDef[x] will contain objects which need to be
             // copied by value and not by reference which is why
             // Object.assign is not used.
-            let src_layer = JSON.parse(JSON.stringify(layersDef[x]));
+            const src_layer = JSON.parse(JSON.stringify(layersDef[x]));
             // now use Object.assign to do the mixin.
             // src_layer is a new object and the original layer
             //  is not being mutated here.
@@ -436,6 +445,31 @@ export class Map extends React.Component {
         delete this.layers[layer_id];
       }
     }
+  }
+
+  configureSprites(map) {
+    if (typeof map.sprites === 'undefined') {
+      // return a resolved promise.
+      return (new Promise((resolve) => {
+        resolve();
+      }));
+    }
+
+    return fetch(`${map.sprites}.json`)
+      .then(r => r.json())
+      .then((spriteJson) => {
+        // store the spite data for later styling.
+        this.spriteData = spriteJson;
+        this.spriteImageUrl = `${map.sprites}.png`;
+
+        // restyle all the symbol layers.
+        for (let i = 0, ii = map.layers.length; i < ii; i++) {
+          const gl_layer = map.layers[i];
+          if (gl_layer.type === 'symbol') {
+            this.layers[gl_layer.id].setStyle(this.fakeStyle(gl_layer));
+          }
+        }
+      });
   }
 
   updatePopups() {
@@ -618,6 +652,7 @@ Map.propTypes = {
     metadata: PropTypes.object,
     layers: PropTypes.array,
     sources: PropTypes.object,
+    sprites: PropTypes.string,
   }),
   initialPopups: PropTypes.arrayOf(PropTypes.object),
   setView: PropTypes.func,
@@ -632,6 +667,7 @@ Map.defaultProps = {
     metadata: {},
     layers: [],
     sources: {},
+    sprites: undefined,
   },
   initialPopups: [],
   setView: () => {
@@ -656,4 +692,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Map);
+// Ensure that withRef is set to true so getWrappedInstance will return the Map.
+export default connect(mapStateToProps, mapDispatchToProps, undefined, { withRef: true })(Map);
