@@ -25,3 +25,30 @@ export function getLayerById(layers, id) {
   }
   return null;
 }
+
+/** Get the max or min number in a given set of numbers
+  * that may contain non-numbers
+ */
+function getNumericValues(values) {
+  const arr = [];
+  for (let i = 0, ii = values.length; i < ii; i++) {
+    if (!isNaN(values[i])) {
+      arr.push(values[i]);
+    }
+  }
+  return arr;
+}
+
+export function getMin(...args) {
+  const numbers = getNumericValues(args);
+  if (numbers.length === 0) { return undefined; }
+  if (numbers.length === 1) { return numbers[0]; }
+  return Math.min.apply(this, getNumericValues(args));
+}
+
+export function getMax(...args) {
+  const numbers = getNumericValues(args);
+  if (numbers.length === 0) { return undefined; }
+  if (numbers.length === 1) { return numbers[0]; }
+  return Math.max.apply(this, getNumericValues(args));
+}

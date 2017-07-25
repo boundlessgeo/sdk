@@ -219,7 +219,7 @@ describe('Map component', () => {
     expect(layer.getVisible()).toBe(false);
   });
 
-  it('handles updated layers', () => {
+  it('handles updates to source and layer min/maxzoom values', () => {
     const sources = {
       tilejson: {
         type: 'raster',
@@ -230,8 +230,8 @@ describe('Map component', () => {
       id: 'tilejson-layer',
       source: 'tilejson',
       minzoom: 2,
+      maxzoom: 5,
     }];
-
     const metadata = {
       'bnd:source-version': 0,
       'bnd:layer-version': 0,
@@ -248,7 +248,11 @@ describe('Map component', () => {
     let max_rez = view.constrainResolution(
       view.getMaxResolution(), layers[0].minzoom - view.getMinZoom());
     expect(layer.getMaxResolution()).toEqual(max_rez);
-    const nextProps = {
+    let min_rez = view.constrainResolution(
+      view.getMinResolution(), layers[0].maxzoom - view.getMaxZoom());
+    expect(layer.getMinResolution()).toEqual(min_rez);
+    // min/max zoom values change on layer def
+    let nextProps = {
       map: {
         center,
         zoom,
@@ -261,6 +265,7 @@ describe('Map component', () => {
           id: 'tilejson-layer',
           source: 'tilejson',
           minzoom: 3,
+          maxzoom: 4,
         }],
       },
     };
@@ -268,6 +273,71 @@ describe('Map component', () => {
     max_rez = view.constrainResolution(
       view.getMaxResolution(), nextProps.map.layers[0].minzoom - view.getMinZoom());
     expect(layer.getMaxResolution()).toEqual(max_rez);
+    min_rez = view.constrainResolution(
+      view.getMinResolution(), nextProps.map.layers[0].maxzoom - view.getMaxZoom());
+    expect(layer.getMinResolution()).toEqual(min_rez);
+    // min/max zoom values defined on source only
+    nextProps = {
+      map: {
+        center,
+        zoom,
+        metadata: {
+          'bnd:source-version': 1,
+          'bnd:layer-version': 2,
+        },
+        sources: {
+          tilejson: {
+            type: 'raster',
+            url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure',
+            minzoom: 4,
+            maxzoom: 8,
+          },
+        },
+        layers: [{
+          id: 'tilejson-layer',
+          source: 'tilejson',
+        }],
+      },
+    };
+    instance.shouldComponentUpdate.call(instance, nextProps);
+    max_rez = view.constrainResolution(
+      view.getMaxResolution(), nextProps.map.sources.tilejson.minzoom - view.getMinZoom());
+    expect(layer.getMaxResolution()).toEqual(max_rez);
+    min_rez = view.constrainResolution(
+      view.getMinResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMaxZoom());
+    expect(layer.getMinResolution()).toEqual(min_rez);
+    // min.max zoom values defined on both source and layer def
+    nextProps = {
+      map: {
+        center,
+        zoom,
+        metadata: {
+          'bnd:source-version': 2,
+          'bnd:layer-version': 3,
+        },
+        sources: {
+          tilejson: {
+            type: 'raster',
+            url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure',
+            minzoom: 1,
+            maxzoom: 7,
+          },
+        },
+        layers: [{
+          id: 'tilejson-layer',
+          source: 'tilejson',
+          minzoom: 2,
+          maxzoom: 9,
+        }],
+      },
+    };
+    instance.shouldComponentUpdate.call(instance, nextProps);
+    max_rez = view.constrainResolution(
+      view.getMaxResolution(), nextProps.map.layers[0].minzoom - view.getMinZoom());
+    expect(layer.getMaxResolution()).toEqual(max_rez);
+    min_rez = view.constrainResolution(
+      view.getMinResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMaxZoom());
+    expect(layer.getMinResolution()).toEqual(min_rez);
   });
 
   it('should handle layer removal and re-adding', () => {
