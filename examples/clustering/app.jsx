@@ -69,6 +69,9 @@ function main() {
         default: 3,
         property: 'point_count',
         stops: [
+          // stops are defined as the "min property value", style value,
+          // In this example points with >= 2 but < 5 points will
+          //  be rendered with a 8 px radius
           [0, 5], [2, 8], [5, 13], [10, 21],
         ],
       },
@@ -83,8 +86,8 @@ function main() {
     source: 'points',
     layout: {
       'text-field': '{point_count}',
-      'text-font': ['Arial'], //DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-      'text-size': 10
+      'text-font': ['Arial'],
+      'text-size': 10,
     },
     filter: ['has', 'point_count'],
   }));
@@ -101,10 +104,6 @@ function main() {
     },
     filter: ['!has', 'point_count'],
   }));
-
-
-
-
 
   // Add a random point to the map
   const addRandomPoints = (nPoints = 10) => {
