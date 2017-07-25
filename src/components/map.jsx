@@ -86,7 +86,7 @@ function configureTileJSONSource(glSource) {
     url: glSource.url,
     crossOrigin: 'anonymous',
   });
-  console.log(test)
+  console.log('TileJSON source', test)
   return test;
 }
 
@@ -444,26 +444,31 @@ export class Map extends React.Component {
         const layer_src = sourcesDef[layer.source];
 
         if (layer_src.type === 'raster' || layer_src.type === 'vector') {
-          const tileGrid = ol_layer.getSource().getTileGrid();
-          const src_min = tileGrid.minZoom;
-          const src_max = tileGrid.maxZoom;
-          if (layer.minzoom) {
-            const maxmin = Math.max(src_min, layer.minzoom);
-            const maxResolution = getResolutionForZoom(this.map, maxmin);
-            ol_layer.setMaxResolution(maxResolution);
+          if ('tiles' in layer_src) {
+            const tileGrid = ol_layer.getSource().getTileGrid();
+            console.log('XYZ source tileGrid ', tileGrid)
+            const src_min = tileGrid.minZoom;
+            const src_max = tileGrid.maxZoom;
+            if (layer.minzoom) {
+              const maxmin = Math.max(src_min, layer.minzoom);
+              const maxResolution = getResolutionForZoom(this.map, maxmin);
+              ol_layer.setMaxResolution(maxResolution);
+            } else {
+              const maxResolution = getResolutionForZoom(this.map, src_min);
+              ol_layer.setMaxResolution(maxResolution);
+            }
+            if (layer.maxzoom) {
+              const minmax = Math.min(src_max, layer.maxzoom);
+              const minResolution = getResolutionForZoom(this.map, minmax);
+              ol_layer.setMinResolution(minResolution);
+            } else {
+              const minResolution = getResolutionForZoom(this.map, src_max);
+              ol_layer.setMinResolution(minResolution);
+            }
           } else {
-            const maxResolution = getResolutionForZoom(this.map, src_min);
-            ol_layer.setMaxResolution(maxResolution);
+            console.log('TileJSON source tileJSON', ol_layer.getSource().getTileJSON())
+            console.log('TileJSON source tileGrid', ol_layer.getSource().getTileGrid())
           }
-          if (layer.maxzoom) {
-            const minmax = Math.min(src_max, layer.maxzoom);
-            const minResolution = getResolutionForZoom(this.map, minmax);
-            ol_layer.setMinResolution(minResolution);
-          } else {
-            const minResolution = getResolutionForZoom(this.map, src_max);
-            ol_layer.setMinResolution(minResolution);
-          }
-          console.log(ol_layer.getSource().getTileGrid())
         } else if (layer_src.type === 'geojson') {
           if (layer_src.maxzoom) {
             if (layer.maxzoom) {
