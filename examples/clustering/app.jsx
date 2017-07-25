@@ -24,8 +24,6 @@ const store = createStore(combineReducers({
 }), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
    applyMiddleware(thunkMiddleware));
 
-window.store = store;
-
 function main() {
   // Start with a reasonable global view of hte map.
   store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 2));
@@ -71,11 +69,25 @@ function main() {
         default: 3,
         property: 'point_count',
         stops: [
-          [0, 3], [2, 5], [5, 10], [10, 30],
+          // stops are defined as the "min property value", style value,
+          // In this example points with >= 2 but < 5 points will
+          //  be rendered with a 8 px radius
+          [0, 5], [2, 8], [5, 13], [10, 21],
         ],
       },
       'circle-color': '#feb24c',
       'circle-stroke-color': '#f03b20',
+    },
+    filter: ['has', 'point_count'],
+  }));
+
+  store.dispatch(mapActions.addLayer({
+    id: 'clustered-labels',
+    source: 'points',
+    layout: {
+      'text-field': '{point_count}',
+      'text-font': ['Arial'],
+      'text-size': 10,
     },
     filter: ['has', 'point_count'],
   }));
@@ -92,7 +104,6 @@ function main() {
     },
     filter: ['!has', 'point_count'],
   }));
-
 
   // Add a random point to the map
   const addRandomPoints = (nPoints = 10) => {

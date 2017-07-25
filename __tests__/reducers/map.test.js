@@ -670,4 +670,38 @@ describe('map reducer', () => {
     };
     expect(reducer(state, null_action).layers).toEqual([layer_a, layer_b]);
   });
+
+  it('should update the map metadata', () => {
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {},
+      layers: [],
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+        'bnd:some-key': 'some-value',
+      },
+    };
+    deepFreeze(state);
+
+    const action = {
+      type: MAP.UPDATE_METADATA,
+      metadata: {
+        'bnd:some-key': 'other-value',
+        'bnd:new-key': 'new-value',
+      },
+    };
+
+    deepFreeze(action);
+
+    expect(reducer(state, action).metadata).toEqual({
+      'bnd:source-version': 0,
+      'bnd:layer-version': 0,
+      'bnd:some-key': 'other-value',
+      'bnd:new-key': 'new-value',
+    });
+  });
 });
