@@ -41,7 +41,7 @@ import { dataVersionKey } from '../reducers/map';
 
 import ClusterSource from '../source/cluster';
 
-import { jsonEquals } from '../util';
+import { jsonEquals, getLayerById } from '../util';
 
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
@@ -191,17 +191,6 @@ function fakeStyle(layer) {
     version: 8,
     layers: [layer],
   }, layer.source);
-}
-
-/** Get a layer by it's id
- */
-function getLayerById(layers, id) {
-  for (let i = 0, ii = layers.length; i < ii; i++) {
-    if (layers[i].id === id) {
-      return layers[i];
-    }
-  }
-  return null;
 }
 
 
@@ -407,12 +396,12 @@ export class Map extends React.Component {
       if (typeof layer.ref !== 'undefined') {
         // find the source layer
         let layer_def = null;
-        for (let x = 0, xx = layersDef.length; x < xx && layer_def === null; x++) {
-          if (layersDef[x].id === layer.ref) {
-            // layersDef[x] will contain objects which need to be
+        for (let j = 0, jj = layersDef.length; j < jj && layer_def === null; j++) {
+          if (layersDef[j].id === layer.ref) {
+            // layersDef[j] will contain objects which need to be
             // copied by value and not by reference which is why
             // Object.assign is not used.
-            const src_layer = JSON.parse(JSON.stringify(layersDef[x]));
+            const src_layer = JSON.parse(JSON.stringify(layersDef[j]));
             // now use Object.assign to do the mixin.
             // src_layer is a new object and the original layer
             //  is not being mutated here.
@@ -420,21 +409,13 @@ export class Map extends React.Component {
           }
         }
 
-        // move on with the loop if the layer
-        //  could not be defined.
-        if (layer_def === null) {
-          // WARNING! Continue is used to short circuit
-          //          the rest of this loop.
-          // eslint-disable-next-line no-continue
-          continue;
-        }
         // change the working definition of the layer.
         layer = layer_def;
       }
 
 
       // if the layer is not on the map, create it.
-      if (!(layer.id in this.layers)) {
+      if (layer !== null && !(layer.id in this.layers)) {
         if (layer.type === 'background') {
           this.configureBackground(layer);
         } else {
@@ -450,7 +431,7 @@ export class Map extends React.Component {
       }
 
       // handle updating the layer.
-      if (layer.id in this.layers) {
+      if (layer !== null && layer.id in this.layers) {
         const ol_layer = this.layers[layer.id];
 
         // check for style changes, the OL style
