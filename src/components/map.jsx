@@ -35,6 +35,8 @@ import VectorSource from 'ol/source/vector';
 
 import GeoJsonFormat from 'ol/format/geojson';
 
+import DrawInteraction from 'ol/interaction/draw';
+
 import { setView } from '../actions/map';
 import { LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
 import { dataVersionKey } from '../reducers/map';
@@ -206,6 +208,10 @@ export class Map extends React.Component {
 
     // popups are stored as an ID managed hash.
     this.popups = {};
+
+    // interactions are how the user can manipulate the map,
+    //  this tracks any active interaction.
+    this.activeInteraction = null;
   }
 
   componentDidMount() {
@@ -264,10 +270,33 @@ export class Map extends React.Component {
       this.configureSprites(nextProps.map);
     }
 
+    // change the current interaction as needed
+    if (nextProps.drawing && (nextProps.drawing.interaction !== this.props.drawing.interaction
+        || nextProps.drawing.sourceName !== this.props.drawing.sourceName)) {
+      this.updateInteraction(nextProps.drawing);
+    }
+
     // This should always return false to keep
     // render() from being called.
     return false;
   }
+
+  /** Callback for finished drawings, converts the event's feature
+   *  to GeoJSON and then passes the relevant information on to
+   *  this.props.onFeatureDrawn.
+   */
+  onFeatureDrawn(sourceName, evt) {
+    // convert the feature to GeoJson
+    const proposed_geojson = GEOJSON_FORMAT.writeFeatureObject(evt.feature, {
+      dataProjection: 'EPSG:4326',
+      featureProjection: this.map.getView().getProjection(),
+    });
+
+    // Pass on feature drawn this map object, the target source,
+    //  and the drawn feature.
+    this.props.onFeatureDrawn(this, sourceName, proposed_geojson);
+  }
+
 
   /** Convert the GL source definitions into internal
    *  OpenLayers source definitions.
@@ -676,6 +705,27 @@ export class Map extends React.Component {
     });
   }
 
+  updateInteraction(drawingProps) {
+    // this assumes the interaction is different,
+    //  so the first thing to do is clear out the old interaction
+    if (this.activeInteraction !== null) {
+      this.map.removeInteraction(this.activeInteraction);
+      this.activeInteraction = null;
+    }
+
+    if (['Point', 'LineString', 'Polygon'].includes(drawingProps.interaction)) {
+      this.activeInteraction = new DrawInteraction({
+        type: drawingProps.interaction,
+      });
+
+      this.activeInteraction.on('drawend', (feature) => {
+        this.onFeatureDrawn(drawingProps.sourceName, feature);
+      });
+
+      this.map.addInteraction(this.activeInteraction);
+    }
+  }
+
   render() {
     return (
       <div ref={(c) => { this.mapdiv = c; }} className="map" />
@@ -692,10 +742,15 @@ Map.propTypes = {
     sources: PropTypes.object,
     sprites: PropTypes.string,
   }),
+  drawing: PropTypes.shape({
+    interaction: PropTypes.string,
+    sourceName: PropTypes.string,
+  }),
   initialPopups: PropTypes.arrayOf(PropTypes.object),
   setView: PropTypes.func,
   includeFeaturesOnClick: PropTypes.bool,
   onClick: PropTypes.func,
+  onFeatureDrawn: PropTypes.func,
 };
 
 Map.defaultProps = {
@@ -707,6 +762,10 @@ Map.defaultProps = {
     sources: {},
     sprites: undefined,
   },
+  drawing: {
+    interaction: null,
+    source: null,
+  },
   initialPopups: [],
   setView: () => {
     // swallow event.
@@ -714,11 +773,14 @@ Map.defaultProps = {
   includeFeaturesOnClick: false,
   onClick: () => {
   },
+  onFeatureDrawn: () => {
+  },
 };
 
 function mapStateToProps(state) {
   return {
     map: state.map,
+    drawing: state.drawing,
   };
 }
 

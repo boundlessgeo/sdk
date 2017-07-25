@@ -20,6 +20,12 @@ export const MAP = {
   SET_SPRITES: 'MAP_SET_SPRITES',
 };
 
+export const DRAWING = {
+  START: 'DRAWING_START',
+  END: 'DRAWING_END',
+};
+
 export default {
   MAP,
+  DRAWING,
 };
