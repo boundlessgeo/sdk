@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@mapbox/mapbox-gl-style-spec": "^9.0.0",
+    "async": "^2.5.0",
     "isomorphic-fetch": "^2.2.1",
     "mapbox-to-ol-style": "^2.5.2",
     "ol": "^4.1.1",
@@ -46,8 +47,10 @@
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-redux": "^5.0.5",
+    "readable-stream": "^2.3.3",
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0",
+    "source-map": "^0.5.6",
     "uuid": "^3.1.0"
   },
   "repository": {

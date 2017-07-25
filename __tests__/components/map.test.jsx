@@ -84,7 +84,7 @@ describe('Map component', () => {
           'circle-color': '#cc00cc',
         },
         filter: ['==', 'isPurple', true],
-      }
+      },
     ];
     const metadata = {
       'bnd:source-version': 0,
