@@ -29,6 +29,10 @@ const config = {
       'webpack/hot/only-dev-server',
       './examples/clustering/app.jsx',
     ],
+    sprites: [
+      'webpack/hot/only-dev-server',
+      './examples/sprites/app.jsx',
+    ],
   },
   // Server Configuration options
   devServer: {
