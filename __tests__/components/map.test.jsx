@@ -218,6 +218,57 @@ describe('Map component', () => {
     expect(layer.getVisible()).toBe(false);
   });
 
+  it('handles updated layers', () => {
+    const sources = {
+      tilejson: {
+        type: 'raster',
+        url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure',
+      },
+    };
+    const layers = [{
+      id: 'tilejson-layer',
+      source: 'tilejson',
+      minzoom: 2,
+    }];
+
+    const metadata = {
+      'bnd:source-version': 0,
+      'bnd:layer-version': 0,
+    };
+    const center = [0, 0];
+    const zoom = 2;
+    const wrapper = shallow(<Map map={{ center, zoom, sources, layers, metadata }} />);
+
+    const instance = wrapper.instance();
+    instance.componentDidMount();
+    const map = instance.map;
+    const layer = map.getLayers().item(0);
+    const view = map.getView();
+    let max_rez = view.constrainResolution(
+      view.getMaxResolution(), layers[0].minzoom - view.getMinZoom());
+    expect(layer.getMaxResolution()).toEqual(max_rez);
+    const nextProps = {
+      map: {
+        center,
+        zoom,
+        metadata: {
+          'bnd:source-version': 0,
+          'bnd:layer-version': 1,
+        },
+        sources,
+        layers: [{
+          id: 'tilejson-layer',
+          source: 'tilejson',
+          minzoom: 3,
+        }],
+      },
+    };
+    instance.shouldComponentUpdate.call(instance, nextProps);
+    max_rez = view.constrainResolution(
+      view.getMaxResolution(), nextProps.map.layers[0].minzoom - view.getMinZoom());
+    expect(layer.getMaxResolution()).toEqual(max_rez);
+  });
+
   it('should handle layer removal and re-adding', () => {
     const sources = {
       tilejson: {

@@ -193,6 +193,12 @@ function fakeStyle(layer) {
   }, layer.source);
 }
 
+function getResolutionForZoom(map, zoom) {
+  const view = map.getView();
+  const max_rez = view.getMaxResolution();
+  return view.constrainResolution(max_rez, zoom - view.getMinZoom());
+}
+
 
 export class Map extends React.Component {
 
@@ -328,6 +334,9 @@ export class Map extends React.Component {
   configureLayer(sourcesDef, layer) {
     const layer_src = sourcesDef[layer.source];
 
+    // const resolution = this.map.getView().getResolution();
+    // console.log(this.map.getView().getZoomForResolution(resolution))
+
     switch (layer_src.type) {
       case 'raster':
         return new TileLayer({
@@ -434,10 +443,18 @@ export class Map extends React.Component {
       if (layer !== null && layer.id in this.layers) {
         const ol_layer = this.layers[layer.id];
 
+        if (layer.maxzoom) {
+          const minResolution = getResolutionForZoom(this.map, layer.maxzoom);
+          ol_layer.setMinResolution(minResolution);
+        }
+        if (layer.minzoom) {
+          const maxResolution = getResolutionForZoom(this.map, layer.minzoom);
+          ol_layer.setMaxResolution(maxResolution);
+        }
+
         // check for style changes, the OL style
         // is defined by filter and paint elements.
         const current_layer = getLayerById(this.props.map.layers, layer.id);
-
         if (current_layer !== null) {
           const diff_filter = !jsonEquals(current_layer.filter, layer.filter);
           const diff_paint = !jsonEquals(current_layer.paint, layer.paint);
@@ -559,6 +576,7 @@ export class Map extends React.Component {
         zoom: this.props.map.zoom,
       }),
     });
+
 
     // when the map moves update the location in the state
     this.map.on('moveend', () => {
