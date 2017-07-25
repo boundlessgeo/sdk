@@ -185,6 +185,17 @@ describe('actions', () => {
 
     expect(actions.orderLayer(layer_id)).toEqual(expectedAction);
   });
+
+  it('should issue an action to change the sprites', () => {
+    const spriteRoot = 'localSprites';
+    const expectedAction = {
+      type: MAP.SET_SPRITES,
+      sprites: spriteRoot,
+      targetId: undefined,
+    };
+
+    expect(actions.setSprites(spriteRoot)).toEqual(expectedAction);
+  });
 });
 
 describe('async actions', () => {

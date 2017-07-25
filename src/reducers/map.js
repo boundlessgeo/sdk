@@ -195,13 +195,14 @@ function removeSource(state, action) {
  *  source changed to the contents of data.
  *
  */
-function changeData(state, sourceName, data) {
+function changeData(state, sourceName, data, crs) {
   const source = state.sources[sourceName];
   const src_mixin = {};
 
   // update the individual source.
   src_mixin[sourceName] = Object.assign({}, source, {
     data,
+    crs,
   });
 
   // kick back the new state.
@@ -240,7 +241,7 @@ function addFeatures(state, action) {
   }
 
   if (new_data !== null) {
-    return changeData(state, action.sourceName, new_data);
+    return changeData(state, action.sourceName, new_data, action.crs);
   }
   return state;
 }
@@ -366,6 +367,8 @@ export default function MapReducer(state = defaultState, action) {
       return Object.assign({}, state, action.view);
     case MAP.SET_NAME:
       return Object.assign({}, state, action.name);
+    case MAP.SET_SPRITES:
+      return Object.assign({}, state, { sprites: action.sprites });
     case MAP.ADD_LAYER:
       return addLayer(state, action);
     case MAP.REMOVE_LAYER:

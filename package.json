@@ -4,6 +4,7 @@
   "description": "Boundless Web SDK",
   "scripts": {
     "start": "webpack-dev-server --config webpack-dev-server.config.js",
+    "watch": "webpack --watch",
     "test": "jest",
     "test:watch": "npm test -- --watch",
     "lint": "eslint __tests__ src examples --ext .jsx,.js",
@@ -40,6 +41,7 @@
   "dependencies": {
     "@mapbox/mapbox-gl-style-spec": "^9.0.0",
     "async": "^2.5.0",
+    "extract-css": "^1.0.3",
     "isomorphic-fetch": "^2.2.1",
     "mapbox-to-ol-style": "^2.5.2",
     "ol": "^4.1.1",

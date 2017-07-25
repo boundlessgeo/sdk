@@ -18,7 +18,7 @@ import SdkPopup from '@boundlessgeo/sdk/components/map/popup';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
 // This will have webpack include all of the SDK styles.
-import '@boundlessgeo/sdk/stylesheet/sdk.css';
+import '@boundlessgeo/sdk/stylesheet/sdk.scss';
 
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({

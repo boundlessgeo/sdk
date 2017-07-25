@@ -81,11 +81,12 @@ export function setClusterRadius(sourceName, radius) {
   };
 }
 
-export function addFeatures(sourceName, features) {
+export function addFeatures(sourceName, features, crs) {
   return {
     type: MAP.ADD_FEATURES,
     sourceName,
     features,
+    crs
   };
 }
 
@@ -149,7 +150,6 @@ export function setContext(options) {
   };
 }
 
-
 /** Rearrange a layer in the list.
  *
  *  @param layerId the layer to move.
@@ -164,6 +164,19 @@ export function orderLayer(layerId, targetLayerId) {
     type: MAP.ORDER_LAYER,
     layerId,
     targetId: targetLayerId,
+  };
+}
+
+/** Set the sprites for hte map
+ *
+ *  @param spriteRoot - The URI to the sprite data without the .json/.png suffix.
+ *
+ * @returns action object.
+ */
+export function setSprites(spriteRoot) {
+  return {
+    type: MAP.SET_SPRITES,
+    sprites: spriteRoot,
   };
 }
 

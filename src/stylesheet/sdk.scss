@@ -2,6 +2,7 @@
  * Include the SDK stylesheet
  */
 @import '~ol/ol.css';
+@import 'popup';
 
 $sdk-orange: #f58d50;
 $sdk-blue: #29728d;
@@ -35,5 +36,3 @@ button.sdk-btn {
         background-color: rgba($sdk-blue, .9);
     }
 }
-
-@import './popup.scss';

@@ -1,4 +1,4 @@
-/* global it, describe, expect */
+/* global it, describe, expect, spyOn */
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
@@ -15,6 +15,7 @@ import { createStore, combineReducers } from 'redux';
 
 import ConnectedMap, { Map } from '../../src/components/map';
 import MapReducer from '../../src/reducers/map';
+import * as MapActions from '../../src/actions/map';
 
 describe('Map component', () => {
   it('should render without throwing an error', () => {
@@ -359,5 +360,19 @@ describe('Map component', () => {
       map: MapReducer,
     }));
     mount(<ConnectedMap store={store} />);
+  });
+
+  it('should change the sprites and redraw the layer', () => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+    }));
+
+    const wrapper = mount(<ConnectedMap store={store} />);
+    const map = wrapper.instance().getWrappedInstance();
+
+    spyOn(map, 'configureSprites');
+    store.dispatch(MapActions.setSprites('./sprites'));
+
+    expect(map.configureSprites).toHaveBeenCalled();
   });
 });
