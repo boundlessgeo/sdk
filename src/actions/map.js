@@ -176,6 +176,6 @@ export function orderLayer(layerId, targetLayerId) {
 export function setSprites(spriteRoot) {
   return {
     type: MAP.SET_SPRITES,
-    sprites: spriteRoot
+    sprites: spriteRoot,
   };
 }

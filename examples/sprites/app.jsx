@@ -26,7 +26,6 @@ const store = createStore(combineReducers({
 function main() {
   // Start with a reasonable global view of the map.
   store.dispatch(mapActions.setView([0, 0], 3));
-  //-1759914.3204498321, 3236495.368492126], 2));
 
   // setup the map sprites.
   store.dispatch(mapActions.setSprites('./sprites'));

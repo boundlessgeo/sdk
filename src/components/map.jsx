@@ -450,7 +450,7 @@ export class Map extends React.Component {
           const diff_filter = !jsonEquals(current_layer.filter, layer.filter);
           const diff_paint = !jsonEquals(current_layer.paint, layer.paint);
           if (diff_filter || diff_paint) {
-            ol_layer.setStyle(fakeStyle(layer));
+            ol_layer.setStyle(this.fakeStyle(layer));
           }
         }
 
