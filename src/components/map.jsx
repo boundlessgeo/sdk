@@ -41,6 +41,8 @@ import { dataVersionKey } from '../reducers/map';
 
 import ClusterSource from '../source/cluster';
 
+import { jsonEquals, getLayerById } from '../util';
+
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
 
@@ -190,6 +192,7 @@ function fakeStyle(layer) {
     layers: [layer],
   }, layer.source);
 }
+
 
 export class Map extends React.Component {
 
@@ -361,67 +364,10 @@ export class Map extends React.Component {
     }
   }
 
-  configureLayers(sourcesDef, layersDef, layerVersion) {
+  cleanupLayers(layersDef) {
     const layer_exists = {};
-
-    // update the internal version counter.
-    this.layersVersion = layerVersion;
-
-    // layers is an array.
     for (let i = 0, ii = layersDef.length; i < ii; i++) {
-      let layer = layersDef[i];
-      layer_exists[layer.id] = true;
-
-      // check to see if this layer references another.
-      if (typeof layer.ref !== 'undefined') {
-        // find the source layer
-        let layer_def = null;
-        for (let x = 0, xx = layersDef.length; x < xx && layer_def === null; x++) {
-          if (layersDef[x].id === layer.ref) {
-            // layersDef[x] will contain objects which need to be
-            // copied by value and not by reference which is why
-            // Object.assign is not used.
-            let src_layer = JSON.parse(JSON.stringify(layersDef[x]));
-            // now use Object.assign to do the mixin.
-            // src_layer is a new object and the original layer
-            //  is not being mutated here.
-            layer_def = Object.assign(src_layer, layer);
-          }
-        }
-
-        // move on with the loop if the layer
-        //  could not be defined.
-        if (layer_def === null) {
-          continue;
-        }
-        // change the working definition of the layer.
-        layer = layer_def;
-      }
-
-
-      // if the layer is not on the map, create it.
-      if (!(layer.id in this.layers)) {
-        if (layer.type === 'background') {
-          this.configureBackground(layer);
-        } else {
-          const new_layer = this.configureLayer(sourcesDef, layer);
-          new_layer.set('name', layer.id);
-
-          // if the new layer has been defined, add it to the map.
-          if (new_layer !== null) {
-            this.layers[layer.id] = new_layer;
-            this.map.addLayer(this.layers[layer.id]);
-          }
-        }
-      }
-
-      const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
-
-      // handle visibility and z-ordering.
-      if (layer.id in this.layers) {
-        this.layers[layer.id].setVisible(is_visible);
-        this.layers[layer.id].setZIndex(i);
-      }
+      layer_exists[layersDef[i].id] = true;
     }
 
     // check for layers which should be removed.
@@ -436,6 +382,81 @@ export class Map extends React.Component {
         delete this.layers[layer_id];
       }
     }
+  }
+
+  configureLayers(sourcesDef, layersDef, layerVersion) {
+    // update the internal version counter.
+    this.layersVersion = layerVersion;
+
+    // layers is an array.
+    for (let i = 0, ii = layersDef.length; i < ii; i++) {
+      let layer = layersDef[i];
+
+      // check to see if this layer references another.
+      if (typeof layer.ref !== 'undefined') {
+        // find the source layer
+        let layer_def = null;
+        for (let j = 0, jj = layersDef.length; j < jj && layer_def === null; j++) {
+          if (layersDef[j].id === layer.ref) {
+            // layersDef[j] will contain objects which need to be
+            // copied by value and not by reference which is why
+            // Object.assign is not used.
+            const src_layer = JSON.parse(JSON.stringify(layersDef[j]));
+            // now use Object.assign to do the mixin.
+            // src_layer is a new object and the original layer
+            //  is not being mutated here.
+            layer_def = Object.assign(src_layer, layer);
+          }
+        }
+
+        // change the working definition of the layer.
+        layer = layer_def;
+      }
+
+
+      // if the layer is not on the map, create it.
+      if (layer !== null && !(layer.id in this.layers)) {
+        if (layer.type === 'background') {
+          this.configureBackground(layer);
+        } else {
+          const new_layer = this.configureLayer(sourcesDef, layer);
+          new_layer.set('name', layer.id);
+
+          // if the new layer has been defined, add it to the map.
+          if (new_layer !== null) {
+            this.layers[layer.id] = new_layer;
+            this.map.addLayer(this.layers[layer.id]);
+          }
+        }
+      }
+
+      // handle updating the layer.
+      if (layer !== null && layer.id in this.layers) {
+        const ol_layer = this.layers[layer.id];
+
+        // check for style changes, the OL style
+        // is defined by filter and paint elements.
+        const current_layer = getLayerById(this.props.map.layers, layer.id);
+
+        if (current_layer !== null) {
+          const diff_filter = !jsonEquals(current_layer.filter, layer.filter);
+          const diff_paint = !jsonEquals(current_layer.paint, layer.paint);
+          if (diff_filter || diff_paint) {
+            ol_layer.setStyle(fakeStyle(layer));
+          }
+        }
+
+        // check for visibility changes.
+        const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
+        ol_layer.setVisible(is_visible);
+
+        // ensure the display order hasn't changed.
+        ol_layer.setZIndex(i);
+      }
+    }
+
+    // clean up layers which should be removed.
+    this.cleanupLayers(layersDef);
   }
 
   updatePopups() {
