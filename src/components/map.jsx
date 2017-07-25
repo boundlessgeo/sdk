@@ -41,6 +41,8 @@ import { dataVersionKey } from '../reducers/map';
 
 import ClusterSource from '../source/cluster';
 
+import { jsonEquals, getLayerById } from '../util';
+
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
 
@@ -196,6 +198,7 @@ function getResolutionForZoom(map, zoom) {
   const max_rez = view.getMaxResolution();
   return view.constrainResolution(max_rez, zoom - view.getMinZoom());
 }
+
 
 export class Map extends React.Component {
 
@@ -370,27 +373,44 @@ export class Map extends React.Component {
     }
   }
 
-  configureLayers(sourcesDef, layersDef, layerVersion) {
+  cleanupLayers(layersDef) {
     const layer_exists = {};
+    for (let i = 0, ii = layersDef.length; i < ii; i++) {
+      layer_exists[layersDef[i].id] = true;
+    }
 
+    // check for layers which should be removed.
+    const layer_ids = Object.keys(this.layers);
+    for (let i = 0, ii = layer_ids.length; i < ii; i++) {
+      const layer_id = layer_ids[i];
+      // if the layer_id was not set to true then
+      //  it has been removed the state and needs to be removed
+      //  from the map.
+      if (layer_exists[layer_id] !== true) {
+        this.map.removeLayer(this.layers[layer_id]);
+        delete this.layers[layer_id];
+      }
+    }
+  }
+
+  configureLayers(sourcesDef, layersDef, layerVersion) {
     // update the internal version counter.
     this.layersVersion = layerVersion;
 
     // layers is an array.
     for (let i = 0, ii = layersDef.length; i < ii; i++) {
       let layer = layersDef[i];
-      layer_exists[layer.id] = true;
 
       // check to see if this layer references another.
       if (typeof layer.ref !== 'undefined') {
         // find the source layer
         let layer_def = null;
-        for (let x = 0, xx = layersDef.length; x < xx && layer_def === null; x++) {
-          if (layersDef[x].id === layer.ref) {
-            // layersDef[x] will contain objects which need to be
+        for (let j = 0, jj = layersDef.length; j < jj && layer_def === null; j++) {
+          if (layersDef[j].id === layer.ref) {
+            // layersDef[j] will contain objects which need to be
             // copied by value and not by reference which is why
             // Object.assign is not used.
-            const src_layer = JSON.parse(JSON.stringify(layersDef[x]));
+            const src_layer = JSON.parse(JSON.stringify(layersDef[j]));
             // now use Object.assign to do the mixin.
             // src_layer is a new object and the original layer
             //  is not being mutated here.
@@ -398,18 +418,13 @@ export class Map extends React.Component {
           }
         }
 
-        // move on with the loop if the layer
-        //  could not be defined.
-        if (layer_def === null) {
-          continue;
-        }
         // change the working definition of the layer.
         layer = layer_def;
       }
 
 
       // if the layer is not on the map, create it.
-      if (!(layer.id in this.layers)) {
+      if (layer !== null && !(layer.id in this.layers)) {
         if (layer.type === 'background') {
           this.configureBackground(layer);
         } else {
@@ -424,36 +439,41 @@ export class Map extends React.Component {
         }
       }
 
-      const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
+      // handle updating the layer.
+      if (layer !== null && layer.id in this.layers) {
+        const ol_layer = this.layers[layer.id];
 
-      // handle visibility and z-ordering.
-      // TODO: handle other changes to existing layers
-      if (layer.id in this.layers) {
-        this.layers[layer.id].setVisible(is_visible);
-        this.layers[layer.id].setZIndex(i);
         if (layer.maxzoom) {
           const minResolution = getResolutionForZoom(this.map, layer.maxzoom);
-          this.layers[layer.id].setMinResolution(minResolution);
+          ol_layer.setMinResolution(minResolution);
         }
         if (layer.minzoom) {
           const maxResolution = getResolutionForZoom(this.map, layer.minzoom);
-          this.layers[layer.id].setMaxResolution(maxResolution);
+          ol_layer.setMaxResolution(maxResolution);
         }
+
+        // check for style changes, the OL style
+        // is defined by filter and paint elements.
+        const current_layer = getLayerById(this.props.map.layers, layer.id);
+        if (current_layer !== null) {
+          const diff_filter = !jsonEquals(current_layer.filter, layer.filter);
+          const diff_paint = !jsonEquals(current_layer.paint, layer.paint);
+          if (diff_filter || diff_paint) {
+            ol_layer.setStyle(fakeStyle(layer));
+          }
+        }
+
+        // check for visibility changes.
+        const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
+        ol_layer.setVisible(is_visible);
+
+        // ensure the display order hasn't changed.
+        ol_layer.setZIndex(i);
       }
     }
 
-    // check for layers which should be removed.
-    const layer_ids = Object.keys(this.layers);
-    for (let i = 0, ii = layer_ids.length; i < ii; i++) {
-      const layer_id = layer_ids[i];
-      // if the layer_id was not set to true then
-      //  it has been removed from the state and needs to be removed
-      //  from the map.
-      if (layer_exists[layer_id] !== true) {
-        this.map.removeLayer(this.layers[layer_id]);
-        delete this.layers[layer_id];
-      }
-    }
+    // clean up layers which should be removed.
+    this.cleanupLayers(layersDef);
   }
 
   updatePopups() {
