@@ -17,6 +17,7 @@ import Overlay from 'ol/overlay';
 
 import Proj from 'ol/proj';
 import Coordinate from 'ol/coordinate';
+import Collection from 'ol/collection';
 
 import TileLayer from 'ol/layer/tile';
 import XyzSource from 'ol/source/xyz';
@@ -36,6 +37,8 @@ import VectorSource from 'ol/source/vector';
 import GeoJsonFormat from 'ol/format/geojson';
 
 import DrawInteraction from 'ol/interaction/draw';
+import ModifyInteraction from 'ol/interaction/modify';
+import SelectInteraction from 'ol/interaction/select';
 
 import { setView } from '../actions/map';
 import { LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
@@ -211,7 +214,7 @@ export class Map extends React.Component {
 
     // interactions are how the user can manipulate the map,
     //  this tracks any active interaction.
-    this.activeInteraction = null;
+    this.activeInteractions = null;
   }
 
   componentDidMount() {
@@ -285,16 +288,20 @@ export class Map extends React.Component {
    *  to GeoJSON and then passes the relevant information on to
    *  this.props.onFeatureDrawn.
    */
-  onFeatureDrawn(sourceName, evt) {
+  onFeatureEvent(eventType, sourceName, feature) {
     // convert the feature to GeoJson
-    const proposed_geojson = GEOJSON_FORMAT.writeFeatureObject(evt.feature, {
+    const proposed_geojson = GEOJSON_FORMAT.writeFeatureObject(feature, {
       dataProjection: 'EPSG:4326',
       featureProjection: this.map.getView().getProjection(),
     });
 
     // Pass on feature drawn this map object, the target source,
     //  and the drawn feature.
-    this.props.onFeatureDrawn(this, sourceName, proposed_geojson);
+    if (eventType === 'drawn') {
+      this.props.onFeatureDrawn(this, sourceName, proposed_geojson);
+    } else if(eventType === 'modified') {
+      this.props.onFeatureModified(this, sourceName, proposed_geojson);
+    }
   }
 
 
@@ -708,21 +715,44 @@ export class Map extends React.Component {
   updateInteraction(drawingProps) {
     // this assumes the interaction is different,
     //  so the first thing to do is clear out the old interaction
-    if (this.activeInteraction !== null) {
-      this.map.removeInteraction(this.activeInteraction);
-      this.activeInteraction = null;
+    if (this.activeInteractions !== null) {
+
+      for (let i = 0, ii = this.activeInteractions.length; i < ii; i++) {
+        this.map.removeInteraction(this.activeInteractions[i]);
+      }
+      this.activeInteractions = null;
     }
 
-    if (['Point', 'LineString', 'Polygon'].includes(drawingProps.interaction)) {
-      this.activeInteraction = new DrawInteraction({
+    if (drawingProps.interaction === 'Modify') {
+      const select = new SelectInteraction({
+        wrapX: false,
+      });
+
+      const modify = new ModifyInteraction({
+        features: select.getFeatures(),
+      });
+
+      modify.on('modifyend', (evt) => {
+        this.onFeatureEvent('modified', drawingProps.sourceName, evt.features.item(0));
+      });
+
+      this.activeInteractions = [select, modify];
+    } else if (['Point', 'LineString', 'Polygon'].includes(drawingProps.interaction)) {
+      const draw = new DrawInteraction({
         type: drawingProps.interaction,
       });
 
-      this.activeInteraction.on('drawend', (feature) => {
-        this.onFeatureDrawn(drawingProps.sourceName, feature);
+      draw.on('drawend', (evt) => {
+        this.onFeatureEvent('drawn', drawingProps.sourceName, evt.feature);
       });
 
-      this.map.addInteraction(this.activeInteraction);
+      this.activeInteractions = [draw,];
+    }
+
+    if (this.activeInteractions) {
+      for (let i = 0, ii = this.activeInteractions.length; i < ii; i++) {
+        this.map.addInteraction(this.activeInteractions[i]);
+      }
     }
   }
 
@@ -751,6 +781,7 @@ Map.propTypes = {
   includeFeaturesOnClick: PropTypes.bool,
   onClick: PropTypes.func,
   onFeatureDrawn: PropTypes.func,
+  onFeatureModified: PropTypes.func,
 };
 
 Map.defaultProps = {
@@ -774,6 +805,8 @@ Map.defaultProps = {
   onClick: () => {
   },
   onFeatureDrawn: () => {
+  },
+  onFeatureModified: () => {
   },
 };
 

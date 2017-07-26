@@ -27,6 +27,8 @@ const store = createStore(combineReducers({
 }), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
    applyMiddleware(thunkMiddleware));
 
+window.store = store;
+
 function main() {
   // Start with a reasonable global view of hte map.
   store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 2));
@@ -96,6 +98,8 @@ function main() {
     },
   }));
 
+  let FEATURE_ID = 1;
+
   // Promises are used here as a way to demonstrate that the
   // features could be added asynchronously.  This is useful
   // in cases in which the feature may need validated by the
@@ -109,6 +113,8 @@ function main() {
       };
 
       if (feature.geometry.type === geom_types[sourceName]) {
+        feature.properties = {id: FEATURE_ID};
+        FEATURE_ID += 1;
         resolve(feature);
       } else {
         reject('Feature geometry-type does not match source geometry-type.');
@@ -126,7 +132,7 @@ function main() {
     validateFeature(sourceName, proposedFeature)
       .then((feature) => {
         store.dispatch(mapActions.addFeatures(sourceName, feature));
-        error_div.innerHTML = 'Featured added.';
+        error_div.innerHTML = `Featured ${feature.properties.id} added.`;
       })
       .catch((msg) => {
         if (error_div !== null) {
@@ -135,8 +141,21 @@ function main() {
       });
   };
 
+  const modifyFeature = (map, sourceName, feature) => {
+    console.log('modify feature', sourceName, feature.geometry.coordinates[0].length);
+    store.dispatch(mapActions.removeFeatures(sourceName, ['==', 'id', feature.properties.id]));
+    store.dispatch(mapActions.addFeatures(sourceName, [feature,]));
+    error_div.innerHTML = `Feature ${feature.properties.id} modified.`;
+  };
+
   // place the map on the page.
-  ReactDOM.render(<SdkMap onFeatureDrawn={addFeature} store={store} />, document.getElementById('map'));
+  ReactDOM.render(
+    <SdkMap
+      store={store}
+      onFeatureDrawn={addFeature}
+      onFeatureModified={modifyFeature}
+    />
+  , document.getElementById('map'));
 
   let drawing_tool = null;
   let drawing_layer = 'points';
@@ -179,6 +198,7 @@ function main() {
           <option value="Point">Draw point</option>
           <option value="LineString">Draw line</option>
           <option value="Polygon">Draw polygon</option>
+          <option value="Modify">Modify feature</option>
         </select>
       </div>
       <div className="control-panel">
