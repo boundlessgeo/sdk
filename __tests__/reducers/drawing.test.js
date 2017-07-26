@@ -36,6 +36,7 @@ describe('drawing reducer', () => {
       interaction: 'Point',
       sourceName: 'test-points',
     };
+    deepFreeze(initial_state);
 
     const expected_state = {
       interaction: null,

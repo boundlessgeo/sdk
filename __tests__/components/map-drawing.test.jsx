@@ -1,4 +1,4 @@
-/* global it, describe, expect */
+/* global it, describe, expect, beforeEach */
 
 /** Specific tests for map interactions.
  *
@@ -9,21 +9,22 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { mount } from 'enzyme';
 
 import { createStore, combineReducers } from 'redux';
+
+import SdkMap from '../../src/components/map';
+import MapReducer from '../../src/reducers/map';
+import DrawingReducer from '../../src/reducers/drawing';
+
+import { DRAWING } from '../../src/action-types';
+
 
 // jsdom / enzyme / jest will include <canvas> support
 // but not the full API, this dummys the CanvasPattern
 // and CanvasGradient objects so that OL testing works.
 global.CanvasPattern = function CanvasPattern() {};
 global.CanvasGradient = function CanvasGradient() {};
-
-import Map from '../../src/components/map';
-import MapReducer from '../../src/reducers/map';
-import DrawingReducer from '../../src/reducers/drawing';
-
-import { DRAWING } from '../../src/action-types';
 
 let HAS_CANVAS = false;
 
@@ -32,9 +33,8 @@ try {
   // statically load modules during conversion,
   // require will throw the appropriate error if the module
   // is not found.
-  const canvas = require('canvas');
-  HAS_CANVAS = true;
-} catch(err) {
+  HAS_CANVAS = (typeof require('canvas') !== 'undefined'); // eslint-disable-line global-require
+} catch (err) {
   console.error('No canvas module available, skipping map-drawing tests.');
 }
 
@@ -44,11 +44,11 @@ try {
 describe('Map with drawing reducer', () => {
   it('creates a map with the drawing reducer', () => {
     const store = createStore(combineReducers({
-        map: MapReducer,
-        drawing: DrawingReducer,
+      map: MapReducer,
+      drawing: DrawingReducer,
     }));
 
-    expect(mount(<Map store={store} />).contains(<div className="map" />)).toBe(true);
+    expect(mount(<SdkMap store={store} />).contains(<div className="map" />)).toBe(true);
   });
 });
 
@@ -66,7 +66,7 @@ if (HAS_CANVAS) {
     });
 
     it('turns on a drawing tool', () => {
-      const wrapper = mount(<Map store={store} />);
+      const wrapper = mount(<SdkMap store={store} />);
       const sdk_map = wrapper.instance().getWrappedInstance();
       const ol_map = sdk_map.map;
 
@@ -84,7 +84,7 @@ if (HAS_CANVAS) {
     });
 
     it('turns off a drawing tool', () => {
-      const wrapper = mount(<Map store={store} />);
+      const wrapper = mount(<SdkMap store={store} />);
       store.dispatch({
         type: DRAWING.START,
         interaction: 'Point',

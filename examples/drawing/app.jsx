@@ -113,9 +113,13 @@ function main() {
       };
 
       if (feature.geometry.type === geom_types[sourceName]) {
-        feature.properties = {id: FEATURE_ID};
+        const new_feature = Object.assign({}, feature, {
+          properties: {
+            id: FEATURE_ID,
+          },
+        });
         FEATURE_ID += 1;
-        resolve(feature);
+        resolve(new_feature);
       } else {
         reject('Feature geometry-type does not match source geometry-type.');
       }
@@ -142,9 +146,8 @@ function main() {
   };
 
   const modifyFeature = (map, sourceName, feature) => {
-    console.log('modify feature', sourceName, feature.geometry.coordinates[0].length);
     store.dispatch(mapActions.removeFeatures(sourceName, ['==', 'id', feature.properties.id]));
-    store.dispatch(mapActions.addFeatures(sourceName, [feature,]));
+    store.dispatch(mapActions.addFeatures(sourceName, [feature]));
     error_div.innerHTML = `Feature ${feature.properties.id} modified.`;
   };
 

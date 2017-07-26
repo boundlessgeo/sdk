@@ -1,13 +1,7 @@
 /* global describe, it, expect */
 
-import configureMockStore from 'redux-mock-store';
-import thunk from 'redux-thunk';
-
 import * as actions from '../../src/actions/drawing';
 import { DRAWING } from '../../src/action-types';
-
-const middlewares = [thunk];
-const mockStore = configureMockStore(middlewares);
 
 describe('drawing actions', () => {
   it('should create an action to start drawing', () => {
@@ -23,7 +17,6 @@ describe('drawing actions', () => {
   });
 
   it('should create an action to end drawing', () => {
-    expect(actions.endDrawing()).toEqual({type: DRAWING.END});
+    expect(actions.endDrawing()).toEqual({ type: DRAWING.END });
   });
-
 });

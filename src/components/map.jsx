@@ -17,7 +17,6 @@ import Overlay from 'ol/overlay';
 
 import Proj from 'ol/proj';
 import Coordinate from 'ol/coordinate';
-import Collection from 'ol/collection';
 
 import TileLayer from 'ol/layer/tile';
 import XyzSource from 'ol/source/xyz';
@@ -299,7 +298,7 @@ export class Map extends React.Component {
     //  and the drawn feature.
     if (eventType === 'drawn') {
       this.props.onFeatureDrawn(this, sourceName, proposed_geojson);
-    } else if(eventType === 'modified') {
+    } else if (eventType === 'modified') {
       this.props.onFeatureModified(this, sourceName, proposed_geojson);
     }
   }
@@ -716,7 +715,6 @@ export class Map extends React.Component {
     // this assumes the interaction is different,
     //  so the first thing to do is clear out the old interaction
     if (this.activeInteractions !== null) {
-
       for (let i = 0, ii = this.activeInteractions.length; i < ii; i++) {
         this.map.removeInteraction(this.activeInteractions[i]);
       }
@@ -746,7 +744,7 @@ export class Map extends React.Component {
         this.onFeatureEvent('drawn', drawingProps.sourceName, evt.feature);
       });
 
-      this.activeInteractions = [draw,];
+      this.activeInteractions = [draw];
     }
 
     if (this.activeInteractions) {
