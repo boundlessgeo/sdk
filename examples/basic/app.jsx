@@ -59,7 +59,6 @@ function main() {
   // be an individual Feature or a FeatureCollection.
   store.dispatch(mapActions.addSource('points', {
     type: 'geojson',
-    maxzoom: 6,
     data: {
       type: 'Feature',
       geometry: {
@@ -99,7 +98,6 @@ function main() {
       'circle-color': '#feb24c',
       'circle-stroke-color': '#f03b20',
     },
-    maxzoom: 3,
   }));
 
   // The points source has both null island
@@ -115,16 +113,6 @@ function main() {
       'circle-stroke-color': '#756bb1',
     },
     filter: ['==', 'isRandom', true],
-  }));
-
-  store.dispatch(mapActions.addLayer({
-    id: 'tilejson-layer',
-    source: 'tilejson',
-  }));
-
-  store.dispatch(mapActions.addSource('tilejson', {
-    type: 'raster',
-    url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure',
   }));
 
   /*
