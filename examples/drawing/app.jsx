@@ -17,6 +17,8 @@ import SdkDrawingReducer from '@boundlessgeo/sdk/reducers/drawing';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 import * as drawingActions from '@boundlessgeo/sdk/actions/drawing';
 
+import { INTERACTIONS } from '@boundlessgeo/sdk/constants';
+
 // This will have webpack include all of the SDK styles.
 import '@boundlessgeo/sdk/stylesheet/sdk.css';
 
@@ -26,8 +28,6 @@ const store = createStore(combineReducers({
   drawing: SdkDrawingReducer,
 }), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
    applyMiddleware(thunkMiddleware));
-
-window.store = store;
 
 function main() {
   // Start with a reasonable global view of hte map.
@@ -98,6 +98,7 @@ function main() {
     },
   }));
 
+  // A counter for the feature IDs
   let FEATURE_ID = 1;
 
   // Promises are used here as a way to demonstrate that the
@@ -106,19 +107,25 @@ function main() {
   // server before being added to the layer.
   const validateFeature = (sourceName, feature) => {
     const p = new Promise((resolve, reject) => {
+      // Each source is intended to store a specific
+      // type of geometry.
       const geom_types = {
         points: 'Point',
         lines: 'LineString',
         polygons: 'Polygon',
       };
 
+      // verify the geometry type matches the source.
       if (feature.geometry.type === geom_types[sourceName]) {
+        // define the new feature with an ID.
         const new_feature = Object.assign({}, feature, {
           properties: {
             id: FEATURE_ID,
           },
         });
         FEATURE_ID += 1;
+
+        // resolving the feature will pass it down the chain.
         resolve(new_feature);
       } else {
         reject('Feature geometry-type does not match source geometry-type.');
@@ -128,15 +135,19 @@ function main() {
     return p;
   };
 
+  // Reference a div which can hold messages.
   let error_div = null;
 
   // When the feature is drawn on the map, validate it and
   //  then add it to the source.
   const addFeature = (map, sourceName, proposedFeature) => {
+    // This calls the validation function which returns a Promise.
     validateFeature(sourceName, proposedFeature)
       .then((feature) => {
+        // if the feature passes the validation, then add it to the source.
         store.dispatch(mapActions.addFeatures(sourceName, feature));
-        error_div.innerHTML = `Featured ${feature.properties.id} added.`;
+        // and let the user know
+        error_div.innerHTML = `Feature ${feature.properties.id} added.`;
       })
       .catch((msg) => {
         if (error_div !== null) {
@@ -145,10 +156,19 @@ function main() {
       });
   };
 
+  // As redux doesn't really have an "update" as state
+  //  is immutable. The method here is to remove the old feature,
+  //  then immediate create a new one with our changes.
   const modifyFeature = (map, sourceName, feature) => {
     store.dispatch(mapActions.removeFeatures(sourceName, ['==', 'id', feature.properties.id]));
     store.dispatch(mapActions.addFeatures(sourceName, [feature]));
+    // let the user know what happened.
     error_div.innerHTML = `Feature ${feature.properties.id} modified.`;
+  };
+
+  // Selecting a feature displays it's ID.
+  const selectFeature = (map, sourceName, feature) => {
+    error_div.innerHTML = `Feature with ID ${feature.properties.id} selected.`;
   };
 
   // place the map on the page.
@@ -157,6 +177,7 @@ function main() {
       store={store}
       onFeatureDrawn={addFeature}
       onFeatureModified={modifyFeature}
+      onFeatureSelected={selectFeature}
     />
   , document.getElementById('map'));
 
@@ -198,10 +219,11 @@ function main() {
         <h4>Drawing tools</h4>
         <select onChange={setDrawingTool}>
           <option value="none">None</option>
-          <option value="Point">Draw point</option>
-          <option value="LineString">Draw line</option>
-          <option value="Polygon">Draw polygon</option>
-          <option value="Modify">Modify feature</option>
+          <option value={INTERACTIONS.point}>Draw point</option>
+          <option value={INTERACTIONS.line}>Draw line</option>
+          <option value={INTERACTIONS.polygon}>Draw polygon</option>
+          <option value={INTERACTIONS.modify}>Modify feature</option>
+          <option value={INTERACTIONS.select}>Select feature</option>
         </select>
       </div>
       <div className="control-panel">

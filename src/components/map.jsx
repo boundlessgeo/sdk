@@ -40,7 +40,7 @@ import ModifyInteraction from 'ol/interaction/modify';
 import SelectInteraction from 'ol/interaction/select';
 
 import { setView } from '../actions/map';
-import { LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
+import { INTERACTIONS, LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
 import { dataVersionKey } from '../reducers/map';
 
 import ClusterSource from '../source/cluster';
@@ -288,18 +288,22 @@ export class Map extends React.Component {
    *  this.props.onFeatureDrawn.
    */
   onFeatureEvent(eventType, sourceName, feature) {
-    // convert the feature to GeoJson
-    const proposed_geojson = GEOJSON_FORMAT.writeFeatureObject(feature, {
-      dataProjection: 'EPSG:4326',
-      featureProjection: this.map.getView().getProjection(),
-    });
+    if (typeof feature !== 'undefined') {
+      // convert the feature to GeoJson
+      const proposed_geojson = GEOJSON_FORMAT.writeFeatureObject(feature, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: this.map.getView().getProjection(),
+      });
 
-    // Pass on feature drawn this map object, the target source,
-    //  and the drawn feature.
-    if (eventType === 'drawn') {
-      this.props.onFeatureDrawn(this, sourceName, proposed_geojson);
-    } else if (eventType === 'modified') {
-      this.props.onFeatureModified(this, sourceName, proposed_geojson);
+      // Pass on feature drawn this map object, the target source,
+      //  and the drawn feature.
+      if (eventType === 'drawn') {
+        this.props.onFeatureDrawn(this, sourceName, proposed_geojson);
+      } else if (eventType === 'modified') {
+        this.props.onFeatureModified(this, sourceName, proposed_geojson);
+      } else if (eventType === 'selected') {
+        this.props.onFeatureSelected(this, sourceName, proposed_geojson);
+      }
     }
   }
 
@@ -721,7 +725,7 @@ export class Map extends React.Component {
       this.activeInteractions = null;
     }
 
-    if (drawingProps.interaction === 'Modify') {
+    if (drawingProps.interaction === INTERACTIONS.modify) {
       const select = new SelectInteraction({
         wrapX: false,
       });
@@ -735,7 +739,23 @@ export class Map extends React.Component {
       });
 
       this.activeInteractions = [select, modify];
-    } else if (['Point', 'LineString', 'Polygon'].includes(drawingProps.interaction)) {
+    } else if (drawingProps.interaction === INTERACTIONS.select) {
+      // TODO: Select is typically a single-feature affair but there
+      //       should be support for multiple feature selections in the future.
+      const select = new SelectInteraction({
+        wrapX: false,
+        layers: (layer) => {
+          const layer_src = this.sources[drawingProps.sourceName];
+          return (layer.getSource() === layer_src);
+        },
+      });
+
+      select.on('select', () => {
+        this.onFeatureEvent('selected', drawingProps.sourcename, select.getFeatures().item(0));
+      });
+
+      this.activeInteractions = [select];
+    } else if (INTERACTIONS.drawing.includes(drawingProps.interaction)) {
       const draw = new DrawInteraction({
         type: drawingProps.interaction,
       });
@@ -780,6 +800,7 @@ Map.propTypes = {
   onClick: PropTypes.func,
   onFeatureDrawn: PropTypes.func,
   onFeatureModified: PropTypes.func,
+  onFeatureSelected: PropTypes.func,
 };
 
 Map.defaultProps = {
@@ -805,6 +826,8 @@ Map.defaultProps = {
   onFeatureDrawn: () => {
   },
   onFeatureModified: () => {
+  },
+  onFeatureSelected: () => {
   },
 };
 
