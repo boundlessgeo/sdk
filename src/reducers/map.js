@@ -24,10 +24,6 @@ const defaultState = {
   layers: [],
 };
 
-const projectionDef = {
-  "urn:ogc:def:crs:OGC:1.3:CRS84":""
-};
-
 function getVersion(metadata, version) {
   if (typeof (metadata) === 'undefined' || typeof (metadata[version]) === 'undefined') {
     return 0;
