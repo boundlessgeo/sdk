@@ -678,6 +678,30 @@ describe('map reducer', () => {
       center: [0, 0],
       zoom: 3,
       sources: {},
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+        'bnd:data-version:points': 0,
+      },
+      layers: [],
+    };
+
+    const sprite_root = './my-sprites';
+    const sprite_action = {
+      type: MAP.SET_SPRITES,
+      sprites: sprite_root,
+    };
+
+    expect(reducer(state, sprite_action).sprites).toEqual(sprite_root);
+  });
+
+  it('should change the maps sprites', () => {
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {},
       layers: [],
       metadata: {
         'bnd:source-version': 0,

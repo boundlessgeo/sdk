@@ -1,4 +1,5 @@
-sudo: false
+dist: trusty
+sudo: required 
 
 language: node_js
 
@@ -14,6 +15,8 @@ env:
   - COMMIT_AUTHOR_EMAIL: "bartvde@boundlessgeo.com"
 
 before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev g++
   - "npm prune"
 
 before_script:

@@ -35,13 +35,17 @@ import VectorSource from 'ol/source/vector';
 
 import GeoJsonFormat from 'ol/format/geojson';
 
+import DrawInteraction from 'ol/interaction/draw';
+import ModifyInteraction from 'ol/interaction/modify';
+import SelectInteraction from 'ol/interaction/select';
+
 import { setView } from '../actions/map';
-import { LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
+import { INTERACTIONS, LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
 import { dataVersionKey } from '../reducers/map';
 
 import ClusterSource from '../source/cluster';
 
-import { jsonEquals, getLayerById } from '../util';
+import { jsonEquals, getLayerById, getMin, getMax } from '../util';
 
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
@@ -50,7 +54,7 @@ const GEOJSON_FORMAT = new GeoJsonFormat();
  *  for undefined values to be returned.
  */
 function getVersion(obj, key) {
-  if (typeof obj.metadata === 'undefined') {
+  if (obj.metadata === undefined) {
     return undefined;
   }
   return obj.metadata[key];
@@ -183,22 +187,11 @@ function configureSource(glSource) {
   return null;
 }
 
-/** This is a small bit of trickery that fakes
- *  `getStyleFunction` into rendering only THIS layer.
- */
-function fakeStyle(layer) {
-  return getStyleFunction({
-    version: 8,
-    layers: [layer],
-  }, layer.source);
-}
-
 function getResolutionForZoom(map, zoom) {
   const view = map.getView();
   const max_rez = view.getMaxResolution();
   return view.constrainResolution(max_rez, zoom - view.getMinZoom());
 }
-
 
 export class Map extends React.Component {
 
@@ -217,11 +210,18 @@ export class Map extends React.Component {
 
     // popups are stored as an ID managed hash.
     this.popups = {};
+
+    // interactions are how the user can manipulate the map,
+    //  this tracks any active interaction.
+    this.activeInteractions = null;
   }
 
   componentDidMount() {
     // put the map into the DOM
     this.configureMap();
+
+    // check to see if ther are any sprites in the state.
+    this.configureSprites(this.props.map);
   }
 
   /** This will check nextProps and nextState to see
@@ -267,10 +267,46 @@ export class Map extends React.Component {
     //  that have been closed.
     this.updatePopups();
 
+    // update the sprites, this could happen BEFORE the map
+    if (this.props.map.sprites !== nextProps.map.sprites) {
+      this.configureSprites(nextProps.map);
+    }
+
+    // change the current interaction as needed
+    if (nextProps.drawing && (nextProps.drawing.interaction !== this.props.drawing.interaction
+        || nextProps.drawing.sourceName !== this.props.drawing.sourceName)) {
+      this.updateInteraction(nextProps.drawing);
+    }
+
     // This should always return false to keep
     // render() from being called.
     return false;
   }
+
+  /** Callback for finished drawings, converts the event's feature
+   *  to GeoJSON and then passes the relevant information on to
+   *  this.props.onFeatureDrawn.
+   */
+  onFeatureEvent(eventType, sourceName, feature) {
+    if (feature !== undefined) {
+      // convert the feature to GeoJson
+      const proposed_geojson = GEOJSON_FORMAT.writeFeatureObject(feature, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: this.map.getView().getProjection(),
+      });
+
+      // Pass on feature drawn this map object, the target source,
+      //  and the drawn feature.
+      if (eventType === 'drawn') {
+        this.props.onFeatureDrawn(this, sourceName, proposed_geojson);
+      } else if (eventType === 'modified') {
+        this.props.onFeatureModified(this, sourceName, proposed_geojson);
+      } else if (eventType === 'selected') {
+        this.props.onFeatureSelected(this, sourceName, proposed_geojson);
+      }
+    }
+  }
+
 
   /** Convert the GL source definitions into internal
    *  OpenLayers source definitions.
@@ -329,6 +365,17 @@ export class Map extends React.Component {
     }
   }
 
+  /** This is a small bit of trickery that fakes
+   *  `getStyleFunction` into rendering only THIS layer.
+   */
+  fakeStyle(layer) {
+    // getStyleFunction(glStyle, source, resolutions, spriteData, spriteImageUrl, fonts) {
+    return getStyleFunction({
+      version: 8,
+      layers: [layer],
+    }, layer.source, undefined, this.spriteData, this.spriteImageUrl);
+  }
+
   /** Convert a GL-defined to an OpenLayers' layer.
    */
   configureLayer(sourcesDef, layer) {
@@ -342,12 +389,12 @@ export class Map extends React.Component {
       case 'geojson':
         return new VectorLayer({
           source: this.sources[layer.source],
-          style: fakeStyle(layer),
+          style: this.fakeStyle(layer),
         });
       case 'vector':
         return new VectorTileLayer({
           source: this.sources[layer.source],
-          style: fakeStyle(layer),
+          style: this.fakeStyle(layer),
         });
       case 'image':
         return new ImageLayer({
@@ -399,7 +446,7 @@ export class Map extends React.Component {
       let layer = layersDef[i];
 
       // check to see if this layer references another.
-      if (typeof layer.ref !== 'undefined') {
+      if (layer.ref !== undefined) {
         // find the source layer
         let layer_def = null;
         for (let j = 0, jj = layersDef.length; j < jj && layer_def === null; j++) {
@@ -439,13 +486,18 @@ export class Map extends React.Component {
       // handle updating the layer.
       if (layer !== null && layer.id in this.layers) {
         const ol_layer = this.layers[layer.id];
+        const layer_src = sourcesDef[layer.source];
 
-        if (layer.maxzoom) {
-          const minResolution = getResolutionForZoom(this.map, layer.maxzoom);
+        // check for min/max zoom changes on sources and layers
+        const maxzoom = getMin(layer_src.maxzoom, layer.maxzoom);
+        if (maxzoom) {
+          const minResolution = getResolutionForZoom(this.map, maxzoom);
           ol_layer.setMinResolution(minResolution);
         }
-        if (layer.minzoom) {
-          const maxResolution = getResolutionForZoom(this.map, layer.minzoom);
+
+        const minzoom = getMax(layer_src.minzoom, layer.minzoom);
+        if (minzoom) {
+          const maxResolution = getResolutionForZoom(this.map, minzoom);
           ol_layer.setMaxResolution(maxResolution);
         }
 
@@ -456,7 +508,7 @@ export class Map extends React.Component {
           const diff_filter = !jsonEquals(current_layer.filter, layer.filter);
           const diff_paint = !jsonEquals(current_layer.paint, layer.paint);
           if (diff_filter || diff_paint) {
-            ol_layer.setStyle(fakeStyle(layer));
+            ol_layer.setStyle(this.fakeStyle(layer));
           }
         }
 
@@ -471,6 +523,31 @@ export class Map extends React.Component {
 
     // clean up layers which should be removed.
     this.cleanupLayers(layersDef);
+  }
+
+  configureSprites(map) {
+    if (map.sprites === undefined) {
+      // return a resolved promise.
+      return (new Promise((resolve) => {
+        resolve();
+      }));
+    }
+
+    return fetch(`${map.sprites}.json`)
+      .then(r => r.json())
+      .then((spriteJson) => {
+        // store the spite data for later styling.
+        this.spriteData = spriteJson;
+        this.spriteImageUrl = `${map.sprites}.png`;
+
+        // restyle all the symbol layers.
+        for (let i = 0, ii = map.layers.length; i < ii; i++) {
+          const gl_layer = map.layers[i];
+          if (gl_layer.type === 'symbol') {
+            this.layers[gl_layer.id].setStyle(this.fakeStyle(gl_layer));
+          }
+        }
+      });
   }
 
   updatePopups() {
@@ -640,6 +717,65 @@ export class Map extends React.Component {
     });
   }
 
+  updateInteraction(drawingProps) {
+    // this assumes the interaction is different,
+    //  so the first thing to do is clear out the old interaction
+    if (this.activeInteractions !== null) {
+      for (let i = 0, ii = this.activeInteractions.length; i < ii; i++) {
+        this.map.removeInteraction(this.activeInteractions[i]);
+      }
+      this.activeInteractions = null;
+    }
+
+    if (drawingProps.interaction === INTERACTIONS.modify) {
+      const select = new SelectInteraction({
+        wrapX: false,
+      });
+
+      const modify = new ModifyInteraction({
+        features: select.getFeatures(),
+      });
+
+      modify.on('modifyend', (evt) => {
+        this.onFeatureEvent('modified', drawingProps.sourceName, evt.features.item(0));
+      });
+
+      this.activeInteractions = [select, modify];
+    } else if (drawingProps.interaction === INTERACTIONS.select) {
+      // TODO: Select is typically a single-feature affair but there
+      //       should be support for multiple feature selections in the future.
+      const select = new SelectInteraction({
+        wrapX: false,
+        layers: (layer) => {
+          const layer_src = this.sources[drawingProps.sourceName];
+          return (layer.getSource() === layer_src);
+        },
+      });
+
+      select.on('select', () => {
+        this.onFeatureEvent('selected', drawingProps.sourcename, select.getFeatures().item(0));
+      });
+
+      this.activeInteractions = [select];
+    } else if (INTERACTIONS.drawing.includes(drawingProps.interaction)) {
+      const draw = new DrawInteraction({
+        type: drawingProps.interaction,
+      });
+
+      draw.on('drawend', (evt) => {
+        this.onFeatureEvent('drawn', drawingProps.sourceName, evt.feature);
+      });
+
+      this.activeInteractions = [draw];
+    }
+
+    if (this.activeInteractions) {
+      for (let i = 0, ii = this.activeInteractions.length; i < ii; i++) {
+        this.map.addInteraction(this.activeInteractions[i]);
+      }
+    }
+  }
+
   render() {
     return (
       <div ref={(c) => { this.mapdiv = c; }} className="map" />
@@ -654,11 +790,19 @@ Map.propTypes = {
     metadata: PropTypes.object,
     layers: PropTypes.array,
     sources: PropTypes.object,
+    sprites: PropTypes.string,
+  }),
+  drawing: PropTypes.shape({
+    interaction: PropTypes.string,
+    sourceName: PropTypes.string,
   }),
   initialPopups: PropTypes.arrayOf(PropTypes.object),
   setView: PropTypes.func,
   includeFeaturesOnClick: PropTypes.bool,
   onClick: PropTypes.func,
+  onFeatureDrawn: PropTypes.func,
+  onFeatureModified: PropTypes.func,
+  onFeatureSelected: PropTypes.func,
 };
 
 Map.defaultProps = {
@@ -668,6 +812,11 @@ Map.defaultProps = {
     metadata: {},
     layers: [],
     sources: {},
+    sprites: undefined,
+  },
+  drawing: {
+    interaction: null,
+    source: null,
   },
   initialPopups: [],
   setView: () => {
@@ -676,11 +825,18 @@ Map.defaultProps = {
   includeFeaturesOnClick: false,
   onClick: () => {
   },
+  onFeatureDrawn: () => {
+  },
+  onFeatureModified: () => {
+  },
+  onFeatureSelected: () => {
+  },
 };
 
 function mapStateToProps(state) {
   return {
     map: state.map,
+    drawing: state.drawing,
   };
 }
 
@@ -692,4 +848,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Map);
+// Ensure that withRef is set to true so getWrappedInstance will return the Map.
+export default connect(mapStateToProps, mapDispatchToProps, undefined, { withRef: true })(Map);

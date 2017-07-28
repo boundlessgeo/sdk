@@ -16,8 +16,16 @@ export const MAP = {
   ORDER_LAYER: 'MAP_ORDER_LAYER',
   CLUSTER_POINTS: 'MAP_CLUSTER_POINTS',
   SET_CLUSTER_RADIUS: 'MAP_CLUSTER_RAIDUS',
+
+  SET_SPRITES: 'MAP_SET_SPRITES',
+};
+
+export const DRAWING = {
+  START: 'DRAWING_START',
+  END: 'DRAWING_END',
 };
 
 export default {
   MAP,
+  DRAWING,
 };
