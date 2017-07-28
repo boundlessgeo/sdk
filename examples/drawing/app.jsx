@@ -1,7 +1,4 @@
-/** Demo of clustered points in an SDK map.
- *
- *  Contains a Map and demonstrates some of the dynamics of
- *  using the store.
+/** Demo of using the drawing, modify, and select interactions.
  *
  */
 
@@ -103,7 +100,7 @@ function main() {
 
   // Promises are used here as a way to demonstrate that the
   // features could be added asynchronously.  This is useful
-  // in cases in which the feature may need validated by the
+  // in cases in which the feature may need validation by the
   // server before being added to the layer.
   const validateFeature = (sourceName, feature) => {
     const p = new Promise((resolve, reject) => {
@@ -166,7 +163,7 @@ function main() {
     error_div.innerHTML = `Feature ${feature.properties.id} modified.`;
   };
 
-  // Selecting a feature displays it's ID.
+  // Selecting a feature displays its ID.
   const selectFeature = (map, sourceName, feature) => {
     error_div.innerHTML = `Feature with ID ${feature.properties.id} selected.`;
   };

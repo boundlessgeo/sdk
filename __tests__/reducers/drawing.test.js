@@ -22,6 +22,7 @@ describe('drawing reducer', () => {
       interaction: geo_type,
       sourceName: source_name,
     };
+    deepFreeze(test_action);
 
     const expected_state = {
       interaction: geo_type,

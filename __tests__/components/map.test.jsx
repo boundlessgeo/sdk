@@ -366,20 +366,35 @@ describe('Map component', () => {
     const store = createStore(combineReducers({
       map: MapReducer,
     }));
+
     const wrapper = mount(<ConnectedMap store={store} />);
     const sdk_map = wrapper.instance().getWrappedInstance();
 
     store.dispatch(MapActions.setView([-45, -45], 11));
+
+    sdk_map.map.getView().setCenter([45, 45]);
     sdk_map.map.dispatchEvent({
       type: 'moveend',
     });
+
+    expect(store.getState().map.center).toEqual([45, 45]);
   });
 
   it('should trigger the popup-related callbacks', () => {
     const store = createStore(combineReducers({
       map: MapReducer,
     }));
-    const wrapper = mount(<ConnectedMap store={store} />);
+    const onClick = () => { };
+
+    // create a props dictionary which
+    //  can include a spy.
+    const props = {
+      store,
+      onClick,
+    };
+    spyOn(props, 'onClick');
+
+    const wrapper = mount(<ConnectedMap {...props} />);
     const sdk_map = wrapper.instance().getWrappedInstance();
     sdk_map.map.dispatchEvent({
       type: 'postcompose',
@@ -394,6 +409,9 @@ describe('Map component', () => {
         target: sdk_map.map.getRenderer().canvas_,
       },
     });
+
+    // onclick should get called when the map is clicked.
+    expect(props.onClick).toHaveBeenCalled();
   });
 
   it('should change the sprites and redraw the layer', () => {
