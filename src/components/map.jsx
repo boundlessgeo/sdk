@@ -120,7 +120,7 @@ function updateGeojsonSource(olSource, glSource, mapProjection) {
   // parse the new features,
 
   let features;
-  let glSourceCrs = undefined;
+  let glSourceCrs;
   if(glSource.crs && glSource.crs.properties && glSource.crs.properties.name){
     glSourceCrs = glSource.crs.properties.name;
   }
