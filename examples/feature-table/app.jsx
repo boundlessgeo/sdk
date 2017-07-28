@@ -31,7 +31,7 @@ const store = createStore(combineReducers({
 
 function main() {
   // Start with a view of the sample data location
-  store.dispatch(mapActions.setView([ -7070054.9651234485,9521866.402961753], 2));
+  store.dispatch(mapActions.setView([-93, 45], 2));
 
   // add the OSM source
   store.dispatch(mapActions.addSource('osm', {
