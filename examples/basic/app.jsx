@@ -98,7 +98,6 @@ function main() {
       'circle-color': '#feb24c',
       'circle-stroke-color': '#f03b20',
     },
-    minzoom: 1,
   }));
 
   // The points source has both null island

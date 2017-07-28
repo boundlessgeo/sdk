@@ -45,7 +45,7 @@ import { dataVersionKey } from '../reducers/map';
 
 import ClusterSource from '../source/cluster';
 
-import { jsonEquals, getLayerById } from '../util';
+import { jsonEquals, getLayerById, getMin, getMax } from '../util';
 
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
@@ -381,9 +381,6 @@ export class Map extends React.Component {
   configureLayer(sourcesDef, layer) {
     const layer_src = sourcesDef[layer.source];
 
-    // const resolution = this.map.getView().getResolution();
-    // console.log(this.map.getView().getZoomForResolution(resolution))
-
     switch (layer_src.type) {
       case 'raster':
         return new TileLayer({
@@ -489,13 +486,18 @@ export class Map extends React.Component {
       // handle updating the layer.
       if (layer !== null && layer.id in this.layers) {
         const ol_layer = this.layers[layer.id];
+        const layer_src = sourcesDef[layer.source];
 
-        if (layer.maxzoom) {
-          const minResolution = getResolutionForZoom(this.map, layer.maxzoom);
+        // check for min/max zoom changes on sources and layers
+        const maxzoom = getMin(layer_src.maxzoom, layer.maxzoom);
+        if (maxzoom) {
+          const minResolution = getResolutionForZoom(this.map, maxzoom);
           ol_layer.setMinResolution(minResolution);
         }
-        if (layer.minzoom) {
-          const maxResolution = getResolutionForZoom(this.map, layer.minzoom);
+
+        const minzoom = getMax(layer_src.minzoom, layer.minzoom);
+        if (minzoom) {
+          const maxResolution = getResolutionForZoom(this.map, minzoom);
           ol_layer.setMaxResolution(maxResolution);
         }
 
