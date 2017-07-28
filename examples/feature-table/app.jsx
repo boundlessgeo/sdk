@@ -89,7 +89,7 @@ function main() {
         error => console.error('An error occured.', error),
       )
       .then(json => {
-        //addFeatures with the features, soruce name, and crs
+        //addFeatures with the features, source name, and crs
         store.dispatch(mapActions.addFeatures(sourceName, json.features, json.crs));
     })
   }
@@ -108,7 +108,7 @@ function main() {
     let headers = [];
     //Loop over features
     for (let i = 0, ii = features.length; i < ii; i++) {
-      //Build a list of uniguq properties for the header list
+      //Build a list of unique properties for the header list
       let temp = headers.concat(Object.keys(features[i].properties).filter(function (item) {
         return headers.indexOf(item) < 0;
       }));
@@ -126,12 +126,12 @@ function main() {
     return (<thead><tr>{th}</tr></thead>);
   }
 
-  //Build the body of the table based on list of properties and sourece store in redux store
-  const buildTableBody = (properties, souceName) => {
+  //Build the body of the table based on list of properties and source store in redux store
+  const buildTableBody = (properties, sourceName) => {
     let body = [];
     let row = [];
     //Get all the features from the Redux store
-    const features = store.getState().map.sources[souceName].data.features;
+    const features = store.getState().map.sources[sourceName].data.features;
     //Loop over features
     for (let i = 0, ii = features.length; i < ii; i++) {
       //Loop over properties
