@@ -54,7 +54,7 @@ const GEOJSON_FORMAT = new GeoJsonFormat();
  *  for undefined values to be returned.
  */
 function getVersion(obj, key) {
-  if (typeof obj.metadata === 'undefined') {
+  if (obj.metadata === undefined) {
     return undefined;
   }
   return obj.metadata[key];
@@ -288,7 +288,7 @@ export class Map extends React.Component {
    *  this.props.onFeatureDrawn.
    */
   onFeatureEvent(eventType, sourceName, feature) {
-    if (typeof feature !== 'undefined') {
+    if (feature !== undefined) {
       // convert the feature to GeoJson
       const proposed_geojson = GEOJSON_FORMAT.writeFeatureObject(feature, {
         dataProjection: 'EPSG:4326',
@@ -449,7 +449,7 @@ export class Map extends React.Component {
       let layer = layersDef[i];
 
       // check to see if this layer references another.
-      if (typeof layer.ref !== 'undefined') {
+      if (layer.ref !== undefined) {
         // find the source layer
         let layer_def = null;
         for (let j = 0, jj = layersDef.length; j < jj && layer_def === null; j++) {
@@ -524,7 +524,7 @@ export class Map extends React.Component {
   }
 
   configureSprites(map) {
-    if (typeof map.sprites === 'undefined') {
+    if (map.sprites === undefined) {
       // return a resolved promise.
       return (new Promise((resolve) => {
         resolve();

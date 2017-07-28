@@ -160,7 +160,7 @@ if (HAS_CANVAS) {
         sourceName: 'test',
       });
 
-      // modify differes from select and drawing tools
+      // modify differs from select and drawing tools
       //  as it requires adding two interactions to the map.
       expect(interactions.getLength()).toBe(n_interactions + 2);
 
@@ -168,7 +168,7 @@ if (HAS_CANVAS) {
       const select = interactions.item(interactions.getLength() - 2);
       const modify = interactions.item(interactions.getLength() - 1);
 
-      // configure a spy, when a feature is modifyed onFeatureEvent
+      // configure a spy, when a feature is modified onFeatureEvent
       //  should be called.
       spyOn(sdk_map, 'onFeatureEvent');
 
