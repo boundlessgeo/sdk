@@ -18,22 +18,22 @@ describe('test the HashHistory component', () => {
     const wrapper = shallow(<HashHistory />);
 
     // defaults to center=[0,0], zoom=1
-    expect(window.location.hash).toBe('#x=0&y=0&z=1');
+    expect(window.location.hash).toBe('#x=0&y=0&z=1&r=0');
 
     // update x
     wrapper.setProps({ map: { center: [-1, 0], zoom: 1 } });
     wrapper.update();
-    expect(window.location.hash).toBe('#x=-1&y=0&z=1');
+    expect(window.location.hash).toBe('#x=-1&y=0&z=1&r=0');
 
     // update y
     wrapper.setProps({ map: { center: [-1, -1], zoom: 1 } });
     wrapper.update();
-    expect(window.location.hash).toBe('#x=-1&y=-1&z=1');
+    expect(window.location.hash).toBe('#x=-1&y=-1&z=1&r=0');
 
     // update z
     wrapper.setProps({ map: { center: [-1, -1], zoom: 11 } });
     wrapper.update();
-    expect(window.location.hash).toBe('#x=-1&y=-1&z=11');
+    expect(window.location.hash).toBe('#x=-1&y=-1&z=11&r=0');
   });
 
   it('should update the view when x,y,z changes', () => {
@@ -44,7 +44,7 @@ describe('test the HashHistory component', () => {
     mount(<HashHistory {...props} />);
 
     // simulate a hash change event.
-    window.location.hash = '#x=200&y=200&z=22';
+    window.location.hash = '#x=200&y=200&z=22&r=0';
     window.dispatchEvent(new Event('hashchange'));
 
     // setView is the function property to handle
@@ -54,7 +54,7 @@ describe('test the HashHistory component', () => {
 
   it('should fail gracefully when there is an invalid center value', () => {
     mount(<HashHistory />);
-    expect(window.location.hash).toBe('#x=0&y=0&z=1');
+    expect(window.location.hash).toBe('#x=0&y=0&z=1&r=0');
     window.location.hash = '#x=chicken&y=nuggets';
     window.dispatchEvent(new Event('hashchange'));
   });
@@ -74,7 +74,7 @@ describe('change the connected HashHistory', () => {
     mount(<SdkHashHistory store={store} />);
 
     // simulate a hash change event.
-    window.location.hash = '#x=200&y=200&z=22';
+    window.location.hash = '#x=200&y=200&z=22&r=0';
     window.dispatchEvent(new Event('hashchange'));
 
     const st = store.getState();
@@ -86,6 +86,6 @@ describe('change the connected HashHistory', () => {
     // mount a connected HashHistory component.
     mount(<SdkHashHistory store={store} />);
     store.dispatch(setView([100, 100], 10));
-    expect(window.location.hash).toBe('#x=100&y=100&z=10');
+    expect(window.location.hash).toBe('#x=100&y=100&z=10&r=0');
   });
 });

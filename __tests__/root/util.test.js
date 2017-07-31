@@ -42,7 +42,7 @@ describe('util', () => {
     expect(util.jsonEquals(paint, same_paint)).toEqual(true);
   });
 
-  it('parses aand deodes a query string', () => {
+  it('parses and decodes a query string', () => {
     const query_string = 'what=%2Fis%20slash&roses=3000';
     const parsed = {
       what: '/is slash',

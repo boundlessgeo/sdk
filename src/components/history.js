@@ -42,6 +42,7 @@ export class HashHistory extends React.Component {
       this.props.map.center[0] !== nextProps.map.center[0]
       || this.props.map.center[1] !== nextProps.map.center[1]
       || this.props.map.zoom !== nextProps.map.zoom
+      || this.props.map.rotation !== nextProps.map.rotation
     );
   }
 
@@ -67,6 +68,7 @@ export class HashHistory extends React.Component {
       x: this.props.map.center[0],
       y: this.props.map.center[1],
       z: this.props.map.zoom,
+      r: this.props.map.rotation ? this.props.map.rotation : 0,
     };
   }
 
@@ -90,15 +92,17 @@ export class HashHistory extends React.Component {
    */
   parseLocationHash(parsedHash) {
     // create copies of the current center and zoom
-    const center = this.props.map.center.slice();
-    let zoom = 0 + this.props.map.zoom;
+    const center = this.props.map.center;
 
-    center[0] = proposeFloat(parsedHash.x, center[0]);
-    center[1] = proposeFloat(parsedHash.y, center[1]);
-    zoom = proposeFloat(parsedHash.z, zoom);
+    const new_center = [
+      proposeFloat(parsedHash.x, center[0]),
+      proposeFloat(parsedHash.y, center[1]),
+    ];
+
+    const zoom = proposeFloat(parsedHash.z, this.props.map.zoom);
 
     // change the view.
-    this.props.setView(center, zoom);
+    this.props.setView(new_center, zoom);
   }
 
   /** Encode the state for the URL hash.
@@ -121,6 +125,7 @@ HashHistory.propTypes = {
   map: PropTypes.shape({
     center: PropTypes.arrayOf(PropTypes.number),
     zoom: PropTypes.number,
+    rotation: PropTypes.number,
   }),
   setView: PropTypes.func,
 };
@@ -130,6 +135,7 @@ HashHistory.defaultProps = {
   map: {
     center: [0, 0],
     zoom: 1,
+    rotation: 0,
   },
   setView: () => {
   },
