@@ -309,4 +309,35 @@ describe('async actions', () => {
 
     return expect(store.dispatch(actions.setContext('foo'))).rejects.toEqual('Invalid option for setContext. Specify either json or url.');
   });
+
+  it('should create an action to cluster points', () => {
+    const sourceName = 'foo';
+    const isClustered = false;
+    const expectedAction = {
+      type: MAP.CLUSTER_POINTS,
+      sourceName,
+      cluster: isClustered,
+    };
+    expect(actions.clusterPoints(sourceName, isClustered)).toEqual(expectedAction);
+  });
+
+  it('should create an action to set the cluster radius', () => {
+    const sourceName = 'foo';
+    const radius = 5;
+    const expectedAction = {
+      type: MAP.SET_CLUSTER_RADIUS,
+      sourceName,
+      radius,
+    };
+    expect(actions.setClusterRadius(sourceName, radius)).toEqual(expectedAction);
+  });
+
+  it('should create an action to update the metadata', () => {
+    const metadata = { foo: 'bar' };
+    const expectedAction = {
+      type: MAP.UPDATE_METADATA,
+      metadata,
+    };
+    expect(actions.updateMetadata(metadata)).toEqual(expectedAction);
+  });
 });
