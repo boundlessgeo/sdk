@@ -50,5 +50,4 @@ describe('drawing actions', () => {
   it('should create an action to end select', () => {
     expect(actions.endSelect()).toEqual({ type: DRAWING.END });
   });
-
 });
