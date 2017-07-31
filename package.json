@@ -4,7 +4,7 @@
   "description": "Boundless Web SDK",
   "scripts": {
     "start": "webpack-dev-server --config webpack-dev-server.config.js",
-    "test": "jest",
+    "test": "jest && npm run lint",
     "test:watch": "npm test -- --watch",
     "lint": "eslint __tests__ src examples --ext .jsx,.js",
     "cover": "node_modules/.bin/jest --coverage"
