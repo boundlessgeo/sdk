@@ -229,6 +229,40 @@ describe('map reducer', () => {
     });
   });
 
+  it('should handle SET_LAYER_VISIBILITY if nothing changed', () => {
+    const layer = {
+      id: 'background',
+      type: 'background',
+      paint: {
+        'background-color': 'rgba(0,0,0,0)',
+      },
+    };
+    const osm = {
+      id: 'osm',
+      source: 'osm',
+    };
+    deepFreeze(layer);
+    deepFreeze(osm);
+    const action = {
+      type: MAP.SET_LAYER_VISIBILITY,
+    };
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+      },
+      sources: {},
+      layers: [layer, osm],
+    };
+    deepFreeze(state);
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual(state);
+  });
+
   it('should handle REMOVE_LAYER', () => {
     const layer = {
       id: 'background',
@@ -540,6 +574,37 @@ describe('map reducer', () => {
       },
       layers: [],
     });
+  });
+
+  it('should handle ADD_FEATURES with unknown type', () => {
+    // since we do not go through ADD_SOURCE we need to set _dataVersion
+    // eslint-disable-next-line
+    const source = {data: {type:'Foo'}};
+    deepFreeze(source);
+    const action = {
+      type: MAP.ADD_FEATURES,
+      sourceName: 'points',
+      // eslint-disable-next-line
+      features: [{type:'Feature',properties:{'n':27,'cat':2},geometry:{type:'Point',coordinates:[2.5,5.5]}},{type:'Feature',properties:{'n':28,'cat':1},'geometry':{type:'Point',coordinates:[2.5,6.5]}}]
+    };
+    deepFreeze(action);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {
+        points: source,
+      },
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+      },
+      layers: [],
+    };
+    deepFreeze(state);
+    // since type is not known, it returns the passed in state
+    expect(reducer(state, action)).toEqual(state);
   });
 
   it('should handle ADD_FEATURES to add action features to a source feature', () => {
@@ -857,6 +922,83 @@ describe('map reducer', () => {
       'bnd:layer-version': 0,
       'bnd:some-key': 'other-value',
       'bnd:new-key': 'new-value',
+    });
+  });
+
+  it('should handle CLUSTER_POINTS', () => {
+    const layer = {
+      id: 'my-points',
+      source: 'points',
+    };
+    const source = {
+      data: {
+        type: 'FeatureCollection',
+        features: [],
+      },
+    };
+    deepFreeze(layer);
+    deepFreeze(source);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: { points: source },
+      layers: [layer],
+    };
+    const action = {
+      type: MAP.CLUSTER_POINTS,
+      sourceName: 'points',
+      cluster: true,
+    };
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual({
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: { points: { data: { type: 'FeatureCollection', features: [] }, cluster: true, clusterRadius: 50 } },
+      layers: [{ id: 'my-points', source: 'points' }],
+      metadata: { 'bnd:source-version': 1 },
+    });
+  });
+
+  it('should handle SET_CLUSTER_RADIUS', () => {
+    const layer = {
+      id: 'my-points',
+      source: 'points',
+    };
+    const source = {
+      data: {
+        type: 'FeatureCollection',
+        features: [],
+      },
+    };
+    deepFreeze(layer);
+    deepFreeze(source);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: { points: source },
+      layers: [layer],
+    };
+    const action = {
+      type: MAP.SET_CLUSTER_RADIUS,
+      sourceName: 'points',
+      cluster: true,
+      radius: 10,
+    };
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual({
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: { points: { data: { type: 'FeatureCollection', features: [] }, cluster: true, clusterRadius: 10 } },
+      layers: [{ id: 'my-points', source: 'points' }],
+      metadata: { 'bnd:source-version': 1 },
     });
   });
 });
