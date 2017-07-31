@@ -14,6 +14,7 @@ import TileJSONSource from 'ol/source/tilejson';
 import { createStore, combineReducers } from 'redux';
 
 import ConnectedMap, { Map } from '../../src/components/map';
+import SdkPopup from '../../src/components/map/popup';
 import MapReducer from '../../src/reducers/map';
 import * as MapActions from '../../src/actions/map';
 
@@ -482,6 +483,29 @@ describe('Map component', () => {
 
     // onclick should get called when the map is clicked.
     expect(props.onClick).toHaveBeenCalled();
+  });
+
+  it('should create an overlay for the initialPopups', () => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+    }));
+
+    const props = {
+      store,
+      initialPopups: [(<SdkPopup coordinate={[0, 0]}><div>foo</div></SdkPopup>)],
+    };
+
+
+    const wrapper = mount(<ConnectedMap {...props} />);
+    const sdk_map = wrapper.instance().getWrappedInstance();
+
+    expect(sdk_map.map.getOverlays().getLength()).toEqual(0);
+
+    sdk_map.map.dispatchEvent({
+      type: 'postcompose',
+    });
+
+    expect(sdk_map.map.getOverlays().getLength()).toEqual(1);
   });
 
   it('should change the sprites and redraw the layer', () => {

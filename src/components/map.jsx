@@ -635,7 +635,7 @@ export class Map extends React.Component {
 
     // do not trigger an update if silent is
     //  set to true.  Useful for bulk popup additions.
-    if (silent === true) {
+    if (silent !== true) {
       this.updatePopups();
     }
   }
