@@ -640,7 +640,80 @@ describe('map reducer', () => {
     });
   });
 
-  it('should handle REMOVE_FEATURES', () => {
+  it('should handle REMOVE_FEATURES with unknown type', () => {
+    // eslint-disable-next-line
+    const source = {data: {type:'Foo',properties:{'n':3,'cat':2},'geometry':{type:'Point',coordinates:[0.5,1.5]}}};
+    deepFreeze(source);
+    const action = {
+      type: MAP.REMOVE_FEATURES,
+      sourceName: 'points',
+      filter: ['all', ['<=', 'n', 3]],
+    };
+    deepFreeze(action);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {
+        points: source,
+      },
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+        'bnd:data-version:points': 0,
+      },
+      layers: [],
+    };
+    // eslint-disable-next-line
+    expect(reducer(state, action)).toEqual(state);
+  });
+
+  it('should handle REMOVE_FEATURES with Feature as a source', () => {
+    // eslint-disable-next-line
+    const source = {data: {type:'Feature',properties:{'n':3,'cat':2},'geometry':{type:'Point',coordinates:[0.5,1.5]}}};
+    deepFreeze(source);
+    const action = {
+      type: MAP.REMOVE_FEATURES,
+      sourceName: 'points',
+      filter: ['all', ['<=', 'n', 3]],
+    };
+    deepFreeze(action);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {
+        points: source,
+      },
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+        'bnd:data-version:points': 0,
+      },
+      layers: [],
+    };
+    // eslint-disable-next-line
+    const newSource = {data: {type:'FeatureCollection', features: []}};
+    expect(reducer(state, action)).toEqual({
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {
+        points: newSource,
+      },
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+        'bnd:data-version:points': 1,
+      },
+      layers: [],
+    });
+  });
+
+  it('should handle REMOVE_FEATURES with FeatureCollection as a source', () => {
     // eslint-disable-next-line
     const source = {data: {type:'FeatureCollection',crs:{type:'name',properties:{'name':'urn:ogc:def:crs:OGC:1.3:CRS84'}},features:[{type:'Feature',properties:{'n':2,'cat':1},geometry:{type:'Point',coordinates:[0.5,0.5]}},{type:'Feature',properties:{'n':3,'cat':2},'geometry':{type:'Point',coordinates:[0.5,1.5]}}]}};
     deepFreeze(source);
