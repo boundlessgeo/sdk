@@ -13,6 +13,7 @@ import ReactDOM from 'react-dom';
 
 import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
+import { reprojectGeoJson } from '@boundlessgeo/sdk/util';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
 import fetch from 'isomorphic-fetch';
@@ -21,7 +22,7 @@ import fetch from 'isomorphic-fetch';
 // This will have webpack include all of the SDK styles.
 import '@boundlessgeo/sdk/stylesheet/sdk.scss';
 
-// Use app.css to style current app
+//Use app.css to style current app
 
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
@@ -31,11 +32,15 @@ const store = createStore(combineReducers({
 
 function main() {
   // Start with a view of the sample data location
+<<<<<<< ac94b459b04e58ab5ef03d9e3259df67c7ec6ba5
 <<<<<<< 462881546c75888f6d45ab594b63894840fce7e4
   store.dispatch(mapActions.setView([-93, 45], 2));
 =======
   store.dispatch(mapActions.setView([-7070054.9651234485, 9521866.402961753], 2));
 >>>>>>> Features can now be drawn on the map! (#575)
+=======
+  store.dispatch(mapActions.setView([ -7070054.9651234485,9521866.402961753], 2));
+>>>>>>> Building geoJsonReprojection function to support import of geojson from non 4326 source
 
   // add the OSM source
   store.dispatch(mapActions.addSource('osm', {
@@ -55,6 +60,25 @@ function main() {
     source: 'osm',
   }));
 
+  // 'geojson' sources allow rendering a vector layer
+  // with all the features stored as GeoJSON. "data" can
+  // be an individual Feature or a FeatureCollection.
+  store.dispatch(mapActions.addSource('dynamic-source', {
+      type: 'geojson'
+    }
+  ));
+
+  store.dispatch(mapActions.addLayer({
+    id: 'dynamic-layer',
+    type:'circle',
+    source: 'dynamic-source',
+    paint: {
+      'circle-radius': 5,
+      'circle-color': '#552211',
+      'circle-stroke-color': '#00ff11',
+    },
+  }));
+
   // Background layers change the background color of
   // the map. They are not attached to a source.
   store.dispatch(mapActions.addLayer({
@@ -65,110 +89,92 @@ function main() {
     },
   }));
 
-  // Fetch the geoJson file from a url and add it to the map at the named source
+  //Fetch the geoJson file from a url and add it to the map at the named source
   const addLayerFromGeoJSON = (url, sourceName) => {
-  // 'geojson' sources allow rendering a vector layer
-  // with all the features stored as GeoJSON. "data" can
-  // be an individual Feature or a FeatureCollection.
-    store.dispatch(mapActions.addSource('dynamic-source', {
-      type: 'geojson',
-    }));
-
-    store.dispatch(mapActions.addLayer({
-      id: 'dynamic-layer',
-      type: 'circle',
-      source: 'dynamic-source',
-      paint: {
-        'circle-radius': 5,
-        'circle-color': '#552211',
-        'circle-stroke-color': '#00ff11',
-      },
-    }));
-    // Fetch URL
+    //Fetch URL
     fetch(url)
       .then(
         response => response.json(),
         error => console.error('An error occured.', error),
       )
-      // addFeatures with the features, source name, and crs
-      .then(json => store.dispatch(mapActions.addFeatures(sourceName, json.features, json.crs)));
-  };
-
-  // This is called by the onClick, keeping the onClick HTML clean
+      .then(json => {
+        // Reproject feature if they are not in 4326 to mapbox gl spec 4326
+        // Add reprojected feature to the map with source name
+        store.dispatch(mapActions.addFeatures(sourceName, reprojectGeoJson(json.features, json.crs)));
+    })
+  }
+  //This is called by the onClick, keeping the onClick HTML clean
   const runFetchGeoJSON = () => {
-    const url = './data/airports.json';
+    var url = './data/airports.json'
     addLayerFromGeoJSON(url, 'dynamic-source');
-  };
+  }
 
-  // Read the source and get all the possible properties
-  const getTableHeaders = (sourceName) => {
+  //Next few functions are all about building the feature Table
+
+  //Read the source and get all the possible properties
+  const getTableHeaders = (sourceName) =>{
     const features = store.getState().map.sources[sourceName].data.features;
-    const headers = [];
-    // Loop over features
+    let headers = [];
+    //Loop over features
     for (let i = 0, ii = features.length; i < ii; i++) {
-      // Build a list of unique properties for the header list
-      const properties = Object.keys(features[i].properties);
-      for (let j = 0, jj = properties.length; j < jj; j++) {
-        // Check if properties key already a header
-        if (headers.indexOf(properties[j]) < 0) {
-          // Add new property keys to header
-          headers.push(properties[j]);
-        }
-      }
+      //Build a list of unique properties for the header list
+      let temp = headers.concat(Object.keys(features[i].properties).filter(function (item) {
+        return headers.indexOf(item) < 0;
+      }));
+      headers = temp;
     }
     return headers;
-  };
+  }
 
-  // Build out the headers based on supplied list of properties
+  //Build out the headers based on supplied list of properties
   const buildTableHeader = (properties) => {
-    const th = [];
+    let th = [];
     for (let i = 0, ii = properties.length; i < ii; i++) {
-      th.push(<th key={properties[i]}>{properties[i]}</th>);
+      th.push(<th key={properties[i]}>{properties[i]}</th>)
     }
     return (<thead><tr>{th}</tr></thead>);
-  };
+  }
 
-  // Build the body of the table based on list of properties and source store in redux store
+  //Build the body of the table based on list of properties and source store in redux store
   const buildTableBody = (properties, sourceName) => {
-    const body = [];
-    const row = [];
-    // Get all the features from the Redux store
+    let body = [];
+    let row = [];
+    //Get all the features from the Redux store
     const features = store.getState().map.sources[sourceName].data.features;
-    // Loop over features
+    //Loop over features
     for (let i = 0, ii = features.length; i < ii; i++) {
-      // Loop over properties
+      //Loop over properties
       for (let j = 0, jj = properties.length; j < jj; j++) {
-        // Build list of properties for each feature
-        row.push(<td key={j}>{features[i].properties[properties[j]]}</td>);
+        //Build list of properties for each feature
+        row.push(<td key={j}>{features[i].properties[properties[j]]}</td>)
       }
-      // add the features properties to the list
+      //add the features properties to the list
       body.push(<tr key={i}>{row}</tr>);
-      // Reset the row
-      row.length = 0;
+      //Reset the row
+      row = [];
     }
-    // Return the body
-    return (<tbody>{body}</tbody>);
-  };
-  // Show the data in a table
+    //Return the body
+    return(<tbody>{body}</tbody>)
+  }
+  //Show the data in a table
   const displayTable = () => {
-    // Get full list of properties
+    //Get full list of properties
     const propertyList = getTableHeaders('dynamic-source');
-    // This would be a good point to filter out any
-    // unwanted properties such as GUID from the propertyList
+    //This would be a good point to filter out any unwanted properties such as GUID from the propertyList
 
-    // Build table header
+    //Build table header
     const tableHeader = buildTableHeader(propertyList);
-    // Build table body
+    //Build table body
     const tableBody = buildTableBody(propertyList, 'dynamic-source');
 
-    // Place the table on the page
+    //Place the table on the page
     ReactDOM.render((
-      <table className="sdk-table">
+      <table className='sdk-table'>
         {tableHeader}
         {tableBody}
       </table>
     ), document.getElementById('table'));
-  };
+  }
   // place the map on the page.
   ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
 

@@ -127,11 +127,7 @@ function updateGeojsonSource(olSource, glSource, mapProjection) {
   // parse the new features,
 
   if (glSource.data.features) {
-    const readFeatureOptions = {
-      featureProjection: mapProjection || 'EPSG:3857',
-      dataProjection: glSource.crsName,
-    };
-    const features = GEOJSON_FORMAT.readFeatures(glSource.data, readFeatureOptions);
+    const features = GEOJSON_FORMAT.readFeatures(glSource.data, {featureProjection: mapProjection || 'EPSG:4326'});
 
     if (features === undefined) {
       console.error('No features found for source.');

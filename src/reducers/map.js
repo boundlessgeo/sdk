@@ -197,22 +197,16 @@ function removeSource(state, action) {
  *  @param {object} state - redux state
  *  @param {string} sourceName - name of the souce to be changed
  *  @param {array} data -  List of features to be added to the source
- *  @param {sting}  [crs] - projectionLike string ie 'EPSG:3857' or 'EPSG:4326'
  *        If blank determined by openlayers
 *
  */
-function changeData(state, sourceName, data, crs) {
+function changeData(state, sourceName, data) {
   const source = state.sources[sourceName];
   const src_mixin = {};
-  let crsName;
-  if (crs && crs.properties && crs.properties.name) {
-    crsName = crs.properties.name;
-  }
 
   // update the individual source.
   src_mixin[sourceName] = Object.assign({}, source, {
     data,
-    crsName,
   });
 
   // kick back the new state.
@@ -251,7 +245,7 @@ function addFeatures(state, action) {
   }
 
   if (new_data !== null) {
-    return changeData(state, action.sourceName, new_data, action.crs);
+    return changeData(state, action.sourceName, new_data);
   }
   return state;
 }

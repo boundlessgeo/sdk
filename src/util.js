@@ -1,3 +1,6 @@
+import GeoJsonFormat from 'ol/format/geojson';
+
+
 /** Utility functions for SDK.
  *
  *  This is the grab bag of universally useful functions.
