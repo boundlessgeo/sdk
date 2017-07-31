@@ -126,13 +126,6 @@ function configureMvtSource(glSource) {
 
 function updateGeojsonSource(olSource, glSource, mapProjection) {
   // parse the new features,
-<<<<<<< bf1ba1dd61e046bcd179bb8cf1bb1bf9b0917a69
-=======
-  // TODO: This should really check the map for the correct projection.
-  const features = GEOJSON_FORMAT.readFeatures(glSource.data, {
-    featureProjection: mapProjection,
-  });
->>>>>>> Added EPSG:4326 example. (#585)
 
   if (glSource.data.features) {
     const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: mapProjection || 'EPSG:4326' });
@@ -214,13 +207,6 @@ function getResolutionForZoom(map, zoom) {
   const max_rez = view.getMaxResolution();
   return view.constrainResolution(max_rez, zoom - view.getMinZoom());
 }
-
-function getResolutionForZoom(map, zoom) {
-  const view = map.getView();
-  const max_rez = view.getMaxResolution();
-  return view.constrainResolution(max_rez, zoom - view.getMinZoom());
-}
-
 
 export class Map extends React.Component {
 
@@ -853,7 +839,7 @@ export class Map extends React.Component {
 
   render() {
     return (
-      <div ref={(c) => { this.mapdiv = c; }} className="map" />
+      <div ref={(c) => { this.mapdiv = c; }} className="sdk-map" />
     );
   }
 }
