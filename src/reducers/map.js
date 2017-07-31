@@ -194,15 +194,25 @@ function removeSource(state, action) {
 /** Creates a new state with the data for a
  *  source changed to the contents of data.
  *
+ *  @param {object} state - redux state
+ *  @param {string} sourceName - name of the souce to be changed
+ *  @param {array} data -  List of features to be added to the source
+ *  @param {sting}  [crs] - projectionLike string ie 'EPSG:3857' or 'EPSG:4326'
+ *        If blank determined by openlayers
+*
  */
 function changeData(state, sourceName, data, crs) {
   const source = state.sources[sourceName];
   const src_mixin = {};
+  let crsName;
+  if (crs && crs.properties && crs.properties.name) {
+    crsName = crs.properties.name;
+  }
 
   // update the individual source.
   src_mixin[sourceName] = Object.assign({}, source, {
     data,
-    crs,
+    crsName,
   });
 
   // kick back the new state.

@@ -17,7 +17,7 @@ import * as drawingActions from '@boundlessgeo/sdk/actions/drawing';
 import { INTERACTIONS } from '@boundlessgeo/sdk/constants';
 
 // This will have webpack include all of the SDK styles.
-import '@boundlessgeo/sdk/stylesheet/sdk.css';
+import '@boundlessgeo/sdk/stylesheet/sdk.scss';
 
 // include a MeasureTable component for this app.
 import MeasureTable from './measure-table';

@@ -126,36 +126,33 @@ function configureMvtSource(glSource) {
 function updateGeojsonSource(olSource, glSource, mapProjection) {
   // parse the new features,
 
-  let features;
-  let glSourceCrs;
-  if(glSource.crs && glSource.crs.properties && glSource.crs.properties.name){
-    glSourceCrs = glSource.crs.properties.name;
-  }
+  if (glSource.data.features) {
+    const readFeatureOptions = {
+      featureProjection: mapProjection || 'EPSG:3857',
+      dataProjection: glSource.crsName,
+    };
+    const features = GEOJSON_FORMAT.readFeatures(glSource.data, readFeatureOptions);
 
-  if(glSource.data.features){
-    const readFeatureOptions = { featureProjection: mapProjection || 'EPSG:3857',
-      dataProjection: glSourceCrs}
-    features = GEOJSON_FORMAT.readFeatures(glSource.data,readFeatureOptions);
-  }
+    if (features === undefined) {
+      console.error('No features found for source.');
+    } else {
+      let vector_src = olSource;
 
-  let vector_src = olSource;
+      // if the source is clustered then
+      //  the actual data is stored on the source's source.
+      if (glSource.cluster) {
+        vector_src = olSource.getSource();
 
-  // if the source is clustered then
-  //  the actual data is stored on the source's source.
-  if (glSource.cluster) {
-    vector_src = olSource.getSource();
+        if (glSource.clusterRadius !== olSource.getDistance()) {
+          olSource.setDistance(glSource.clusterRadius);
+        }
+      }
 
-    if (glSource.clusterRadius !== olSource.getDistance()) {
-      olSource.setDistance(glSource.clusterRadius);
+      // clear the layer WITHOUT dispatching remove events.
+      vector_src.clear(true);
+      // bulk load the feature data
+      vector_src.addFeatures(features);
     }
-  }
-
-  if(features){
-    // clear the layer WITHOUT dispatching remove events.
-    vector_src.clear(true);
-    // bulk load the feature data
-    vector_src.addFeatures(features || null);
-
   }
 }
 
@@ -214,13 +211,6 @@ function getResolutionForZoom(map, zoom) {
   const max_rez = view.getMaxResolution();
   return view.constrainResolution(max_rez, zoom - view.getMinZoom());
 }
-
-function getResolutionForZoom(map, zoom) {
-  const view = map.getView();
-  const max_rez = view.getMaxResolution();
-  return view.constrainResolution(max_rez, zoom - view.getMinZoom());
-}
-
 
 export class Map extends React.Component {
 
@@ -289,7 +279,7 @@ export class Map extends React.Component {
 
         if (this.props.map.metadata[version_key] !== nextProps.map.metadata[version_key]) {
           const next_src = nextProps.map.sources[src_name];
-          updateGeojsonSource(this.sources[src_name], next_src, this.map.getView().getProjection().getCode());
+          updateGeojsonSource(this.sources[src_name], next_src, this.map.getView().getProjection());
         }
       }
     }
@@ -851,7 +841,7 @@ export class Map extends React.Component {
 
   render() {
     return (
-      <div ref={(c) => { this.mapdiv = c; }} className="map" />
+      <div ref={(c) => { this.mapdiv = c; }} className="sdk-map" />
     );
   }
 }
