@@ -81,12 +81,11 @@ export function setClusterRadius(sourceName, radius) {
   };
 }
 
-export function addFeatures(sourceName, features, crs) {
+export function addFeatures(sourceName, features) {
   return {
     type: MAP.ADD_FEATURES,
     sourceName,
     features,
-    crs,
   };
 }
 
