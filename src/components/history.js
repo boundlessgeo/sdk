@@ -1,4 +1,4 @@
-/** Track the history of the map in the history.
+/** Track the history of the map in the hash.
  *
  */
 
