@@ -28,7 +28,7 @@ describe('actions', () => {
     const name = 'New Name';
     const expectedAction = {
       type: MAP.SET_NAME,
-      name: { name },
+      name,
     };
     expect(actions.setMapName(name)).toEqual(expectedAction);
   });
