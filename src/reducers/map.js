@@ -365,7 +365,7 @@ export default function MapReducer(state = defaultState, action) {
     case MAP.SET_VIEW:
       return Object.assign({}, state, action.view);
     case MAP.SET_NAME:
-      return Object.assign({}, state, action.name);
+      return Object.assign({}, state, { name: action.name });
     case MAP.SET_SPRITES:
       return Object.assign({}, state, { sprites: action.sprites });
     case MAP.ADD_LAYER:

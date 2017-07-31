@@ -63,6 +63,56 @@ describe('map reducer', () => {
     });
   });
 
+  it('should handle SET_NAME', () => {
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {},
+      layers: [],
+    };
+    const name = 'New Name';
+    deepFreeze(state);
+    const action = {
+      type: MAP.SET_NAME,
+      name,
+    };
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual({
+      version: 8,
+      name: 'New Name',
+      center: [0, 0],
+      zoom: 3,
+      sources: {},
+      layers: [],
+    });
+  });
+
+  it('should handle RECEIVE_CONTEXT', () => {
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {},
+      layers: [],
+    };
+    deepFreeze(state);
+    const context = {
+      version: 9,
+      name: 'foo',
+      center: [10, 10],
+      zoom: 4,
+    };
+    const action = {
+      type: MAP.RECEIVE_CONTEXT,
+      context,
+    };
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual(context);
+  });
+
   it('should handle SET_LAYER_METADATA', () => {
     const title = 'Background';
     const layer = {
@@ -126,7 +176,12 @@ describe('map reducer', () => {
         'background-color': 'rgba(0,0,0,0)',
       },
     };
+    const osm = {
+      id: 'osm',
+      source: 'osm',
+    };
     deepFreeze(layer);
+    deepFreeze(osm);
     const action = {
       type: MAP.SET_LAYER_VISIBILITY,
       layerId: 'background',
@@ -142,7 +197,7 @@ describe('map reducer', () => {
         'bnd:layer-version': 0,
       },
       sources: {},
-      layers: [layer],
+      layers: [layer, osm],
     };
     deepFreeze(state);
     deepFreeze(action);
@@ -166,6 +221,9 @@ describe('map reducer', () => {
           layout: {
             visibility: 'none',
           },
+        }, {
+          id: 'osm',
+          source: 'osm',
         },
       ],
     });
