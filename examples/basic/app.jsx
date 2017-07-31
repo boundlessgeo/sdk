@@ -7,17 +7,12 @@
 
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-/** Basic Application.
- *
- *  Creates a map with OSM tiles and a GeoJSON source
- *  and layer.
- *
- */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 
 import SdkMap from '@boundlessgeo/sdk/components/map';
+import SdkHashHistory from '@boundlessgeo/sdk/components/history';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
@@ -274,6 +269,8 @@ function main() {
       <button className="sdk-btn blue" onClick={removeRandomPoints}>Remove random points</button>
       <button className="sdk-btn" onClick={updateMinzoom}>Update Min Zoom</button>
       <InputField />
+
+      <SdkHashHistory store={store} />
     </div>
   ), document.getElementById('controls'));
 }

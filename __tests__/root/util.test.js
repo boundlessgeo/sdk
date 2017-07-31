@@ -41,4 +41,16 @@ describe('util', () => {
     expect(util.jsonEquals(paint, new_paint)).toEqual(false);
     expect(util.jsonEquals(paint, same_paint)).toEqual(true);
   });
+
+  it('parses aand deodes a query string', () => {
+    const query_string = 'what=%2Fis%20slash&roses=3000';
+    const parsed = {
+      what: '/is slash',
+      roses: '3000',
+    };
+
+    expect(util.parseQueryString(query_string)).toEqual(parsed);
+
+    expect(util.encodeQueryObject(parsed)).toBe(query_string);
+  });
 });
