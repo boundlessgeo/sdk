@@ -65,8 +65,8 @@ export class HashHistory extends React.Component {
    */
   getLocationStateObject() {
     return {
-      x: this.props.map.center[0],
-      y: this.props.map.center[1],
+      x: this.props.map.center[0].toFixed(5),
+      y: this.props.map.center[1].toFixed(5),
       z: this.props.map.zoom,
       r: this.props.map.rotation ? this.props.map.rotation : 0,
     };

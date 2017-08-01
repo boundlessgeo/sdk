@@ -18,22 +18,22 @@ describe('test the HashHistory component', () => {
     const wrapper = shallow(<HashHistory />);
 
     // defaults to center=[0,0], zoom=1
-    expect(window.location.hash).toBe('#x=0&y=0&z=1&r=0');
+    expect(window.location.hash).toBe('#x=0.00000&y=0.00000&z=1&r=0');
 
     // update x
     wrapper.setProps({ map: { center: [-1, 0], zoom: 1 } });
     wrapper.update();
-    expect(window.location.hash).toBe('#x=-1&y=0&z=1&r=0');
+    expect(window.location.hash).toBe('#x=-1.00000&y=0.00000&z=1&r=0');
 
     // update y
     wrapper.setProps({ map: { center: [-1, -1], zoom: 1 } });
     wrapper.update();
-    expect(window.location.hash).toBe('#x=-1&y=-1&z=1&r=0');
+    expect(window.location.hash).toBe('#x=-1.00000&y=-1.00000&z=1&r=0');
 
     // update z
     wrapper.setProps({ map: { center: [-1, -1], zoom: 11 } });
     wrapper.update();
-    expect(window.location.hash).toBe('#x=-1&y=-1&z=11&r=0');
+    expect(window.location.hash).toBe('#x=-1.00000&y=-1.00000&z=11&r=0');
   });
 
   it('should update the view when x,y,z changes', () => {
@@ -54,7 +54,7 @@ describe('test the HashHistory component', () => {
 
   it('should fail gracefully when there is an invalid center value', () => {
     mount(<HashHistory />);
-    expect(window.location.hash).toBe('#x=0&y=0&z=1&r=0');
+    expect(window.location.hash).toBe('#x=0.00000&y=0.00000&z=1&r=0');
     window.location.hash = '#x=chicken&y=nuggets';
     window.dispatchEvent(new Event('hashchange'));
   });
@@ -86,6 +86,6 @@ describe('change the connected HashHistory', () => {
     // mount a connected HashHistory component.
     mount(<SdkHashHistory store={store} />);
     store.dispatch(setView([100, 100], 10));
-    expect(window.location.hash).toBe('#x=100&y=100&z=10&r=0');
+    expect(window.location.hash).toBe('#x=100.00000&y=100.00000&z=10&r=0');
   });
 });

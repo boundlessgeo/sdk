@@ -443,12 +443,12 @@ describe('Map component', () => {
 
     store.dispatch(MapActions.setView([-45, -45], 11));
 
-    sdk_map.map.getView().setCenter([45, 45]);
+    sdk_map.map.getView().setCenter([0, 0]);
     sdk_map.map.dispatchEvent({
       type: 'moveend',
     });
 
-    expect(store.getState().map.center).toEqual([45, 45]);
+    expect(store.getState().map.center).toEqual([0, 0]);
   });
 
   it('should trigger the popup-related callbacks', () => {

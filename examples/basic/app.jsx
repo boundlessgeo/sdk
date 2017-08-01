@@ -27,7 +27,7 @@ const store = createStore(combineReducers({
 
 function main() {
   // Start with a reasonable global view of the map.
-  store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 2));
+  store.dispatch(mapActions.setView([-93, 45], 2));
 
   store.dispatch(mapActions.setMapName('Basic Map Example'));
 

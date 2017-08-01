@@ -232,7 +232,9 @@ export class Map extends React.Component {
     if (nextProps.map.center[0] !== this.props.map.center[0]
       || nextProps.map.center[1] !== this.props.map.center[1]
       || nextProps.map.zoom !== this.props.map.zoom) {
-      this.map.getView().setCenter(nextProps.map.center);
+      // convert the center point to map coordinates.
+      const center = Proj.transform(nextProps.map.center, 'EPSG:4326', this.map.getView().getProjection());
+      this.map.getView().setCenter(center);
       this.map.getView().setZoom(nextProps.map.zoom);
     }
 
@@ -642,12 +644,20 @@ export class Map extends React.Component {
 
   /** Initialize the map */
   configureMap() {
+    // determine the map's projection.
+    const map_proj = this.props.projection;
+
+    // reproject the initial center based on that projection.
+    const center = Proj.transform(this.props.map.center, 'EPSG:4326', map_proj);
+
+    // intiialize the map.
     this.map = new OlMap({
       target: this.mapdiv,
       logo: false,
       view: new View({
-        center: this.props.map.center,
+        center,
         zoom: this.props.map.zoom,
+        projection: map_proj,
       }),
     });
 
@@ -784,6 +794,7 @@ export class Map extends React.Component {
 }
 
 Map.propTypes = {
+  projection: PropTypes.string,
   map: PropTypes.shape({
     center: PropTypes.array,
     zoom: PropTypes.number,
@@ -806,6 +817,7 @@ Map.propTypes = {
 };
 
 Map.defaultProps = {
+  projection: 'EPSG:3857',
   map: {
     center: [0, 0],
     zoom: 2,
@@ -843,7 +855,9 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     setView: (view) => {
-      dispatch(setView(view.getCenter(), view.getZoom()));
+      // transform the center to 4326 before dispatching the action.
+      const center = Proj.transform(view.getCenter(), view.getProjection(), 'EPSG:4326');
+      dispatch(setView(center, view.getZoom()));
     },
   };
 }
