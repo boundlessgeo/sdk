@@ -220,6 +220,8 @@ function main() {
     constructor(props) {
       super(props);
       this.state = { value: store.getState().map.name };
+      this.handleSubmit = this.handleSubmit.bind(this);
+      this.updateMapName = this.updateMapName.bind(this);
     }
     updateMapName(event) {
       this.setState({ value: event.target.value });
