@@ -48,6 +48,10 @@ const config = {
     legends: [
       'webpack/hot/only-dev-server',
       './examples/legends/app.jsx',
+    ],
+    'layer-list': [
+      'webpack/hot/only-dev-server',
+      './examples/layer-list/app.jsx',
     ]
   },
   // Server Configuration options
