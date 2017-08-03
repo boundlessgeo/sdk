@@ -13,7 +13,6 @@ import ReactDOM from 'react-dom';
 
 import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
-import { reprojectGeoJson } from '@boundlessgeo/sdk/util';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
 import fetch from 'isomorphic-fetch';
@@ -32,6 +31,7 @@ const store = createStore(combineReducers({
 
 function main() {
   // Start with a view of the sample data location
+<<<<<<< e1548608ec4d09b4fe0edcc8cd079cd0fd2cbba0
 <<<<<<< ac94b459b04e58ab5ef03d9e3259df67c7ec6ba5
 <<<<<<< 462881546c75888f6d45ab594b63894840fce7e4
   store.dispatch(mapActions.setView([-93, 45], 2));
@@ -41,6 +41,9 @@ function main() {
 =======
   store.dispatch(mapActions.setView([ -7070054.9651234485,9521866.402961753], 2));
 >>>>>>> Building geoJsonReprojection function to support import of geojson from non 4326 source
+=======
+  store.dispatch(mapActions.setView([-93, 45], 2));
+>>>>>>> Addressing PR issues
 
   // add the OSM source
   store.dispatch(mapActions.addSource('osm', {
@@ -98,11 +101,11 @@ function main() {
         error => console.error('An error occured.', error),
       )
       .then(json => {
-        // Reproject feature if they are not in 4326 to mapbox gl spec 4326
-        // Add reprojected feature to the map with source name
-        store.dispatch(mapActions.addFeatures(sourceName, reprojectGeoJson(json.features, json.crs)));
+        //addFeatures with the features, source name, and crs
+        store.dispatch(mapActions.addFeatures(sourceName, json.features, json.crs));
     })
   }
+
   //This is called by the onClick, keeping the onClick HTML clean
   const runFetchGeoJSON = () => {
     var url = './data/airports.json'
