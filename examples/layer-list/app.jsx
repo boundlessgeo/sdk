@@ -1,7 +1,7 @@
-/** Demo of clustered points in an SDK map.
+/** Demo of layer list in an SDK map.
  *
- *  Contains a Map and demonstrates some of the dynamics of
- *  using the store.
+ *  Contains a Map and demonstrates adding many types of layers
+ *  And a layer list componet to manage the layers
  *
  */
 
@@ -15,6 +15,8 @@ import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
+import LayerList from './components/layerList.jsx';
+
 // This will have webpack include all of the SDK styles.
 import '@boundlessgeo/sdk/stylesheet/sdk.scss';
 
@@ -26,7 +28,7 @@ const store = createStore(combineReducers({
 
 function main() {
   // Start with a reasonable global view of hte map.
-  store.dispatch(mapActions.setView([-93, 45], 5));
+  store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 2));
 
   // add the OSM source
   store.dispatch(mapActions.addSource('osm', {
@@ -49,6 +51,44 @@ function main() {
   // 'geojson' sources allow rendering a vector layer
   // with all the features stored as GeoJSON. "data" can
   // be an individual Feature or a FeatureCollection.
+  store.dispatch(mapActions.addSource('dynamic-source', {
+      type: 'geojson'
+    }
+  ));
+
+  store.dispatch(mapActions.addLayer({
+    id: 'dynamic-layer',
+    type:'circle',
+    source: 'dynamic-source',
+    paint: {
+      'circle-radius': 5,
+      'circle-color': '#552211',
+      'circle-stroke-color': '#00ff11',
+    },
+  }));
+  //Fetch the geoJson file from a url and add it to the map at the named source
+  const addLayerFromGeoJSON = (url, sourceName) => {
+    //Fetch URL
+    fetch(url)
+      .then(
+        response => response.json(),
+        error => console.error('An error occured.', error),
+      )
+      .then(json => {
+        //addFeatures with the features, source name, and crs
+        store.dispatch(mapActions.addFeatures(sourceName, json.features, json.crs));
+    })
+  }
+
+  //This is called by the onClick, keeping the onClick HTML clean
+  const runFetchGeoJSON = () => {
+    var url = './data/airports.json'
+    addLayerFromGeoJSON(url, 'dynamic-source');
+  }
+  runFetchGeoJSON()
+  // 'geojson' sources allow rendering a vector layer
+  // with all the features stored as GeoJSON. "data" can
+  // be an individual Feature or a FeatureCollection.
   store.dispatch(mapActions.addSource('points', {
     type: 'geojson',
     clusterRadius: 50,
@@ -56,40 +96,6 @@ function main() {
       type: 'FeatureCollection',
       features: [],
     },
-  }));
-
-  // Setup a layer to render the features as clustered.
-  store.dispatch(mapActions.addLayer({
-    id: 'clustered-points',
-    source: 'points',
-    type: 'circle',
-    paint: {
-      'circle-radius': {
-        type: 'interval',
-        default: 3,
-        property: 'point_count',
-        stops: [
-          // stops are defined as the "min property value", style value,
-          // In this example points with >= 2 but < 5 points will
-          //  be rendered with a 8 px radius
-          [0, 5], [2, 8], [5, 13], [10, 21],
-        ],
-      },
-      'circle-color': '#feb24c',
-      'circle-stroke-color': '#f03b20',
-    },
-    filter: ['has', 'point_count'],
-  }));
-
-  store.dispatch(mapActions.addLayer({
-    id: 'clustered-labels',
-    source: 'points',
-    layout: {
-      'text-field': '{point_count}',
-      'text-font': ['Arial'],
-      'text-size': 10,
-    },
-    filter: ['has', 'point_count'],
   }));
 
   // Show the unclustered points in a different colour.
@@ -129,20 +135,18 @@ function main() {
   // add 200 random points to the map on startup
   addRandomPoints(200);
 
-  // Cluster points on the map
-  const clusterPoints = (evt) => {
-    store.dispatch(mapActions.clusterPoints('points', evt.target.checked));
-  };
+  // add the wms source
+  store.dispatch(mapActions.addSource('states', {
+    type: 'raster',
+    tileSize: 256,
+    tiles: ['https://ahocevar.com/geoserver/gwc/service/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/png&SRS=EPSG:900913&LAYERS=topp:states&STYLES=&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}'],
+  }));
 
-  // Change the radius of the cluster map
-  const changeRadius = (evt) => {
-    store.dispatch(mapActions.setClusterRadius('points', parseFloat(evt.target.value)));
-  };
-
-  const getClusterRadius = () => {
-    const st = store.getState().map.sources.points;
-    return st.clusterRadius ? st.clusterRadius : 50;
-  };
+  // add the wms layer
+  store.dispatch(mapActions.addLayer({
+    id: 'states',
+    source: 'states',
+  }));
 
   // place the map on the page.
   ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
@@ -150,20 +154,7 @@ function main() {
   // add some buttons to demo some actions.
   ReactDOM.render((
     <div>
-      <button className="sdk-btn" onClick={() => { addRandomPoints(); }}>Add 10 random points</button>
-      <p>
-        <span className="input"><input type="checkbox" onChange={clusterPoints} /></span> Cluster Points
-      </p>
-      <p>
-        <span className="input">
-          <input
-            className="radius"
-            type="number"
-            defaultValue={getClusterRadius()}
-            onChange={changeRadius}
-          />
-        </span> Cluster Radius
-      </p>
+      <LayerList store={store}></LayerList>
     </div>
   ), document.getElementById('controls'));
 }
