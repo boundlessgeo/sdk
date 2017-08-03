@@ -15,10 +15,7 @@ import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
-import LayerList from './components/layerList.jsx';
-
-// This will have webpack include all of the SDK styles.
-import '@boundlessgeo/sdk/stylesheet/sdk.scss';
+import LayerList from './components/layerList';
 
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
@@ -28,7 +25,7 @@ const store = createStore(combineReducers({
 
 function main() {
   // Start with a reasonable global view of hte map.
-  store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 2));
+  store.dispatch(mapActions.setView([-93, 45], 2));
 
   // add the OSM source
   store.dispatch(mapActions.addSource('osm', {
@@ -51,14 +48,11 @@ function main() {
   // 'geojson' sources allow rendering a vector layer
   // with all the features stored as GeoJSON. "data" can
   // be an individual Feature or a FeatureCollection.
-  store.dispatch(mapActions.addSource('dynamic-source', {
-      type: 'geojson'
-    }
-  ));
+  store.dispatch(mapActions.addSource('dynamic-source', { type: 'geojson' }));
 
   store.dispatch(mapActions.addLayer({
     id: 'dynamic-layer',
-    type:'circle',
+    type: 'circle',
     source: 'dynamic-source',
     paint: {
       'circle-radius': 5,
@@ -66,26 +60,24 @@ function main() {
       'circle-stroke-color': '#00ff11',
     },
   }));
-  //Fetch the geoJson file from a url and add it to the map at the named source
+  // Fetch the geoJson file from a url and add it to the map at the named source
   const addLayerFromGeoJSON = (url, sourceName) => {
-    //Fetch URL
+    // Fetch URL
     fetch(url)
       .then(
         response => response.json(),
         error => console.error('An error occured.', error),
       )
-      .then(json => {
-        //addFeatures with the features, source name, and crs
-        store.dispatch(mapActions.addFeatures(sourceName, json.features, json.crs));
-    })
-  }
+      // addFeatures with the features, source name, and crs
+      .then(json => store.dispatch(mapActions.addFeatures(sourceName, json.features, json.crs)));
+  };
 
-  //This is called by the onClick, keeping the onClick HTML clean
+  // This is called by the onClick, keeping the onClick HTML clean
   const runFetchGeoJSON = () => {
-    var url = './data/airports.json'
+    const url = './data/airports.json';
     addLayerFromGeoJSON(url, 'dynamic-source');
-  }
-  runFetchGeoJSON()
+  };
+  runFetchGeoJSON();
   // 'geojson' sources allow rendering a vector layer
   // with all the features stored as GeoJSON. "data" can
   // be an individual Feature or a FeatureCollection.
@@ -154,7 +146,7 @@ function main() {
   // add some buttons to demo some actions.
   ReactDOM.render((
     <div>
-      <LayerList store={store}></LayerList>
+      <LayerList store={store} />
     </div>
   ), document.getElementById('controls'));
 }

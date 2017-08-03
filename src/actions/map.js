@@ -86,7 +86,7 @@ export function addFeatures(sourceName, features, crs) {
     type: MAP.ADD_FEATURES,
     sourceName,
     features,
-    crs
+    crs,
   };
 }
 

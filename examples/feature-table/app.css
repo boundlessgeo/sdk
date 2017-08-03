@@ -1,3 +1,5 @@
+/* Demo how to over ride the default color of the buttons */
+
 button.sdk-btn.blue {
     background-color: #29728d;
 }
@@ -21,8 +23,3 @@ button.sdk-btn.blue {
 .sdk-table th, .sdk-table td{
   border: solid 1px #333333;
 }
-
-/*
-.map {
-	height: 480px;
-}*/
