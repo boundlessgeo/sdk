@@ -15,8 +15,11 @@ import OlMap from 'ol/map';
 import View from 'ol/view';
 import Overlay from 'ol/overlay';
 
+import Observable from 'ol/observable';
+
 import Proj from 'ol/proj';
 import Coordinate from 'ol/coordinate';
+import Sphere from 'ol/sphere';
 
 import TileLayer from 'ol/layer/tile';
 import XyzSource from 'ol/source/xyz';
@@ -43,12 +46,16 @@ import { setView } from '../actions/map';
 import { INTERACTIONS, LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
 import { dataVersionKey } from '../reducers/map';
 
+import { setMeasureFeature, clearMeasureFeature } from '../actions/drawing';
+
 import ClusterSource from '../source/cluster';
 
 import { jsonEquals, getLayerById, getMin, getMax } from '../util';
 
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
+const WGS84_SPHERE = new Sphere(6378137);
+
 
 /** This variant of getVersion differs as it allows
  *  for undefined values to be returned.
@@ -783,6 +790,34 @@ export class Map extends React.Component {
       });
 
       this.activeInteractions = [draw];
+    } else if (INTERACTIONS.measuring.includes(drawingProps.interaction)) {
+      // clear the previous measure feature.
+      this.props.clearMeasureFeature();
+
+      const measure = new DrawInteraction({
+        // The measure interactions are the same as the drawing interactions
+        // but are prefixed with "measure:"
+        type: drawingProps.interaction.split(':')[1],
+      });
+
+      let measure_listener = null;
+      measure.on('drawstart', (evt) => {
+        const geom = evt.feature.getGeometry();
+        const proj = this.map.getView().getProjection();
+
+        measure_listener = geom.on('change', (geomEvt) => {
+          this.props.setMeasureGeometry(geomEvt.target, proj);
+        });
+
+        this.props.setMeasureGeometry(geom, proj);
+      });
+
+      measure.on('drawend', () => {
+        // remove the listener
+        Observable.unByKey(measure_listener);
+      });
+
+      this.activeInteractions = [measure];
     }
 
     if (this.activeInteractions) {
@@ -821,6 +856,8 @@ Map.propTypes = {
   onFeatureModified: PropTypes.func,
   onFeatureSelected: PropTypes.func,
   onExportImage: PropTypes.func,
+  setMeasureGeometry: PropTypes.func,
+  clearMeasureFeature: PropTypes.func,
 };
 
 Map.defaultProps = {
@@ -852,6 +889,10 @@ Map.defaultProps = {
   },
   onExportImage: () => {
   },
+  setMeasureGeometry: () => {
+  },
+  clearMeasureFeature: () => {
+  },
 };
 
 function mapStateToProps(state) {
@@ -868,6 +909,32 @@ function mapDispatchToProps(dispatch) {
       // transform the center to 4326 before dispatching the action.
       const center = Proj.transform(view.getCenter(), view.getProjection(), 'EPSG:4326');
       dispatch(setView(center, view.getZoom()));
+    },
+    setMeasureGeometry: (geometry, projection) => {
+      const geom = GEOJSON_FORMAT.writeGeometryObject(geometry, {
+        featureProjection: projection,
+        dataProjection: 'EPSG:4326',
+      });
+      const segments = [];
+      if (geom.type === 'LineString') {
+        for (let i = 0, ii = geom.coordinates.length - 1; i < ii; i++) {
+          const a = geom.coordinates[i];
+          const b = geom.coordinates[i + 1];
+          segments.push(WGS84_SPHERE.haversineDistance(a, b));
+        }
+      } else if (geom.type === 'Polygon' && geom.coordinates.length > 0) {
+        segments.push(Math.abs(WGS84_SPHERE.geodesicArea(geom.coordinates[0])));
+      }
+
+
+      dispatch(setMeasureFeature({
+        type: 'Feature',
+        properties: {},
+        geometry: geom,
+      }, segments));
+    },
+    clearMeasureFeature: () => {
+      dispatch(clearMeasureFeature());
     },
   };
 }

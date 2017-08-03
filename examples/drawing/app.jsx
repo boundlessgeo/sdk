@@ -19,6 +19,10 @@ import { INTERACTIONS } from '@boundlessgeo/sdk/constants';
 // This will have webpack include all of the SDK styles.
 import '@boundlessgeo/sdk/stylesheet/sdk.css';
 
+// include a MeasureTable component for this app.
+import MeasureTable from './measure-table';
+
+
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
   map: SdkMapReducer,
@@ -216,12 +220,18 @@ function main() {
         <h4>Drawing tools</h4>
         <select onChange={setDrawingTool}>
           <option value="none">None</option>
+          <option value={INTERACTIONS.measure_point}>Measure point</option>
+          <option value={INTERACTIONS.measure_line}>Measure line</option>
+          <option value={INTERACTIONS.measure_polygon}>Measure polygon</option>
           <option value={INTERACTIONS.point}>Draw point</option>
           <option value={INTERACTIONS.line}>Draw line</option>
           <option value={INTERACTIONS.polygon}>Draw polygon</option>
           <option value={INTERACTIONS.modify}>Modify feature</option>
           <option value={INTERACTIONS.select}>Select feature</option>
         </select>
+      </div>
+      <div className="control-panel">
+        <MeasureTable store={store} />
       </div>
       <div className="control-panel">
         <h4>Messages</h4>

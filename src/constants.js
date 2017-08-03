@@ -11,10 +11,20 @@ export const INTERACTIONS = {
   point: 'Point',
   line: 'LineString',
   polygon: 'Polygon',
+  measure_point: 'measure:Point',
+  measure_line: 'measure:LineString',
+  measure_polygon: 'measure:Polygon',
 };
 
 // useful for deciding what is or is not a drawing interaction
 INTERACTIONS.drawing = [INTERACTIONS.point, INTERACTIONS.line, INTERACTIONS.polygon];
+
+// determine which is a measuring interaction
+INTERACTIONS.measuring = [
+  INTERACTIONS.measure_point,
+  INTERACTIONS.measure_line,
+  INTERACTIONS.measure_polygon,
+];
 
 export default {
   LAYER_VERSION_KEY,
