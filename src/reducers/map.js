@@ -84,18 +84,44 @@ function placeLayer(state, layer, targetId) {
   }, incrementVersion(state.metadata, LAYER_VERSION_KEY));
 }
 
-/** Change the order of the layer in the stack.
+/** Move a layer in the layers list.
+ *
  */
-function orderLayer(state, action) {
-  let layer = null;
-  for (let i = 0, ii = state.layers.length; i < ii && layer === null; i++) {
-    if (state.layers[i].id === action.layerId) {
-      layer = state.layers[i];
+function reorderLayers(state, sourceLayer, targetLayer) {
+  const new_layers = [];
+
+  for (let i = 0, ii = state.layers.length; i < ii; i++) {
+    const l = state.layers[i];
+    if (l.id === sourceLayer.id) {
+      new_layers.push(targetLayer);
+    } else if (l.id === targetLayer.id) {
+      new_layers.push(sourceLayer);
+    } else {
+      new_layers.push(l);
     }
   }
 
-  if (layer !== null) {
-    return placeLayer(state, layer, action.targetId);
+  return Object.assign({}, state, {
+    layers: new_layers,
+  }, incrementVersion(state.metadata, LAYER_VERSION_KEY));
+}
+
+/** Change the order of the layer in the stack.
+ */
+function orderLayer(state, action) {
+  let sourceLayer = null;
+  let targetLayer = null;
+  for (let i = 0, ii = state.layers.length; i < ii ; i++) {
+    if (state.layers[i].id === action.layerId) {
+      sourceLayer = state.layers[i];
+    }
+    if (state.layers[i].id === action.targetId) {
+      targetLayer = state.layers[i];
+    }
+  }
+
+  if (targetLayer !== null && sourceLayer !== null) {
+    return reorderLayers(state, sourceLayer, targetLayer);
   }
   return state;
 }
