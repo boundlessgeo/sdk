@@ -13,7 +13,6 @@ import ReactDOM from 'react-dom';
 
 import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
-import { reprojectGeoJson } from '@boundlessgeo/sdk/util';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
 import { reprojectGeoJson } from '@boundlessgeo/sdk/util';
