@@ -90,13 +90,17 @@ function placeLayer(state, layer, targetId) {
 function reorderLayers(state, sourceLayer, targetLayer) {
   const new_layers = [];
 
+  //3 possible outcomes from looping over list
   for (let i = 0, ii = state.layers.length; i < ii; i++) {
     const l = state.layers[i];
+    // Match source id - push target Layer
     if (l.id === sourceLayer.id) {
       new_layers.push(targetLayer);
+    // Match source target - push source Layer
     } else if (l.id === targetLayer.id) {
       new_layers.push(sourceLayer);
     } else {
+    // Otherwise push layer
       new_layers.push(l);
     }
   }
