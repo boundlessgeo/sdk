@@ -40,6 +40,10 @@ const config = {
     'drawing': [
       'webpack/hot/only-dev-server',
       './examples/drawing/app.jsx',
+    ],
+    legends: [
+      'webpack/hot/only-dev-server',
+      './examples/legends/app.jsx',
     ]
   },
   // Server Configuration options
