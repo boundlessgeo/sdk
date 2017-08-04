@@ -53,4 +53,42 @@ describe('util', () => {
 
     expect(util.encodeQueryObject(parsed)).toBe(query_string);
   });
+
+  it('reprojects geojson data to target crs', () =>
+    const geojson3857 = {
+      "type": "FeatureCollection",
+      "crs": {
+        "type": "name",
+        "properties": {
+          "name": "urn:ogc:def:crs:EPSG::3857"
+        }
+      },
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {
+            "cat": 1
+          },
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              -18142325.26,
+              10318077.84
+            ]
+          }
+        }
+      ]
+    };
+    
+
+    // const query_string = 'what=%2Fis%20slash&roses=3000';
+    // const parsed = {
+    //   what: '/is slash',
+    //   roses: '3000',
+    // };
+    //
+    // expect(util.parseQueryString(query_string)).toEqual(parsed);
+    //
+    // expect(util.encodeQueryObject(parsed)).toBe(query_string);
+  });
 });

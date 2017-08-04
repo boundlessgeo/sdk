@@ -15,6 +15,8 @@ import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
+import { reprojectGeoJson } from '@boundlessgeo/sdk/util'
+
 import fetch from 'isomorphic-fetch';
 
 
@@ -85,8 +87,8 @@ function main() {
         response => response.json(),
         error => console.error('An error occured.', error),
       )
-      // addFeatures with the features, source name, and crs
-      .then(json => store.dispatch(mapActions.addFeatures(sourceName, json.features, json.crs)));
+      // addFeatures with the features, source name
+      .then(json => store.dispatch(mapActions.addFeatures(sourceName, reprojectGeoJson(json.features, json.crs))));
   };
 
   // This is called by the onClick, keeping the onClick HTML clean
@@ -106,7 +108,7 @@ function main() {
       const temp = Object.keys(features[i].properties);
       for (let j = 0, jj = temp.length; j < jj; j++) {
         // if the feature.properties is new add it to headers
-        if (headers.indexOf(temp[j] < 0)) {
+        if (headers.indexOf(temp[j]) < 0) {
           headers.push(temp[j]);
         }
       }
@@ -126,7 +128,7 @@ function main() {
   // Build the body of the table based on list of properties and source store in redux store
   const buildTableBody = (properties, sourceName) => {
     const body = [];
-    const row = [];
+    let row = [];
     // Get all the features from the Redux store
     const features = store.getState().map.sources[sourceName].data.features;
     // Loop over features
@@ -139,7 +141,7 @@ function main() {
       // add the features properties to the list
       body.push(<tr key={i}>{row}</tr>);
       // Reset the row
-      row.length = 0;
+      row = [];
     }
     // Return the body
     return (<tbody>{body}</tbody>);
