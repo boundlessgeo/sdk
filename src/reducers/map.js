@@ -194,6 +194,11 @@ function removeSource(state, action) {
 /** Creates a new state with the data for a
  *  source changed to the contents of data.
  *
+ *  @param {object} state - redux state
+ *  @param {string} sourceName - name of the souce to be changed
+ *  @param {array} data -  List of features to be added to the source
+ *        If blank determined by openlayers
+*
  */
 function changeData(state, sourceName, data) {
   const source = state.sources[sourceName];

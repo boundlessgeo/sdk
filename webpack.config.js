@@ -21,37 +21,13 @@ const config = {
       'webpack/hot/only-dev-server',
       './examples/wms/app.jsx',
     ],
-    'feature-table': [
+    featureTable: [
       'webpack/hot/only-dev-server',
-      './examples/feature-table/app.jsx',
-    ],
-    popups: [
-      'webpack/hot/only-dev-server',
-      './examples/popups/app.jsx',
+      './examples/featureTable/app.jsx',
     ],
     clustering: [
       'webpack/hot/only-dev-server',
       './examples/clustering/app.jsx',
-    ],
-    sprites: [
-      'webpack/hot/only-dev-server',
-      './examples/sprites/app.jsx',
-    ],
-    'paint-change': [
-      'webpack/hot/only-dev-server',
-      './examples/paint-change/app.jsx',
-    ],
-    'drawing': [
-      'webpack/hot/only-dev-server',
-      './examples/drawing/app.jsx',
-    ],
-    legends: [
-      'webpack/hot/only-dev-server',
-      './examples/legends/app.jsx',
-    ],
-    'export-image': [
-      'webpack/hot/only-dev-server',
-      './examples/export-image/app.jsx',
     ],
   },
   // Server Configuration options
@@ -67,7 +43,7 @@ const config = {
   output: {
     path: __dirname, // Path of output file
     // [name] refers to the entry point's name.
-    filename: 'examples/[name]/[name].bundle.js',
+    filename: 'dist/[name]/[name].bundle.js',
   },
   plugins: [
     new ExtractTextPlugin('dist/sdk.css'),

@@ -15,8 +15,11 @@ import OlMap from 'ol/map';
 import View from 'ol/view';
 import Overlay from 'ol/overlay';
 
+import Observable from 'ol/observable';
+
 import Proj from 'ol/proj';
 import Coordinate from 'ol/coordinate';
+import Sphere from 'ol/sphere';
 
 import TileLayer from 'ol/layer/tile';
 import XyzSource from 'ol/source/xyz';
@@ -43,16 +46,21 @@ import { setView } from '../actions/map';
 import { INTERACTIONS, LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
 import { dataVersionKey } from '../reducers/map';
 
+import { setMeasureFeature, clearMeasureFeature } from '../actions/drawing';
+
 import ClusterSource from '../source/cluster';
 
 import { jsonEquals, getLayerById, getMin, getMax } from '../util';
 
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
+const WGS84_SPHERE = new Sphere(6378137);
+
 
 /** This variant of getVersion differs as it allows
  *  for undefined values to be returned.
  */
+
 function getVersion(obj, key) {
   if (obj.metadata === undefined) {
     return undefined;
@@ -115,26 +123,32 @@ function configureMvtSource(glSource) {
 }
 
 
-function updateGeojsonSource(olSource, glSource) {
+function updateGeojsonSource(olSource, glSource, mapProjection) {
   // parse the new features,
-  // TODO: This should really check the map for the correct projection.
-  const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: 'EPSG:3857' });
 
-  let vector_src = olSource;
+  if (glSource.data.features) {
+    const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: mapProjection || 'EPSG:4326' });
 
-  // if the source is clustered then
-  //  the actual data is stored on the source's source.
-  if (glSource.cluster) {
-    vector_src = olSource.getSource();
+    let vector_src = olSource;
 
-    if (glSource.clusterRadius !== olSource.getDistance()) {
-      olSource.setDistance(glSource.clusterRadius);
+    // if the source is clustered then
+    //  the actual data is stored on the source's source.
+    if (glSource.cluster) {
+      vector_src = olSource.getSource();
+
+      if (glSource.clusterRadius !== olSource.getDistance()) {
+        olSource.setDistance(glSource.clusterRadius);
+      }
+    }
+
+    // clear the layer WITHOUT dispatching remove events.
+    vector_src.clear(true);
+    // bulk load the feature data
+
+    if (features !== undefined) {
+      vector_src.addFeatures(features);
     }
   }
-  // clear the layer WITHOUT dispatching remove events.
-  vector_src.clear(true);
-  // bulk load the feature data.
-  vector_src.addFeatures(features);
 }
 
 /** Create a vector source based on a
@@ -260,7 +274,7 @@ export class Map extends React.Component {
 
         if (this.props.map.metadata[version_key] !== nextProps.map.metadata[version_key]) {
           const next_src = nextProps.map.sources[src_name];
-          updateGeojsonSource(this.sources[src_name], next_src);
+          updateGeojsonSource(this.sources[src_name], next_src, this.map.getView().getProjection());
         }
       }
     }
@@ -783,6 +797,34 @@ export class Map extends React.Component {
       });
 
       this.activeInteractions = [draw];
+    } else if (INTERACTIONS.measuring.includes(drawingProps.interaction)) {
+      // clear the previous measure feature.
+      this.props.clearMeasureFeature();
+
+      const measure = new DrawInteraction({
+        // The measure interactions are the same as the drawing interactions
+        // but are prefixed with "measure:"
+        type: drawingProps.interaction.split(':')[1],
+      });
+
+      let measure_listener = null;
+      measure.on('drawstart', (evt) => {
+        const geom = evt.feature.getGeometry();
+        const proj = this.map.getView().getProjection();
+
+        measure_listener = geom.on('change', (geomEvt) => {
+          this.props.setMeasureGeometry(geomEvt.target, proj);
+        });
+
+        this.props.setMeasureGeometry(geom, proj);
+      });
+
+      measure.on('drawend', () => {
+        // remove the listener
+        Observable.unByKey(measure_listener);
+      });
+
+      this.activeInteractions = [measure];
     }
 
     if (this.activeInteractions) {
@@ -821,6 +863,8 @@ Map.propTypes = {
   onFeatureModified: PropTypes.func,
   onFeatureSelected: PropTypes.func,
   onExportImage: PropTypes.func,
+  setMeasureGeometry: PropTypes.func,
+  clearMeasureFeature: PropTypes.func,
 };
 
 Map.defaultProps = {
@@ -852,6 +896,10 @@ Map.defaultProps = {
   },
   onExportImage: () => {
   },
+  setMeasureGeometry: () => {
+  },
+  clearMeasureFeature: () => {
+  },
 };
 
 function mapStateToProps(state) {
@@ -868,6 +916,32 @@ function mapDispatchToProps(dispatch) {
       // transform the center to 4326 before dispatching the action.
       const center = Proj.transform(view.getCenter(), view.getProjection(), 'EPSG:4326');
       dispatch(setView(center, view.getZoom()));
+    },
+    setMeasureGeometry: (geometry, projection) => {
+      const geom = GEOJSON_FORMAT.writeGeometryObject(geometry, {
+        featureProjection: projection,
+        dataProjection: 'EPSG:4326',
+      });
+      const segments = [];
+      if (geom.type === 'LineString') {
+        for (let i = 0, ii = geom.coordinates.length - 1; i < ii; i++) {
+          const a = geom.coordinates[i];
+          const b = geom.coordinates[i + 1];
+          segments.push(WGS84_SPHERE.haversineDistance(a, b));
+        }
+      } else if (geom.type === 'Polygon' && geom.coordinates.length > 0) {
+        segments.push(Math.abs(WGS84_SPHERE.geodesicArea(geom.coordinates[0])));
+      }
+
+
+      dispatch(setMeasureFeature({
+        type: 'Feature',
+        properties: {},
+        geometry: geom,
+      }, segments));
+    },
+    clearMeasureFeature: () => {
+      dispatch(clearMeasureFeature());
     },
   };
 }

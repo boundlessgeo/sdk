@@ -50,4 +50,40 @@ describe('drawing actions', () => {
   it('should create an action to end select', () => {
     expect(actions.endSelect()).toEqual({ type: DRAWING.END });
   });
+
+  it('should create an action to set measure feature and segments', () => {
+    const line = {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Line',
+        coordinates: [
+          [0, 0], [1, 1], [2, 2],
+        ],
+      },
+    };
+    const segs = [1, 1];
+
+    const expected_action = {
+      type: DRAWING.SET_MEASURE_FEATURE,
+      feature: line,
+      segments: segs,
+    };
+
+    const action = actions.setMeasureFeature(line, segs);
+
+    expect(action).toEqual(expected_action);
+  });
+
+  it('should create an action to clear the measure feature', () => {
+    expect(actions.clearMeasureFeature()).toEqual({ type: DRAWING.CLEAR_MEASURE_FEATURE });
+  });
+
+  it('should start a measuring tool', () => {
+    expect(actions.startMeasure(INTERACTIONS.measure_point)).toEqual({
+      type: DRAWING.START,
+      interaction: INTERACTIONS.measure_point,
+      sourceName: null,
+    });
+  });
 });

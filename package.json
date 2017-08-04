@@ -42,6 +42,7 @@
   "dependencies": {
     "@mapbox/mapbox-gl-style-spec": "^9.0.0",
     "async": "^2.5.0",
+    "extract-css": "^1.0.3",
     "isomorphic-fetch": "^2.2.1",
     "mapbox-to-ol-style": "^2.5.2",
     "ol": "^4.1.1",

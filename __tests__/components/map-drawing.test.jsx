@@ -15,12 +15,15 @@ import { createStore, combineReducers } from 'redux';
 
 import Feature from 'ol/feature';
 import Point from 'ol/geom/point';
+import LineString from 'ol/geom/linestring';
+import Polygon from 'ol/geom/polygon';
 
 import SdkMap from '../../src/components/map';
 import MapReducer from '../../src/reducers/map';
 import DrawingReducer from '../../src/reducers/drawing';
 
 import * as MapActions from '../../src/actions/map';
+import * as DrawingActions from '../../src/actions/drawing';
 
 import { INTERACTIONS } from '../../src/constants';
 import { DRAWING } from '../../src/action-types';
@@ -218,6 +221,108 @@ if (HAS_CANVAS) {
 
       // ensure onFeatureEvent was called.
       expect(sdk_map.onFeatureEvent).toHaveBeenCalled();
+    });
+
+    it('measures a point', () => {
+      const sdk_map = wrapper.instance().getWrappedInstance();
+      const ol_map = sdk_map.map;
+
+      // set the point measure
+      store.dispatch(DrawingActions.startMeasure(INTERACTIONS.measure_point));
+      // get the measure interaction
+      const interactions = ol_map.getInteractions();
+      const measure = interactions.item(interactions.getLength() - 1);
+
+      // create a dummy OL feature with a Point for measuring.
+      const sketch_geometry = new Point([100, 100]);
+      const sketch_feature = new Feature(sketch_geometry);
+
+      measure.dispatchEvent({
+        type: 'drawstart',
+        feature: sketch_feature,
+      });
+
+      sketch_geometry.setCoordinates([0, 0]);
+
+      expect(store.getState().drawing.measureFeature).toEqual({
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Point',
+          coordinates: [0, 0],
+        },
+      });
+    });
+
+    it('measures a line', () => {
+      const sdk_map = wrapper.instance().getWrappedInstance();
+      const ol_map = sdk_map.map;
+
+      // set the line measure
+      store.dispatch(DrawingActions.startMeasure(INTERACTIONS.measure_line));
+      // get the measure interaction
+      const interactions = ol_map.getInteractions();
+      const measure = interactions.item(interactions.getLength() - 1);
+
+      // create a dummy OL feature with a Line for measuring.
+      const sketch_geometry = new LineString([]);
+      const sketch_feature = new Feature(sketch_geometry);
+
+      measure.dispatchEvent({
+        type: 'drawstart',
+        feature: sketch_feature,
+      });
+
+      const coords = [[0, 0], [20, 0], [40, 0]];
+      // create a new line feature that is in map coordinates.
+      const tmp_line = (new LineString(coords.slice()));
+      tmp_line.transform('EPSG:4326', 'EPSG:3857');
+
+      sketch_geometry.setCoordinates(tmp_line.getCoordinates());
+
+      expect(store.getState().drawing.measureFeature).toEqual({
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: coords,
+        },
+      });
+    });
+
+    it('measures a polygon', () => {
+      const sdk_map = wrapper.instance().getWrappedInstance();
+      const ol_map = sdk_map.map;
+
+      // set the polygon measure
+      store.dispatch(DrawingActions.startMeasure(INTERACTIONS.measure_polygon));
+      // get the measure interaction
+      const interactions = ol_map.getInteractions();
+      const measure = interactions.item(interactions.getLength() - 1);
+
+      // create a dummy OL feature with a Polygon for measuring.
+      const sketch_geometry = new Polygon([]);
+      const sketch_feature = new Feature(sketch_geometry);
+
+      measure.dispatchEvent({
+        type: 'drawstart',
+        feature: sketch_feature,
+      });
+
+      const coords = [[[0, 0], [20, 20], [0, 40], [0, 0]]];
+      // create a new polygon in map coordinates
+      const tmp_polygon = (new Polygon(coords.slice()));
+      tmp_polygon.transform('EPSG:4326', 'EPSG:3857');
+      sketch_geometry.setCoordinates(tmp_polygon.getCoordinates());
+
+      expect(store.getState().drawing.measureFeature).toEqual({
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Polygon',
+          coordinates: coords,
+        },
+      });
     });
   });
 }
