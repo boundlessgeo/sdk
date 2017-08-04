@@ -837,7 +837,7 @@ export class Map extends React.Component {
 
   render() {
     return (
-      <div ref={(c) => { this.mapdiv = c; }} className="sdk-map" />
+      <div ref={(c) => { this.mapdiv = c; }} className="map" />
     );
   }
 }
