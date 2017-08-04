@@ -234,9 +234,8 @@ if (HAS_CANVAS) {
       const measure = interactions.item(interactions.getLength() - 1);
 
       // create a dummy OL feature with a Point for measuring.
-      const sketch_feature = new Feature();
       const sketch_geometry = new Point([100, 100]);
-      sketch_feature.setGeometry(sketch_geometry);
+      const sketch_feature = new Feature(sketch_geometry);
 
       measure.dispatchEvent({
         type: 'drawstart',
@@ -259,16 +258,15 @@ if (HAS_CANVAS) {
       const sdk_map = wrapper.instance().getWrappedInstance();
       const ol_map = sdk_map.map;
 
-      // set the point measure
+      // set the line measure
       store.dispatch(DrawingActions.startMeasure(INTERACTIONS.measure_line));
       // get the measure interaction
       const interactions = ol_map.getInteractions();
       const measure = interactions.item(interactions.getLength() - 1);
 
-      // create a dummy OL feature with a Point for measuring.
-      const sketch_feature = new Feature();
+      // create a dummy OL feature with a Line for measuring.
       const sketch_geometry = new LineString([]);
-      sketch_feature.setGeometry(sketch_geometry);
+      const sketch_feature = new Feature(sketch_geometry);
 
       measure.dispatchEvent({
         type: 'drawstart',
@@ -296,16 +294,15 @@ if (HAS_CANVAS) {
       const sdk_map = wrapper.instance().getWrappedInstance();
       const ol_map = sdk_map.map;
 
-      // set the point measure
+      // set the polygon measure
       store.dispatch(DrawingActions.startMeasure(INTERACTIONS.measure_polygon));
       // get the measure interaction
       const interactions = ol_map.getInteractions();
       const measure = interactions.item(interactions.getLength() - 1);
 
-      // create a dummy OL feature with a Point for measuring.
-      const sketch_feature = new Feature();
+      // create a dummy OL feature with a Polygon for measuring.
       const sketch_geometry = new Polygon([]);
-      sketch_feature.setGeometry(sketch_geometry);
+      const sketch_feature = new Feature(sketch_geometry);
 
       measure.dispatchEvent({
         type: 'drawstart',
