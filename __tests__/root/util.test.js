@@ -87,11 +87,11 @@ describe('util', () => {
     ];
     const crs3857 = { type: 'name', properties: { name: 'urn:ogc:def:crs:EPSG::3857' } };
     const crs4326 = { type: 'name', properties: { name: 'urn:ogc:def:crs:EPSG::4326' } };
-
+    // convert 3857 to 4326
     expect(util.reprojectGeoJson(features3857, crs3857)).toEqual(feature4326);
-
-    expect(util.reprojectGeoJson(feature4326, crs4326)).toEqual(feature4326);
-
+    // pass in 4326 without a projection and get back 4326
+    expect(util.reprojectGeoJson(feature4326)).toEqual(feature4326);
+    // pass in 4326 and destination projection and get back 3857
     expect(util.reprojectGeoJson(feature4326, crs4326, 'EPSG:3857')).toEqual(features3857);
   });
 });
