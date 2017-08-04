@@ -149,7 +149,6 @@ function updateGeojsonSource(olSource, glSource, mapProjection) {
     if (features !== undefined) {
       vector_src.addFeatures(features);
     }
-
   }
 }
 

@@ -23,7 +23,7 @@ import fetch from 'isomorphic-fetch';
 // This will have webpack include all of the SDK styles.
 import '@boundlessgeo/sdk/stylesheet/sdk.scss';
 
-//Use app.css to style current app
+// Use app.css to style current app
 
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
@@ -79,7 +79,7 @@ function main() {
     },
   }));
 
-  //Fetch the geoJson file from a url and add it to the map at the named source
+  // Fetch the geoJson file from a url and add it to the map at the named source
   const addLayerFromGeoJSON = (url, sourceName) => {
     // Fetch URL
     fetch(url)
@@ -94,9 +94,9 @@ function main() {
 
   // This is called by the onClick, keeping the onClick HTML clean
   const runFetchGeoJSON = () => {
-    var url = './data/airports.json'
+    const url = './data/airports.json';
     addLayerFromGeoJSON(url, 'dynamic-source');
-  }
+  };
 
   //Next few functions are all about building the feature Table
 
@@ -104,8 +104,8 @@ function main() {
   // Read the source and get all the possible properties
   const getTableHeaders = (sourceName) => {
     const features = store.getState().map.sources[sourceName].data.features;
-    let headers = [];
-    //Loop over features
+    const headers = [];
+    // Loop over features
     for (let i = 0, ii = features.length; i < ii; i++) {
       // Build a list of unique properties for the header list
       const temp = Object.keys(features[i].properties);
@@ -117,52 +117,53 @@ function main() {
       }
     }
     return headers;
-  }
+  };
 
-  //Build out the headers based on supplied list of properties
+  // Build out the headers based on supplied list of properties
   const buildTableHeader = (properties) => {
-    let th = [];
+    const th = [];
     for (let i = 0, ii = properties.length; i < ii; i++) {
-      th.push(<th key={properties[i]}>{properties[i]}</th>)
+      th.push(<th key={properties[i]}>{properties[i]}</th>);
     }
     return (<thead><tr>{th}</tr></thead>);
-  }
+  };
 
-  //Build the body of the table based on list of properties and source store in redux store
+  // Build the body of the table based on list of properties and source store in redux store
   const buildTableBody = (properties, sourceName) => {
     const body = [];
     let row = [];
     // Get all the features from the Redux store
     const features = store.getState().map.sources[sourceName].data.features;
-    //Loop over features
+    // Loop over features
     for (let i = 0, ii = features.length; i < ii; i++) {
-      //Loop over properties
+      // Loop over properties
       for (let j = 0, jj = properties.length; j < jj; j++) {
-        //Build list of properties for each feature
-        row.push(<td key={j}>{features[i].properties[properties[j]]}</td>)
+        // Build list of properties for each feature
+        row.push(<td key={j}>{features[i].properties[properties[j]]}</td>);
       }
-      //add the features properties to the list
+      // add the features properties to the list
       body.push(<tr key={i}>{row}</tr>);
       // Reset the row
       row = [];
     }
-    //Return the body
-    return(<tbody>{body}</tbody>)
-  }
-  //Show the data in a table
+    // Return the body
+    return (<tbody>{body}</tbody>);
+  };
+  // Show the data in a table
   const displayTable = () => {
-    //Get full list of properties
+    // Get full list of properties
     const propertyList = getTableHeaders('dynamic-source');
-    //This would be a good point to filter out any unwanted properties such as GUID from the propertyList
+    // This would be a good point to filter out any
+    // unwanted properties such as GUID from the propertyList
 
-    //Build table header
+    // Build table header
     const tableHeader = buildTableHeader(propertyList);
-    //Build table body
+    // Build table body
     const tableBody = buildTableBody(propertyList, 'dynamic-source');
 
-    //Place the table on the page
+    // Place the table on the page
     ReactDOM.render((
-      <table className='sdk-table'>
+      <table className="sdk-table">
         {tableHeader}
         {tableBody}
       </table>), document.getElementById('table'));
