@@ -127,7 +127,7 @@ function updateGeojsonSource(olSource, glSource, mapProjection) {
   // parse the new features,
 
   if (glSource.data.features) {
-    const features = GEOJSON_FORMAT.readFeatures(glSource.data, {featureProjection: mapProjection || 'EPSG:4326'});
+    const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: mapProjection || 'EPSG:4326' });
 
     let vector_src = olSource;
 
@@ -148,7 +148,6 @@ function updateGeojsonSource(olSource, glSource, mapProjection) {
     if (features !== undefined) {
       vector_src.addFeatures(features);
     }
-
   }
 }
 
