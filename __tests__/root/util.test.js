@@ -54,40 +54,41 @@ describe('util', () => {
     expect(util.encodeQueryObject(parsed)).toBe(query_string);
   });
 
-  it('reprojects geojson data to target crs', () =>
-    const geojson3857 = {
-      "type": "FeatureCollection",
-      "crs": {
-        "type": "name",
-        "properties": {
-          "name": "urn:ogc:def:crs:EPSG::3857"
-        }
+  it('reprojects geojson data to target crs', () => {
+    const features3857 = [
+      {
+        type: 'Feature',
+        properties: {
+          cat: 1,
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [
+            -18142325.26,
+            10318077.84,
+          ],
+        },
       },
-      "features": [
-        {
-          "type": "Feature",
-          "properties": {
-            "cat": 1
-          },
-          "geometry": {
-            "type": "Point",
-            "coordinates": [
-              -18142325.26,
-              10318077.84
-            ]
-          }
-        }
-      ]
-    };
-    
+    ];
+    const feature4326 = [
+      {
+        type: 'Feature',
+        properties: {
+          cat: 1,
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [
+            -162.97528070525672,
+            67.56208036704854,
+          ],
+        },
+      },
+    ];
+    const crs3857 = { type: 'name', properties: { name: 'urn:ogc:def:crs:EPSG::3857' } };
+    // const crs4326 = { type: 'name', properties: {name:'urn:ogc:def:crs:EPSG::4326' } };
 
-    // const query_string = 'what=%2Fis%20slash&roses=3000';
-    // const parsed = {
-    //   what: '/is slash',
-    //   roses: '3000',
-    // };
-    //
-    // expect(util.parseQueryString(query_string)).toEqual(parsed);
+    expect(util.reprojectGeoJson(features3857, crs3857)).toEqual(feature4326);
     //
     // expect(util.encodeQueryObject(parsed)).toBe(query_string);
   });

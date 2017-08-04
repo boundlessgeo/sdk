@@ -15,7 +15,7 @@ import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
-import { reprojectGeoJson } from '@boundlessgeo/sdk/util'
+import { reprojectGeoJson } from '@boundlessgeo/sdk/util';
 
 import fetch from 'isomorphic-fetch';
 
@@ -88,7 +88,8 @@ function main() {
         error => console.error('An error occured.', error),
       )
       // addFeatures with the features, source name
-      .then(json => store.dispatch(mapActions.addFeatures(sourceName, reprojectGeoJson(json.features, json.crs))));
+      .then(json => store.dispatch(mapActions.addFeatures(sourceName,
+        reprojectGeoJson(json.features, json.crs))));
   };
 
   // This is called by the onClick, keeping the onClick HTML clean
