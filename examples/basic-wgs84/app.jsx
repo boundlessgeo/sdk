@@ -1,4 +1,4 @@
-/** Very basic SDK application example.
+/** Version of the basic application example but using EPSG:4326.
  *
  *  Contains a Map and demonstrates some of the dynamics of
  *  using the store.
@@ -31,22 +31,24 @@ function main() {
 
   store.dispatch(mapActions.setMapName('Basic Map Example'));
 
-  // add the OSM source
-  store.dispatch(mapActions.addSource('osm', {
+  // Add an example from ArcGIS Online REST services.
+  store.dispatch(mapActions.addSource('esri', {
     type: 'raster',
-    tileSize: 256,
+    crossOrigin: null,
     tiles: [
-      'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      // The {bbox-epsg-3857} is a misnomer in this case.
+      // MapBox GL Style spec does not outline specifying {bbox-epsg-4326}
+      // or {bbox} for native map coordiantes as it does not appear to consider
+      // rendering maps in projections other than EPSG:3857.
+      // 'https://server.arcgisonline.com/arcgis/rest/services/ESRI_Imagery_World_2D/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=&layers=&layerDefs=&size=&imageSR=&format=png&transparent=false&f=image'
+      'https://sampleserver3.arcgisonline.com/ArcGIS/rest/services/World/MODIS/ImageServer/exportImage?bbox={bbox-epsg-3857}&pixelType=U8&f=image',
     ],
   }));
 
-  // and an OSM layer.
-  // Raster layers need not have any paint styles.
+  // This layer is what is presented from the 'esri' source.
   store.dispatch(mapActions.addLayer({
-    id: 'osm',
-    source: 'osm',
+    id: 'esri',
+    source: 'esri',
   }));
 
   // 'geojson' sources allow rendering a vector layer
@@ -110,73 +112,24 @@ function main() {
     filter: ['==', 'isRandom', true],
   }));
 
-  /*
-   * These are some example calls that were earlier prototyped in
-   *  the basic demo. They've been commented out for now but have been
-   *  saved for propsperity (and future porting).
-   *
+  // test the placement of an image on the map.
+  store.dispatch(mapActions.addSource('overlay', {
+    type: 'image',
+    url: 'https://www.mapbox.com/mapbox-gl-js/assets/radar.gif',
+    coordinates: [
+      [-80.425, 46.437],
+      [-71.516, 46.437],
+      [-71.516, 37.936],
+      [-80.425, 37.936],
+    ],
+  }));
 
-  // semaphore to prevent the states layer
-  //  from being added twice.
-  let sem = true;
-  const addLayer = () => {
-    if (sem) {
-      store.dispatch(mapActions.addSource('states', {
-        type: 'raster',
-        tileSize: 256,
-        tiles: ['https://ahocevar.com/geoserver/gwc/service/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/png&SRS=EPSG:900913&LAYERS=topp:states&STYLES=&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}'],
-      }));
-
-      store.dispatch(mapActions.addLayer({
-        id: 'states',
-        source: 'states',
-      }));
-
-      sem = false;
-    }
-  };
-
-  const removeLayer = () => {
-    if (!sem) {
-      store.dispatch(mapActions.removeLayer('states'));
-      store.dispatch(mapActions.removeSource('states'));
-
-      sem = true;
-    }
-  };
-
-  let semOverlay = true;
-  const addOverlay = () => {
-    if (semOverlay) {
-      store.dispatch(mapActions.addSource('overlay', {
-        type: 'image',
-        url: 'https://www.mapbox.com/mapbox-gl-js/assets/radar.gif',
-        coordinates: [
-          [-80.425, 46.437],
-          [-71.516, 46.437],
-          [-71.516, 37.936],
-          [-80.425, 37.936],
-        ],
-      }));
-
-      store.dispatch(mapActions.addLayer({
-        id: 'overlay',
-        source: 'overlay',
-        type: 'raster',
-        paint: { 'raster-opacity': 0.85 },
-      }));
-
-      semOverlay = false;
-    }
-  };
-
-  const loadContext = () => {
-    const url = 'https://raw.githubusercontent.com/boundlessgeo/ol-mapbox-style/master/example/data/wms.json';
-    store.dispatch(mapActions.setContext({ url }));
-  };
-
-  * End of old demo functions.
-  */
+  store.dispatch(mapActions.addLayer({
+    id: 'overlay',
+    source: 'overlay',
+    type: 'raster',
+    paint: { 'raster-opacity': 0.85 },
+  }));
 
   // This doesn't do anything particularly impressive
   // other than recenter the map on null-island.
@@ -209,54 +162,8 @@ function main() {
   const removeRandomPoints = () => {
     store.dispatch(mapActions.removeFeatures('points', ['==', 'isRandom', true]));
   };
-
-  // Component to update map name from user input.
-  class InputField extends React.PureComponent {
-    constructor(props) {
-      super(props);
-      this.state = { value: store.getState().map.name };
-      this.handleSubmit = this.handleSubmit.bind(this);
-      this.updateMapName = this.updateMapName.bind(this);
-    }
-    updateMapName(event) {
-      this.setState({ value: event.target.value });
-    }
-    handleSubmit(event) {
-      event.preventDefault();
-      store.dispatch(mapActions.setMapName(this.state.value));
-      this.setState({ value: '' });
-    }
-    render() {
-      return (
-        <div className="mapName">
-          <form onSubmit={this.handleSubmit}>
-            <div className="mapForm">
-              <label className="nameLabel" htmlFor="nameField">Change Name:</label>
-              <input className="nameField" placeholder="Enter new map name here" type="text" id="nameField" value={this.state.value} onChange={this.updateMapName} />
-              <button className="sdk-btn" type="submit">Change Map Name</button>
-            </div>
-          </form>
-          <div className="newName">New Map Name: {store.getState().map.name}</div>
-        </div>
-      );
-    }
-  }
-  // Updates minzoom level on Null Island layer.
-  const updateMinzoom = () => {
-    store.dispatch(mapActions.updateLayer('null-island', {
-      source: 'points',
-      type: 'circle',
-      paint: {
-        'circle-radius': 10,
-        'circle-color': '#f03b20',
-        'circle-stroke-color': '#f03b20',
-      },
-      minzoom: 2,
-    }));
-  };
-
   // place the map on the page.
-  ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
+  ReactDOM.render(<SdkMap projection="EPSG:4326" store={store} />, document.getElementById('map'));
 
   // add some buttons to demo some actions.
   ReactDOM.render((
@@ -264,8 +171,6 @@ function main() {
       <button className="sdk-btn" onClick={zoomToNullIsland}>Zoom to Null Island</button>
       <button className="sdk-btn" onClick={addRandomPoints}>Add 10 random points</button>
       <button className="sdk-btn blue" onClick={removeRandomPoints}>Remove random points</button>
-      <button className="sdk-btn" onClick={updateMinzoom}>Update Min Zoom</button>
-      <InputField />
 
       <SdkHashHistory store={store} />
     </div>

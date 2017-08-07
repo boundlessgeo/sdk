@@ -26,7 +26,7 @@ const store = createStore(combineReducers({
 
 function main() {
   // Start with a reasonable global view of hte map.
-  store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 2));
+  store.dispatch(mapActions.setView([-93, 45], 5));
 
   // add the OSM source
   store.dispatch(mapActions.addSource('osm', {

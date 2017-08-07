@@ -14,12 +14,15 @@ import TileJSONSource from 'ol/source/tilejson';
 import { createStore, combineReducers } from 'redux';
 
 import ConnectedMap, { Map } from '../../src/components/map';
+import SdkPopup from '../../src/components/map/popup';
 import MapReducer from '../../src/reducers/map';
+import PrintReducer from '../../src/reducers/print';
 import * as MapActions from '../../src/actions/map';
+import * as PrintActions from '../../src/actions/print';
 
 describe('Map component', () => {
   it('should render without throwing an error', () => {
-    expect(shallow(<Map />).contains(<div className="map" />)).toBe(true);
+    expect(shallow(<Map />).contains(<div className="sdk-map" />)).toBe(true);
   });
 
   it('should create a map', () => {
@@ -219,7 +222,7 @@ describe('Map component', () => {
     expect(layer.getVisible()).toBe(false);
   });
 
-  it('handles updated layers', () => {
+  it('handles updates to source and layer min/maxzoom values', () => {
     const sources = {
       tilejson: {
         type: 'raster',
@@ -230,8 +233,8 @@ describe('Map component', () => {
       id: 'tilejson-layer',
       source: 'tilejson',
       minzoom: 2,
+      maxzoom: 5,
     }];
-
     const metadata = {
       'bnd:source-version': 0,
       'bnd:layer-version': 0,
@@ -246,9 +249,13 @@ describe('Map component', () => {
     const layer = map.getLayers().item(0);
     const view = map.getView();
     let max_rez = view.constrainResolution(
-      view.getMaxResolution(), layers[0].minzoom - view.getMinZoom());
+    view.getMaxResolution(), layers[0].minzoom - view.getMinZoom());
     expect(layer.getMaxResolution()).toEqual(max_rez);
-    const nextProps = {
+    let min_rez = view.constrainResolution(
+    view.getMinResolution(), layers[0].maxzoom - view.getMaxZoom());
+    expect(layer.getMinResolution()).toEqual(min_rez);
+    // min/max zoom values change on layer def
+    let nextProps = {
       map: {
         center,
         zoom,
@@ -261,13 +268,79 @@ describe('Map component', () => {
           id: 'tilejson-layer',
           source: 'tilejson',
           minzoom: 3,
+          maxzoom: 4,
         }],
       },
     };
     instance.shouldComponentUpdate.call(instance, nextProps);
     max_rez = view.constrainResolution(
-      view.getMaxResolution(), nextProps.map.layers[0].minzoom - view.getMinZoom());
+    view.getMaxResolution(), nextProps.map.layers[0].minzoom - view.getMinZoom());
     expect(layer.getMaxResolution()).toEqual(max_rez);
+    min_rez = view.constrainResolution(
+    view.getMinResolution(), nextProps.map.layers[0].maxzoom - view.getMaxZoom());
+    expect(layer.getMinResolution()).toEqual(min_rez);
+    // min/max zoom values defined on source only
+    nextProps = {
+      map: {
+        center,
+        zoom,
+        metadata: {
+          'bnd:source-version': 1,
+          'bnd:layer-version': 2,
+        },
+        sources: {
+          tilejson: {
+            type: 'raster',
+            url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure',
+            minzoom: 4,
+            maxzoom: 8,
+          },
+        },
+        layers: [{
+          id: 'tilejson-layer',
+          source: 'tilejson',
+        }],
+      },
+    };
+    instance.shouldComponentUpdate.call(instance, nextProps);
+    max_rez = view.constrainResolution(
+    view.getMaxResolution(), nextProps.map.sources.tilejson.minzoom - view.getMinZoom());
+    expect(layer.getMaxResolution()).toEqual(max_rez);
+    min_rez = view.constrainResolution(
+    view.getMinResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMaxZoom());
+    expect(layer.getMinResolution()).toEqual(min_rez);
+    // min.max zoom values defined on both source and layer def
+    nextProps = {
+      map: {
+        center,
+        zoom,
+        metadata: {
+          'bnd:source-version': 2,
+          'bnd:layer-version': 3,
+        },
+        sources: {
+          tilejson: {
+            type: 'raster',
+            url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure',
+            minzoom: 1,
+            maxzoom: 7,
+          },
+        },
+        layers: [{
+          id: 'tilejson-layer',
+          source: 'tilejson',
+          minzoom: 2,
+          maxzoom: 9,
+        }],
+      },
+    };
+    instance.shouldComponentUpdate.call(instance, nextProps);
+    max_rez = view.constrainResolution(
+    view.getMaxResolution(), nextProps.map.layers[0].minzoom - view.getMinZoom());
+    expect(layer.getMaxResolution()).toEqual(max_rez);
+    min_rez = view.constrainResolution(
+      view.getMinResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMaxZoom());
+    expect(layer.getMinResolution()).toEqual(min_rez);
   });
 
   it('should handle layer removal and re-adding', () => {
@@ -360,6 +433,99 @@ describe('Map component', () => {
       map: MapReducer,
     }));
     mount(<ConnectedMap store={store} />);
+  });
+
+  it('should trigger the setView callback', () => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+    }));
+
+    const wrapper = mount(<ConnectedMap store={store} />);
+    const sdk_map = wrapper.instance().getWrappedInstance();
+
+    store.dispatch(MapActions.setView([-45, -45], 11));
+
+    sdk_map.map.getView().setCenter([0, 0]);
+    sdk_map.map.dispatchEvent({
+      type: 'moveend',
+    });
+
+    expect(store.getState().map.center).toEqual([0, 0]);
+  });
+
+  it('should trigger renderSync on export image', () => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+      print: PrintReducer,
+    }));
+    const props = {
+      store,
+    };
+
+    const wrapper = mount(<ConnectedMap {...props} />);
+    const sdk_map = wrapper.instance().getWrappedInstance();
+    spyOn(sdk_map.map, 'renderSync');
+    store.dispatch(PrintActions.exportMapImage());
+
+    // renderSync should get called.
+    expect(sdk_map.map.renderSync).toHaveBeenCalled();
+  });
+
+  it('should trigger the popup-related callbacks', () => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+    }));
+    const onClick = () => { };
+
+    // create a props dictionary which
+    //  can include a spy.
+    const props = {
+      store,
+      onClick,
+    };
+    spyOn(props, 'onClick');
+
+    const wrapper = mount(<ConnectedMap {...props} />);
+    const sdk_map = wrapper.instance().getWrappedInstance();
+    sdk_map.map.dispatchEvent({
+      type: 'postcompose',
+    });
+
+    sdk_map.map.dispatchEvent({
+      type: 'singleclick',
+      coordinate: [0, 0],
+      // this fakes the clicking of the canvas.
+      originalEvent: {
+        // eslint-disable-next-line no-underscore-dangle
+        target: sdk_map.map.getRenderer().canvas_,
+      },
+    });
+
+    // onclick should get called when the map is clicked.
+    expect(props.onClick).toHaveBeenCalled();
+  });
+
+  it('should create an overlay for the initialPopups', () => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+    }));
+
+    const props = {
+      store,
+      initialPopups: [(<SdkPopup coordinate={[0, 0]}><div>foo</div></SdkPopup>)],
+    };
+
+
+    const wrapper = mount(<ConnectedMap {...props} />);
+    const sdk_map = wrapper.instance().getWrappedInstance();
+
+    expect(sdk_map.map.getOverlays().getLength()).toEqual(0);
+
+    sdk_map.map.dispatchEvent({
+      type: 'postcompose',
+    });
+
+    expect(sdk_map.map.getOverlays().getLength()).toEqual(1);
   });
 
   it('should change the sprites and redraw the layer', () => {

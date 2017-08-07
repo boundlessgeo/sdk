@@ -16,7 +16,7 @@ export function setView(center, zoom) {
 export function setMapName(name) {
   return {
     type: MAP.SET_NAME,
-    name: { name },
+    name,
   };
 }
 
@@ -81,12 +81,11 @@ export function setClusterRadius(sourceName, radius) {
   };
 }
 
-export function addFeatures(sourceName, features, crs) {
+export function addFeatures(sourceName, features) {
   return {
     type: MAP.ADD_FEATURES,
     sourceName,
     features,
-    crs
   };
 }
 

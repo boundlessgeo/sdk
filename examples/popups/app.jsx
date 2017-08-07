@@ -114,7 +114,7 @@ function addPoints(sourceName, n_points = 10) {
 
 function main() {
   // Start with a reasonable global view of the map.
-  store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 1));
+  store.dispatch(mapActions.setView([-15, 30], 2));
 
   // add the OSM source
   store.dispatch(mapActions.addSource('osm', {
