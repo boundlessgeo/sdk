@@ -827,9 +827,16 @@ describe('map reducer', () => {
       id: 'a',
       source: 'osm',
     };
-
     const layer_b = {
       id: 'b',
+      source: 'osm',
+    };
+    const layer_c = {
+      id: 'c',
+      source: 'osm',
+    };
+    const layer_d = {
+      id: 'd',
       source: 'osm',
     };
 
@@ -839,7 +846,7 @@ describe('map reducer', () => {
         type: 'raster',
       },
       layers: [
-        layer_a, layer_b,
+        layer_a, layer_b, layer_c, layer_d
       ],
     };
 
@@ -850,7 +857,39 @@ describe('map reducer', () => {
       layerId: layer_b.id,
       targetId: layer_a.id,
     };
-    expect(reducer(state, action).layers).toEqual([layer_b, layer_a]);
+    expect(reducer(state, action).layers).toEqual([layer_b, layer_a, layer_c, layer_d]);
+
+    // Move C up
+    const c_up_action = {
+      type: MAP.ORDER_LAYER,
+      layerId: layer_c.id,
+      targetId: layer_d.id,
+    };
+    expect(reducer(state, c_up_action).layers).toEqual([layer_a, layer_b, layer_d, layer_c]);
+
+    // Move B up
+    const b_up_action = {
+      type: MAP.ORDER_LAYER,
+      layerId: layer_b.id,
+      targetId: layer_c.id,
+    };
+    expect(reducer(state, b_up_action).layers).toEqual([layer_a, layer_c, layer_b, layer_d]);
+
+    // Move C down
+    const c_down_action = {
+      type: MAP.ORDER_LAYER,
+      layerId: layer_c.id,
+      targetId: layer_b.id,
+    };
+    expect(reducer(state, c_down_action).layers).toEqual([layer_a, layer_c, layer_b, layer_d]);
+
+    // Move D down
+    const d_down_action = {
+      type: MAP.ORDER_LAYER,
+      layerId: layer_d.id,
+      targetId: layer_c.id,
+    };
+    expect(reducer(state, d_down_action).layers).toEqual([layer_a, layer_b, layer_d, layer_c]);
 
     const top_action = {
       type: MAP.ORDER_LAYER,
@@ -864,7 +903,7 @@ describe('map reducer', () => {
       layerId: 4,
       targetId: layer_a.id,
     };
-    expect(reducer(state, null_action).layers).toEqual([layer_a, layer_b]);
+    expect(reducer(state, null_action).layers).toEqual([layer_a, layer_b, layer_c, layer_d]);
   });
 
   it('should update the map metadata', () => {
