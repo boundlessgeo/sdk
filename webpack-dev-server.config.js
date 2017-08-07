@@ -53,6 +53,10 @@ const config = {
       'webpack/hot/only-dev-server',
       './examples/export-image/app.jsx',
     ],
+    'basic-wgs84': [
+      'webpack/hot/only-dev-server',
+      './examples/basic-wgs84/app.jsx'
+    ],
   },
   // Server Configuration options
   devServer: {

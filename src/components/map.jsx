@@ -68,7 +68,7 @@ function getVersion(obj, key) {
   return obj.metadata[key];
 }
 
-function configureXyzSource(glSource) {
+function configureXyzSource(glSource, mapProjection) {
   const source = new XyzSource({
     attributions: glSource.attribution,
     minZoom: glSource.minzoom,
@@ -76,6 +76,7 @@ function configureXyzSource(glSource) {
     tileSize: glSource.tileSize || 512,
     urls: glSource.tiles,
     crossOrigin: 'crossOrigin' in glSource ? glSource.crossOrigin : 'anonymous',
+    projection: mapProjection,
   });
 
   source.setTileLoadFunction((tile, src) => {
@@ -125,6 +126,13 @@ function configureMvtSource(glSource) {
 
 function updateGeojsonSource(olSource, glSource, mapProjection) {
   // parse the new features,
+<<<<<<< bf1ba1dd61e046bcd179bb8cf1bb1bf9b0917a69
+=======
+  // TODO: This should really check the map for the correct projection.
+  const features = GEOJSON_FORMAT.readFeatures(glSource.data, {
+    featureProjection: mapProjection,
+  });
+>>>>>>> Added EPSG:4326 example. (#585)
 
   if (glSource.data.features) {
     const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: mapProjection || 'EPSG:4326' });
@@ -158,7 +166,7 @@ function updateGeojsonSource(olSource, glSource, mapProjection) {
  *
  * @returns ol.source.vector instance.
  */
-function configureGeojsonSource(glSource) {
+function configureGeojsonSource(glSource, mapProjection) {
   const vector_src = new VectorSource({
     useSpatialIndex: true,
     wrapX: false,
@@ -179,20 +187,20 @@ function configureGeojsonSource(glSource) {
 
   // seed the vector source with the first update
   //  before returning it.
-  updateGeojsonSource(new_src, glSource);
+  updateGeojsonSource(new_src, glSource, mapProjection);
   return new_src;
 }
 
-function configureSource(glSource) {
+function configureSource(glSource, mapProjection) {
   // tiled raster layer.
   if (glSource.type === 'raster') {
     if ('tiles' in glSource) {
-      return configureXyzSource(glSource);
+      return configureXyzSource(glSource, mapProjection);
     } else if (glSource.url) {
       return configureTileJSONSource(glSource);
     }
   } else if (glSource.type === 'geojson') {
-    return configureGeojsonSource(glSource);
+    return configureGeojsonSource(glSource, mapProjection);
   } else if (glSource.type === 'image') {
     return configureImageSource(glSource);
   } else if (glSource.type === 'vector') {
@@ -242,12 +250,14 @@ export class Map extends React.Component {
    *  what needs to be updated on the map.
    */
   shouldComponentUpdate(nextProps) {
+    const map_proj = this.map.getView().getProjection();
+
     // compare the centers
     if (nextProps.map.center[0] !== this.props.map.center[0]
       || nextProps.map.center[1] !== this.props.map.center[1]
       || nextProps.map.zoom !== this.props.map.zoom) {
       // convert the center point to map coordinates.
-      const center = Proj.transform(nextProps.map.center, 'EPSG:4326', this.map.getView().getProjection());
+      const center = Proj.transform(nextProps.map.center, 'EPSG:4326', map_proj);
       this.map.getView().setCenter(center);
       this.map.getView().setZoom(nextProps.map.zoom);
     }
@@ -274,7 +284,7 @@ export class Map extends React.Component {
 
         if (this.props.map.metadata[version_key] !== nextProps.map.metadata[version_key]) {
           const next_src = nextProps.map.sources[src_name];
-          updateGeojsonSource(this.sources[src_name], next_src, this.map.getView().getProjection());
+          updateGeojsonSource(this.sources[src_name], next_src, map_proj);
         }
       }
     }
@@ -344,7 +354,8 @@ export class Map extends React.Component {
       // Add the source because it's not in the current
       //  list of sources.
       if (!(src_name in this.sources)) {
-        this.sources[src_name] = configureSource(sourcesDef[src_name]);
+        const proj = this.map.getView().getProjection();
+        this.sources[src_name] = configureSource(sourcesDef[src_name], proj);
       }
 
       // Check to see if there was a clustering change.
@@ -680,7 +691,6 @@ export class Map extends React.Component {
         projection: map_proj,
       }),
     });
-
 
     // when the map moves update the location in the state
     this.map.on('moveend', () => {
