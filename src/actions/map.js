@@ -16,7 +16,7 @@ export function setView(center, zoom) {
 export function setMapName(name) {
   return {
     type: MAP.SET_NAME,
-    name: { name },
+    name,
   };
 }
 

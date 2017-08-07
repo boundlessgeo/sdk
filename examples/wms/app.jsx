@@ -90,7 +90,7 @@ const store = createStore(combineReducers({
 
 function main() {
   // start in the middle of america
-  store.dispatch(mapActions.setView([-10895923.706980927, 4656189.67701237], 4));
+  store.dispatch(mapActions.setView([-98, 40], 4));
 
   // add the OSM source
   store.dispatch(mapActions.addSource('osm', {

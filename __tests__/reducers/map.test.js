@@ -63,6 +63,56 @@ describe('map reducer', () => {
     });
   });
 
+  it('should handle SET_NAME', () => {
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {},
+      layers: [],
+    };
+    const name = 'New Name';
+    deepFreeze(state);
+    const action = {
+      type: MAP.SET_NAME,
+      name,
+    };
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual({
+      version: 8,
+      name: 'New Name',
+      center: [0, 0],
+      zoom: 3,
+      sources: {},
+      layers: [],
+    });
+  });
+
+  it('should handle RECEIVE_CONTEXT', () => {
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {},
+      layers: [],
+    };
+    deepFreeze(state);
+    const context = {
+      version: 9,
+      name: 'foo',
+      center: [10, 10],
+      zoom: 4,
+    };
+    const action = {
+      type: MAP.RECEIVE_CONTEXT,
+      context,
+    };
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual(context);
+  });
+
   it('should handle SET_LAYER_METADATA', () => {
     const title = 'Background';
     const layer = {
@@ -126,7 +176,12 @@ describe('map reducer', () => {
         'background-color': 'rgba(0,0,0,0)',
       },
     };
+    const osm = {
+      id: 'osm',
+      source: 'osm',
+    };
     deepFreeze(layer);
+    deepFreeze(osm);
     const action = {
       type: MAP.SET_LAYER_VISIBILITY,
       layerId: 'background',
@@ -142,7 +197,7 @@ describe('map reducer', () => {
         'bnd:layer-version': 0,
       },
       sources: {},
-      layers: [layer],
+      layers: [layer, osm],
     };
     deepFreeze(state);
     deepFreeze(action);
@@ -166,9 +221,46 @@ describe('map reducer', () => {
           layout: {
             visibility: 'none',
           },
+        }, {
+          id: 'osm',
+          source: 'osm',
         },
       ],
     });
+  });
+
+  it('should handle SET_LAYER_VISIBILITY if nothing changed', () => {
+    const layer = {
+      id: 'background',
+      type: 'background',
+      paint: {
+        'background-color': 'rgba(0,0,0,0)',
+      },
+    };
+    const osm = {
+      id: 'osm',
+      source: 'osm',
+    };
+    deepFreeze(layer);
+    deepFreeze(osm);
+    const action = {
+      type: MAP.SET_LAYER_VISIBILITY,
+    };
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+      },
+      sources: {},
+      layers: [layer, osm],
+    };
+    deepFreeze(state);
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual(state);
   });
 
   it('should handle REMOVE_LAYER', () => {
@@ -484,6 +576,37 @@ describe('map reducer', () => {
     });
   });
 
+  it('should handle ADD_FEATURES with unknown type', () => {
+    // since we do not go through ADD_SOURCE we need to set _dataVersion
+    // eslint-disable-next-line
+    const source = {data: {type:'Foo'}};
+    deepFreeze(source);
+    const action = {
+      type: MAP.ADD_FEATURES,
+      sourceName: 'points',
+      // eslint-disable-next-line
+      features: [{type:'Feature',properties:{'n':27,'cat':2},geometry:{type:'Point',coordinates:[2.5,5.5]}},{type:'Feature',properties:{'n':28,'cat':1},'geometry':{type:'Point',coordinates:[2.5,6.5]}}]
+    };
+    deepFreeze(action);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {
+        points: source,
+      },
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+      },
+      layers: [],
+    };
+    deepFreeze(state);
+    // since type is not known, it returns the passed in state
+    expect(reducer(state, action)).toEqual(state);
+  });
+
   it('should handle ADD_FEATURES to add action features to a source feature', () => {
     // since we do not go through ADD_SOURCE we need to set _dataVersion
     // eslint-disable-next-line
@@ -582,7 +705,80 @@ describe('map reducer', () => {
     });
   });
 
-  it('should handle REMOVE_FEATURES', () => {
+  it('should handle REMOVE_FEATURES with unknown type', () => {
+    // eslint-disable-next-line
+    const source = {data: {type:'Foo',properties:{'n':3,'cat':2},'geometry':{type:'Point',coordinates:[0.5,1.5]}}};
+    deepFreeze(source);
+    const action = {
+      type: MAP.REMOVE_FEATURES,
+      sourceName: 'points',
+      filter: ['all', ['<=', 'n', 3]],
+    };
+    deepFreeze(action);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {
+        points: source,
+      },
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+        'bnd:data-version:points': 0,
+      },
+      layers: [],
+    };
+    // eslint-disable-next-line
+    expect(reducer(state, action)).toEqual(state);
+  });
+
+  it('should handle REMOVE_FEATURES with Feature as a source', () => {
+    // eslint-disable-next-line
+    const source = {data: {type:'Feature',properties:{'n':3,'cat':2},'geometry':{type:'Point',coordinates:[0.5,1.5]}}};
+    deepFreeze(source);
+    const action = {
+      type: MAP.REMOVE_FEATURES,
+      sourceName: 'points',
+      filter: ['all', ['<=', 'n', 3]],
+    };
+    deepFreeze(action);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {
+        points: source,
+      },
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+        'bnd:data-version:points': 0,
+      },
+      layers: [],
+    };
+    // eslint-disable-next-line
+    const newSource = {data: {type:'FeatureCollection', features: []}};
+    expect(reducer(state, action)).toEqual({
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: {
+        points: newSource,
+      },
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+        'bnd:data-version:points': 1,
+      },
+      layers: [],
+    });
+  });
+
+  it('should handle REMOVE_FEATURES with FeatureCollection as a source', () => {
     // eslint-disable-next-line
     const source = {data: {type:'FeatureCollection',crs:{type:'name',properties:{'name':'urn:ogc:def:crs:OGC:1.3:CRS84'}},features:[{type:'Feature',properties:{'n':2,'cat':1},geometry:{type:'Point',coordinates:[0.5,0.5]}},{type:'Feature',properties:{'n':3,'cat':2},'geometry':{type:'Point',coordinates:[0.5,1.5]}}]}};
     deepFreeze(source);
@@ -726,6 +922,83 @@ describe('map reducer', () => {
       'bnd:layer-version': 0,
       'bnd:some-key': 'other-value',
       'bnd:new-key': 'new-value',
+    });
+  });
+
+  it('should handle CLUSTER_POINTS', () => {
+    const layer = {
+      id: 'my-points',
+      source: 'points',
+    };
+    const source = {
+      data: {
+        type: 'FeatureCollection',
+        features: [],
+      },
+    };
+    deepFreeze(layer);
+    deepFreeze(source);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: { points: source },
+      layers: [layer],
+    };
+    const action = {
+      type: MAP.CLUSTER_POINTS,
+      sourceName: 'points',
+      cluster: true,
+    };
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual({
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: { points: { data: { type: 'FeatureCollection', features: [] }, cluster: true, clusterRadius: 50 } },
+      layers: [{ id: 'my-points', source: 'points' }],
+      metadata: { 'bnd:source-version': 1 },
+    });
+  });
+
+  it('should handle SET_CLUSTER_RADIUS', () => {
+    const layer = {
+      id: 'my-points',
+      source: 'points',
+    };
+    const source = {
+      data: {
+        type: 'FeatureCollection',
+        features: [],
+      },
+    };
+    deepFreeze(layer);
+    deepFreeze(source);
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: { points: source },
+      layers: [layer],
+    };
+    const action = {
+      type: MAP.SET_CLUSTER_RADIUS,
+      sourceName: 'points',
+      cluster: true,
+      radius: 10,
+    };
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual({
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      sources: { points: { data: { type: 'FeatureCollection', features: [] }, cluster: true, clusterRadius: 10 } },
+      layers: [{ id: 'my-points', source: 'points' }],
+      metadata: { 'bnd:source-version': 1 },
     });
   });
 });

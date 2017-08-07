@@ -7,17 +7,12 @@
 
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-/** Basic Application.
- *
- *  Creates a map with OSM tiles and a GeoJSON source
- *  and layer.
- *
- */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 
 import SdkMap from '@boundlessgeo/sdk/components/map';
+import SdkHashHistory from '@boundlessgeo/sdk/components/history';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
@@ -32,7 +27,7 @@ const store = createStore(combineReducers({
 
 function main() {
   // Start with a reasonable global view of the map.
-  store.dispatch(mapActions.setView([-1759914.3204498321, 3236495.368492126], 2));
+  store.dispatch(mapActions.setView([-93, 45], 2));
 
   store.dispatch(mapActions.setMapName('Basic Map Example'));
 
@@ -98,7 +93,6 @@ function main() {
       'circle-color': '#feb24c',
       'circle-stroke-color': '#f03b20',
     },
-    minzoom: 1,
   }));
 
   // The points source has both null island
@@ -221,6 +215,8 @@ function main() {
     constructor(props) {
       super(props);
       this.state = { value: store.getState().map.name };
+      this.handleSubmit = this.handleSubmit.bind(this);
+      this.updateMapName = this.updateMapName.bind(this);
     }
     updateMapName(event) {
       this.setState({ value: event.target.value });
@@ -270,6 +266,8 @@ function main() {
       <button className="sdk-btn blue" onClick={removeRandomPoints}>Remove random points</button>
       <button className="sdk-btn" onClick={updateMinzoom}>Update Min Zoom</button>
       <InputField />
+
+      <SdkHashHistory store={store} />
     </div>
   ), document.getElementById('controls'));
 }

@@ -1,0 +1,12 @@
+#controls .legend-label {
+    text-decoration: underline;
+    padding-top: .5em;
+    padding-bottom: .25em;
+    display: block;
+}
+
+#controls, .info {
+    display: inline-block;
+    width: 49%;
+    vertical-align: top;
+}

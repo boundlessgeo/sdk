@@ -15,8 +15,11 @@ import OlMap from 'ol/map';
 import View from 'ol/view';
 import Overlay from 'ol/overlay';
 
+import Observable from 'ol/observable';
+
 import Proj from 'ol/proj';
 import Coordinate from 'ol/coordinate';
+import Sphere from 'ol/sphere';
 
 import TileLayer from 'ol/layer/tile';
 import XyzSource from 'ol/source/xyz';
@@ -35,23 +38,31 @@ import VectorSource from 'ol/source/vector';
 
 import GeoJsonFormat from 'ol/format/geojson';
 
+import DrawInteraction from 'ol/interaction/draw';
+import ModifyInteraction from 'ol/interaction/modify';
+import SelectInteraction from 'ol/interaction/select';
+
 import { setView } from '../actions/map';
-import { LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
+import { INTERACTIONS, LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
 import { dataVersionKey } from '../reducers/map';
+
+import { setMeasureFeature, clearMeasureFeature } from '../actions/drawing';
 
 import ClusterSource from '../source/cluster';
 
-import { jsonEquals, getLayerById } from '../util';
+import { jsonEquals, getLayerById, getMin, getMax } from '../util';
 
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
+const WGS84_SPHERE = new Sphere(6378137);
+
 
 /** This variant of getVersion differs as it allows
  *  for undefined values to be returned.
  */
 
 function getVersion(obj, key) {
-  if (typeof obj.metadata === 'undefined') {
+  if (obj.metadata === undefined) {
     return undefined;
   }
   return obj.metadata[key];
@@ -115,36 +126,28 @@ function configureMvtSource(glSource) {
 function updateGeojsonSource(olSource, glSource, mapProjection) {
   // parse the new features,
 
-  let features;
-  let glSourceCrs;
-  if(glSource.crs && glSource.crs.properties && glSource.crs.properties.name){
-    glSourceCrs = glSource.crs.properties.name;
-  }
+  if (glSource.data.features) {
+    const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: mapProjection || 'EPSG:4326' });
 
-  if(glSource.data.features){
-    const readFeatureOptions = { featureProjection: mapProjection || 'EPSG:3857',
-      dataProjection: glSourceCrs}
-    features = GEOJSON_FORMAT.readFeatures(glSource.data,readFeatureOptions);
-  }
+    let vector_src = olSource;
 
-  let vector_src = olSource;
+    // if the source is clustered then
+    //  the actual data is stored on the source's source.
+    if (glSource.cluster) {
+      vector_src = olSource.getSource();
 
-  // if the source is clustered then
-  //  the actual data is stored on the source's source.
-  if (glSource.cluster) {
-    vector_src = olSource.getSource();
-
-    if (glSource.clusterRadius !== olSource.getDistance()) {
-      olSource.setDistance(glSource.clusterRadius);
+      if (glSource.clusterRadius !== olSource.getDistance()) {
+        olSource.setDistance(glSource.clusterRadius);
+      }
     }
-  }
 
-  if(features){
     // clear the layer WITHOUT dispatching remove events.
     vector_src.clear(true);
     // bulk load the feature data
-    vector_src.addFeatures(features || null);
 
+    if (features !== undefined) {
+      vector_src.addFeatures(features);
+    }
   }
 }
 
@@ -204,13 +207,6 @@ function getResolutionForZoom(map, zoom) {
   return view.constrainResolution(max_rez, zoom - view.getMinZoom());
 }
 
-function getResolutionForZoom(map, zoom) {
-  const view = map.getView();
-  const max_rez = view.getMaxResolution();
-  return view.constrainResolution(max_rez, zoom - view.getMinZoom());
-}
-
-
 export class Map extends React.Component {
 
   constructor(props) {
@@ -228,6 +224,10 @@ export class Map extends React.Component {
 
     // popups are stored as an ID managed hash.
     this.popups = {};
+
+    // interactions are how the user can manipulate the map,
+    //  this tracks any active interaction.
+    this.activeInteractions = null;
   }
 
   componentDidMount() {
@@ -246,7 +246,9 @@ export class Map extends React.Component {
     if (nextProps.map.center[0] !== this.props.map.center[0]
       || nextProps.map.center[1] !== this.props.map.center[1]
       || nextProps.map.zoom !== this.props.map.zoom) {
-      this.map.getView().setCenter(nextProps.map.center);
+      // convert the center point to map coordinates.
+      const center = Proj.transform(nextProps.map.center, 'EPSG:4326', this.map.getView().getProjection());
+      this.map.getView().setCenter(center);
       this.map.getView().setZoom(nextProps.map.zoom);
     }
 
@@ -272,7 +274,7 @@ export class Map extends React.Component {
 
         if (this.props.map.metadata[version_key] !== nextProps.map.metadata[version_key]) {
           const next_src = nextProps.map.sources[src_name];
-          updateGeojsonSource(this.sources[src_name], next_src, this.map.getView().getProjection().getCode());
+          updateGeojsonSource(this.sources[src_name], next_src, this.map.getView().getProjection());
         }
       }
     }
@@ -286,10 +288,47 @@ export class Map extends React.Component {
       this.configureSprites(nextProps.map);
     }
 
+    // change the current interaction as needed
+    if (nextProps.drawing && (nextProps.drawing.interaction !== this.props.drawing.interaction
+        || nextProps.drawing.sourceName !== this.props.drawing.sourceName)) {
+      this.updateInteraction(nextProps.drawing);
+    }
+
+    if (nextProps.print && nextProps.print.exportImage) {
+      // this uses the canvas api to get the map image
+      this.map.once('postcompose', (evt) => { evt.context.canvas.toBlob(this.props.onExportImage); }, this);
+      this.map.renderSync();
+    }
+
     // This should always return false to keep
     // render() from being called.
     return false;
   }
+
+  /** Callback for finished drawings, converts the event's feature
+   *  to GeoJSON and then passes the relevant information on to
+   *  this.props.onFeatureDrawn.
+   */
+  onFeatureEvent(eventType, sourceName, feature) {
+    if (feature !== undefined) {
+      // convert the feature to GeoJson
+      const proposed_geojson = GEOJSON_FORMAT.writeFeatureObject(feature, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: this.map.getView().getProjection(),
+      });
+
+      // Pass on feature drawn this map object, the target source,
+      //  and the drawn feature.
+      if (eventType === 'drawn') {
+        this.props.onFeatureDrawn(this, sourceName, proposed_geojson);
+      } else if (eventType === 'modified') {
+        this.props.onFeatureModified(this, sourceName, proposed_geojson);
+      } else if (eventType === 'selected') {
+        this.props.onFeatureSelected(this, sourceName, proposed_geojson);
+      }
+    }
+  }
+
 
   /** Convert the GL source definitions into internal
    *  OpenLayers source definitions.
@@ -364,9 +403,6 @@ export class Map extends React.Component {
   configureLayer(sourcesDef, layer) {
     const layer_src = sourcesDef[layer.source];
 
-    // const resolution = this.map.getView().getResolution();
-    // console.log(this.map.getView().getZoomForResolution(resolution))
-
     switch (layer_src.type) {
       case 'raster':
         return new TileLayer({
@@ -432,7 +468,7 @@ export class Map extends React.Component {
       let layer = layersDef[i];
 
       // check to see if this layer references another.
-      if (typeof layer.ref !== 'undefined') {
+      if (layer.ref !== undefined) {
         // find the source layer
         let layer_def = null;
         for (let j = 0, jj = layersDef.length; j < jj && layer_def === null; j++) {
@@ -472,13 +508,18 @@ export class Map extends React.Component {
       // handle updating the layer.
       if (layer !== null && layer.id in this.layers) {
         const ol_layer = this.layers[layer.id];
+        const layer_src = sourcesDef[layer.source];
 
-        if (layer.maxzoom) {
-          const minResolution = getResolutionForZoom(this.map, layer.maxzoom);
+        // check for min/max zoom changes on sources and layers
+        const maxzoom = getMin(layer_src.maxzoom, layer.maxzoom);
+        if (maxzoom) {
+          const minResolution = getResolutionForZoom(this.map, maxzoom);
           ol_layer.setMinResolution(minResolution);
         }
-        if (layer.minzoom) {
-          const maxResolution = getResolutionForZoom(this.map, layer.minzoom);
+
+        const minzoom = getMax(layer_src.minzoom, layer.minzoom);
+        if (minzoom) {
+          const maxResolution = getResolutionForZoom(this.map, minzoom);
           ol_layer.setMaxResolution(maxResolution);
         }
 
@@ -507,7 +548,7 @@ export class Map extends React.Component {
   }
 
   configureSprites(map) {
-    if (typeof map.sprites === 'undefined') {
+    if (map.sprites === undefined) {
       // return a resolved promise.
       return (new Promise((resolve) => {
         resolve();
@@ -616,19 +657,27 @@ export class Map extends React.Component {
 
     // do not trigger an update if silent is
     //  set to true.  Useful for bulk popup additions.
-    if (silent === true) {
+    if (silent !== true) {
       this.updatePopups();
     }
   }
 
   /** Initialize the map */
   configureMap() {
+    // determine the map's projection.
+    const map_proj = this.props.projection;
+
+    // reproject the initial center based on that projection.
+    const center = Proj.transform(this.props.map.center, 'EPSG:4326', map_proj);
+
+    // intiialize the map.
     this.map = new OlMap({
       target: this.mapdiv,
       logo: false,
       view: new View({
-        center: this.props.map.center,
+        center,
         zoom: this.props.map.zoom,
+        projection: map_proj,
       }),
     });
 
@@ -698,6 +747,93 @@ export class Map extends React.Component {
     });
   }
 
+  updateInteraction(drawingProps) {
+    // this assumes the interaction is different,
+    //  so the first thing to do is clear out the old interaction
+    if (this.activeInteractions !== null) {
+      for (let i = 0, ii = this.activeInteractions.length; i < ii; i++) {
+        this.map.removeInteraction(this.activeInteractions[i]);
+      }
+      this.activeInteractions = null;
+    }
+
+    if (drawingProps.interaction === INTERACTIONS.modify) {
+      const select = new SelectInteraction({
+        wrapX: false,
+      });
+
+      const modify = new ModifyInteraction({
+        features: select.getFeatures(),
+      });
+
+      modify.on('modifyend', (evt) => {
+        this.onFeatureEvent('modified', drawingProps.sourceName, evt.features.item(0));
+      });
+
+      this.activeInteractions = [select, modify];
+    } else if (drawingProps.interaction === INTERACTIONS.select) {
+      // TODO: Select is typically a single-feature affair but there
+      //       should be support for multiple feature selections in the future.
+      const select = new SelectInteraction({
+        wrapX: false,
+        layers: (layer) => {
+          const layer_src = this.sources[drawingProps.sourceName];
+          return (layer.getSource() === layer_src);
+        },
+      });
+
+      select.on('select', () => {
+        this.onFeatureEvent('selected', drawingProps.sourcename, select.getFeatures().item(0));
+      });
+
+      this.activeInteractions = [select];
+    } else if (INTERACTIONS.drawing.includes(drawingProps.interaction)) {
+      const draw = new DrawInteraction({
+        type: drawingProps.interaction,
+      });
+
+      draw.on('drawend', (evt) => {
+        this.onFeatureEvent('drawn', drawingProps.sourceName, evt.feature);
+      });
+
+      this.activeInteractions = [draw];
+    } else if (INTERACTIONS.measuring.includes(drawingProps.interaction)) {
+      // clear the previous measure feature.
+      this.props.clearMeasureFeature();
+
+      const measure = new DrawInteraction({
+        // The measure interactions are the same as the drawing interactions
+        // but are prefixed with "measure:"
+        type: drawingProps.interaction.split(':')[1],
+      });
+
+      let measure_listener = null;
+      measure.on('drawstart', (evt) => {
+        const geom = evt.feature.getGeometry();
+        const proj = this.map.getView().getProjection();
+
+        measure_listener = geom.on('change', (geomEvt) => {
+          this.props.setMeasureGeometry(geomEvt.target, proj);
+        });
+
+        this.props.setMeasureGeometry(geom, proj);
+      });
+
+      measure.on('drawend', () => {
+        // remove the listener
+        Observable.unByKey(measure_listener);
+      });
+
+      this.activeInteractions = [measure];
+    }
+
+    if (this.activeInteractions) {
+      for (let i = 0, ii = this.activeInteractions.length; i < ii; i++) {
+        this.map.addInteraction(this.activeInteractions[i]);
+      }
+    }
+  }
+
   render() {
     return (
       <div ref={(c) => { this.mapdiv = c; }} className="map" />
@@ -706,6 +842,7 @@ export class Map extends React.Component {
 }
 
 Map.propTypes = {
+  projection: PropTypes.string,
   map: PropTypes.shape({
     center: PropTypes.array,
     zoom: PropTypes.number,
@@ -714,13 +851,24 @@ Map.propTypes = {
     sources: PropTypes.object,
     sprites: PropTypes.string,
   }),
+  drawing: PropTypes.shape({
+    interaction: PropTypes.string,
+    sourceName: PropTypes.string,
+  }),
   initialPopups: PropTypes.arrayOf(PropTypes.object),
   setView: PropTypes.func,
   includeFeaturesOnClick: PropTypes.bool,
   onClick: PropTypes.func,
+  onFeatureDrawn: PropTypes.func,
+  onFeatureModified: PropTypes.func,
+  onFeatureSelected: PropTypes.func,
+  onExportImage: PropTypes.func,
+  setMeasureGeometry: PropTypes.func,
+  clearMeasureFeature: PropTypes.func,
 };
 
 Map.defaultProps = {
+  projection: 'EPSG:3857',
   map: {
     center: [0, 0],
     zoom: 2,
@@ -729,6 +877,10 @@ Map.defaultProps = {
     sources: {},
     sprites: undefined,
   },
+  drawing: {
+    interaction: null,
+    source: null,
+  },
   initialPopups: [],
   setView: () => {
     // swallow event.
@@ -736,18 +888,60 @@ Map.defaultProps = {
   includeFeaturesOnClick: false,
   onClick: () => {
   },
+  onFeatureDrawn: () => {
+  },
+  onFeatureModified: () => {
+  },
+  onFeatureSelected: () => {
+  },
+  onExportImage: () => {
+  },
+  setMeasureGeometry: () => {
+  },
+  clearMeasureFeature: () => {
+  },
 };
 
 function mapStateToProps(state) {
   return {
     map: state.map,
+    drawing: state.drawing,
+    print: state.print,
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     setView: (view) => {
-      dispatch(setView(view.getCenter(), view.getZoom()));
+      // transform the center to 4326 before dispatching the action.
+      const center = Proj.transform(view.getCenter(), view.getProjection(), 'EPSG:4326');
+      dispatch(setView(center, view.getZoom()));
+    },
+    setMeasureGeometry: (geometry, projection) => {
+      const geom = GEOJSON_FORMAT.writeGeometryObject(geometry, {
+        featureProjection: projection,
+        dataProjection: 'EPSG:4326',
+      });
+      const segments = [];
+      if (geom.type === 'LineString') {
+        for (let i = 0, ii = geom.coordinates.length - 1; i < ii; i++) {
+          const a = geom.coordinates[i];
+          const b = geom.coordinates[i + 1];
+          segments.push(WGS84_SPHERE.haversineDistance(a, b));
+        }
+      } else if (geom.type === 'Polygon' && geom.coordinates.length > 0) {
+        segments.push(Math.abs(WGS84_SPHERE.geodesicArea(geom.coordinates[0])));
+      }
+
+
+      dispatch(setMeasureFeature({
+        type: 'Feature',
+        properties: {},
+        geometry: geom,
+      }, segments));
+    },
+    clearMeasureFeature: () => {
+      dispatch(clearMeasureFeature());
     },
   };
 }
