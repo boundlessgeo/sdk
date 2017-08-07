@@ -98,7 +98,7 @@ function main() {
     addLayerFromGeoJSON(url, 'dynamic-source');
   };
 
-  //Next few functions are all about building the feature Table
+  // Next few functions are all about building the feature Table
 
   // Next few functions are all about building the feature Table
   // Read the source and get all the possible properties

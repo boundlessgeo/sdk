@@ -123,34 +123,37 @@ function configureMvtSource(glSource) {
   return source;
 }
 
-
 function updateGeojsonSource(olSource, glSource, mapProjection) {
   // parse the new features,
 
+  let features;
+
   if (glSource.data.features) {
-    const features = GEOJSON_FORMAT.readFeatures(glSource.data, { featureProjection: mapProjection || 'EPSG:4326' });
+    const readFeatureOpt = { featureProjection: mapProjection || 'EPSG:3857' };
+    features = GEOJSON_FORMAT.readFeatures(glSource.data, readFeatureOpt);
+  }
 
-    let vector_src = olSource;
+  let vector_src = olSource;
 
-    // if the source is clustered then
-    //  the actual data is stored on the source's source.
-    if (glSource.cluster) {
-      vector_src = olSource.getSource();
+  // if the source is clustered then
+  //  the actual data is stored on the source's source.
+  if (glSource.cluster) {
+    vector_src = olSource.getSource();
 
-      if (glSource.clusterRadius !== olSource.getDistance()) {
-        olSource.setDistance(glSource.clusterRadius);
-      }
-    }
-
-    // clear the layer WITHOUT dispatching remove events.
-    vector_src.clear(true);
-    // bulk load the feature data
-
-    if (features !== undefined) {
-      vector_src.addFeatures(features);
+    if (glSource.clusterRadius !== olSource.getDistance()) {
+      olSource.setDistance(glSource.clusterRadius);
     }
   }
+
+  // clear the layer WITHOUT dispatching remove events.
+  vector_src.clear(true);
+
+  if (features) {
+    // bulk load the feature data
+    vector_src.addFeatures(features || null);
+  }
 }
+
 
 /** Create a vector source based on a
  *  MapBox GL styles definition.

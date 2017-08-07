@@ -22,7 +22,7 @@ import * as PrintActions from '../../src/actions/print';
 
 describe('Map component', () => {
   it('should render without throwing an error', () => {
-    expect(shallow(<Map />).contains(<div className="map" />)).toBe(true);
+    expect(shallow(<Map />).contains(<div className="sdk-map" />)).toBe(true);
   });
 
   it('should create a map', () => {
