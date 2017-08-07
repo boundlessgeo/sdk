@@ -200,14 +200,13 @@ function removeSource(state, action) {
  *        If blank determined by openlayers
 *
  */
-function changeData(state, sourceName, data, crs) {
+function changeData(state, sourceName, data) {
   const source = state.sources[sourceName];
   const src_mixin = {};
 
   // update the individual source.
   src_mixin[sourceName] = Object.assign({}, source, {
     data,
-    crs,
   });
 
   // kick back the new state.
@@ -246,7 +245,7 @@ function addFeatures(state, action) {
   }
 
   if (new_data !== null) {
-    return changeData(state, action.sourceName, new_data, action.crs);
+    return changeData(state, action.sourceName, new_data);
   }
   return state;
 }
