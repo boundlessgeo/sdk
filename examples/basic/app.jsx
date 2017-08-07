@@ -205,11 +205,6 @@ function main() {
     }
   };
 
-  // Cluster points on the map
-  const clusterPoints = () => {
-    store.dispatch(mapActions.clusterPoints('points', !store.getState().map.sources.points.cluster));
-  };
-
   // Removing features uses MapBox GL Spec filters.
   const removeRandomPoints = () => {
     store.dispatch(mapActions.removeFeatures('points', ['==', 'isRandom', true]));
