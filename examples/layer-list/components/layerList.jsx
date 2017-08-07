@@ -6,20 +6,19 @@ import PropTypes from 'prop-types';
 
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
-class layerList extends React.PureComponent {
-
-  static isLayerVisible(layer) {
-    if (typeof layer.layout !== 'undefined') {
-      return layer.layout.visibility !== 'none';
-    }
-    return true;
+const isLayerVisible = (layer) => {
+  if (typeof layer.layout !== 'undefined') {
+    return layer.layout.visibility !== 'none';
   }
+  return true;
+};
 
+class layerList extends React.PureComponent {
   buildListOfLayers(layers) {
     const list = [];
     for (let i = layers.length - 1, ii = 0; i >= ii; i--) {
       const layer = layers[i];
-      const is_checked = this.isLayerVisible(layer);
+      const is_checked = isLayerVisible(layer);
 
       const checkbox = (<input
         type="checkbox"
@@ -38,14 +37,17 @@ class layerList extends React.PureComponent {
   }
 
   render() {
-    return this.buildListOfLayers(this.props.map.layers);
+    return this.buildListOfLayers(this.props.layers);
   }
 }
 
 layerList.propTypes = {
   toggleVisibility: PropTypes.func.isRequired,
   moveLayer: PropTypes.func.isRequired,
-  map: PropTypes.shape.isRequired,
+  layers: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string,
+    source: PropTypes.string,
+  })).isRequired,
 };
 
 layerList.defaultProps = {
@@ -56,7 +58,7 @@ layerList.defaultProps = {
 
 function mapStateToProps(state) {
   return {
-    map: state.map,
+    layers: state.map.layers,
   };
 }
 

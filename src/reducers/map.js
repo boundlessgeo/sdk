@@ -84,48 +84,18 @@ function placeLayer(state, layer, targetId) {
   }, incrementVersion(state.metadata, LAYER_VERSION_KEY));
 }
 
-/** Move a layer in the layers list.
- *
- */
-function reorderLayers(state, sourceLayer, targetLayer) {
-  const new_layers = [];
-
-  // Three possible outcomes from looping over list
-  for (let i = 0, ii = state.layers.length; i < ii; i++) {
-    const l = state.layers[i];
-    // Match source id - push target Layer
-    if (l.id === sourceLayer.id) {
-      new_layers.push(targetLayer);
-    // Match source target - push source Layer
-    } else if (l.id === targetLayer.id) {
-      new_layers.push(sourceLayer);
-    } else {
-    // No matches - push layer
-      new_layers.push(l);
-    }
-  }
-
-  return Object.assign({}, state, {
-    layers: new_layers,
-  }, incrementVersion(state.metadata, LAYER_VERSION_KEY));
-}
-
 /** Change the order of the layer in the stack.
  */
 function orderLayer(state, action) {
-  let sourceLayer = null;
-  let targetLayer = null;
-  for (let i = 0, ii = state.layers.length; i < ii; i++) {
+  let layer = null;
+  for (let i = 0, ii = state.layers.length; i < ii && layer === null; i++) {
     if (state.layers[i].id === action.layerId) {
-      sourceLayer = state.layers[i];
-    }
-    if (state.layers[i].id === action.targetId) {
-      targetLayer = state.layers[i];
+      layer = state.layers[i];
     }
   }
 
-  if (targetLayer !== null && sourceLayer !== null) {
-    return reorderLayers(state, sourceLayer, targetLayer);
+  if (layer !== null) {
+    return placeLayer(state, layer, action.targetId);
   }
   return state;
 }
@@ -224,15 +194,19 @@ function removeSource(state, action) {
 /** Creates a new state with the data for a
  *  source changed to the contents of data.
  *
+ *  @param {object} state - redux state
+ *  @param {string} sourceName - name of the souce to be changed
+ *  @param {array} data -  List of features to be added to the source
+ *        If blank determined by openlayers
+*
  */
-function changeData(state, sourceName, data, crs) {
+function changeData(state, sourceName, data) {
   const source = state.sources[sourceName];
   const src_mixin = {};
 
   // update the individual source.
   src_mixin[sourceName] = Object.assign({}, source, {
     data,
-    crs,
   });
 
   // kick back the new state.
@@ -271,7 +245,7 @@ function addFeatures(state, action) {
   }
 
   if (new_data !== null) {
-    return changeData(state, action.sourceName, new_data, action.crs);
+    return changeData(state, action.sourceName, new_data);
   }
   return state;
 }
