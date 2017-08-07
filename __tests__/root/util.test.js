@@ -53,7 +53,6 @@ describe('util', () => {
 
     expect(util.encodeQueryObject(parsed)).toBe(query_string);
   });
-
   it('reprojects geojson data to target crs', () => {
     const features3857 = [
       {
