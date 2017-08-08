@@ -22,11 +22,6 @@ import '@boundlessgeo/sdk/stylesheet/sdk.scss';
 // include a MeasureTable component for this app.
 import MeasureTable from './measure-table';
 
-
-// include a MeasureTable component for this app.
-import MeasureTable from './measure-table';
-
-
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
   map: SdkMapReducer,
