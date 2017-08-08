@@ -1,7 +1,11 @@
 /** Demo of layer list in an SDK map.
  *
  *  Contains a Map and demonstrates adding many types of layers
+<<<<<<< 81076615dcd38e1deda120055a39fa958a76c315
  *  And a layer list component to manage the layers
+=======
+ *  And a layer list componet to manage the layers
+>>>>>>> Adding in files
  *
  */
 
@@ -69,15 +73,24 @@ function main() {
         error => console.error('An error occured.', error),
       )
       // addFeatures with the features, source name, and crs
+<<<<<<< 81076615dcd38e1deda120055a39fa958a76c315
       .then(json => store.dispatch(mapActions.addFeatures(sourceName, json)));
+=======
+      .then(json => store.dispatch(mapActions.addFeatures(sourceName, json.features, json.crs)));
+>>>>>>> Adding in files
   };
 
   // This is called by the onClick, keeping the onClick HTML clean
   const runFetchGeoJSON = () => {
+<<<<<<< 81076615dcd38e1deda120055a39fa958a76c315
     // const url = './data/airports.json';
     // addLayerFromGeoJSON(url, 'dynamic-source');
     store.dispatch(mapActions.addSource('dynamic-source',
       { type: 'geojson', data: './data/airports.json' }));
+=======
+    const url = './data/airports.json';
+    addLayerFromGeoJSON(url, 'dynamic-source');
+>>>>>>> Adding in files
   };
   runFetchGeoJSON();
   // 'geojson' sources allow rendering a vector layer
