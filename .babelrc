@@ -1,7 +1,3 @@
 {
-<<<<<<< HEAD
   "presets": ["es2015", "react", "stage-2"]
-=======
-  "presets": ["es2015"]
->>>>>>> 3e88afc... Add a first unit test
 }
