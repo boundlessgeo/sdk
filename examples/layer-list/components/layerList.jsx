@@ -31,7 +31,7 @@ class layerList extends React.PureComponent {
         <button className="sdk-btn" onClick={() => { this.props.moveLayer(layer.id, layers[i - 1].id); }}>Move down</button>
       </span>);
 
-      list.push(<li  className="layer" key={i}><span className="name">{layer.id}</span><span className="checkbox">{checkbox}</span><span className="btn-container">{moveButtons}</span></li>);
+      list.push(<li  className="layer" key={i}><span className="checkbox">{checkbox}</span> <span className="name">{layer.id}</span><span className="btn-container">{moveButtons}</span></li>);
     }
     return (<ul className="sdk-layerlist">{list}</ul>);
   }
