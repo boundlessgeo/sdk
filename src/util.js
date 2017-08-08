@@ -1,3 +1,4 @@
+import GeoJsonFormat from 'ol/format/geojson';
 /** Utility functions for SDK.
  *
  *  This is the grab bag of universally useful functions.
@@ -89,4 +90,38 @@ export function encodeQueryObject(query) {
     pairs.push(`${keys[i]}=${value}`);
   }
   return pairs.join('&');
+}
+
+/** Reproject GeoJSON to mapbox gl style spec EPSG:4326
+  * @param data - array of geoJSON features
+  * @param projection - string from geoJSON crs (coordinate referance system)
+  * @param destProj - ['EPSG:4326'] string of target projection for the data
+  * @return array of geoJSON feature in destProj
+ */
+export function reprojectGeoJson(data, projection, destProj = 'EPSG:4326') {
+  const GEOJSON_FORMAT = new GeoJsonFormat();
+
+  let crsName;
+  if (projection && projection.properties && projection.properties.name) {
+    crsName = projection.properties.name;
+  }
+
+  const readFeatureOptions = {
+    featureProjection: destProj,
+    dataProjection: crsName,
+  };
+
+  const writeFeatureOptions = {
+    featureProjection: destProj,
+    dataProjection: destProj,
+  };
+
+  const new_data = {
+    type: 'FeatureCollection',
+    features: data,
+  };
+  // const features = GEOJSON_FORMAT.readFeatures(new_data, readFeatureOptions);
+  const features = GEOJSON_FORMAT.writeFeaturesObject(
+    GEOJSON_FORMAT.readFeatures(new_data, readFeatureOptions), writeFeatureOptions);
+  return features.features;
 }

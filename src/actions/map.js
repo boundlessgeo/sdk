@@ -149,7 +149,6 @@ export function setContext(options) {
   };
 }
 
-
 /** Rearrange a layer in the list.
  *
  *  @param layerId the layer to move.

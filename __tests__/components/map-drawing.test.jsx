@@ -57,7 +57,7 @@ describe('Map with drawing reducer', () => {
       drawing: DrawingReducer,
     }));
 
-    expect(mount(<SdkMap store={store} />).contains(<div className="map" />)).toBe(true);
+    expect(mount(<SdkMap store={store} />).contains(<div className="sdk-map" />)).toBe(true);
   });
 });
 

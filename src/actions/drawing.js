@@ -73,4 +73,3 @@ export function clearMeasureFeature() {
     type: DRAWING.CLEAR_MEASURE_FEATURE,
   };
 }
-

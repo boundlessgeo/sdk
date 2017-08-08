@@ -37,11 +37,14 @@
     "sass-loader": "^6.0.6",
     "style-loader": "^0.18.2",
     "webpack": "^2.2.1",
-    "webpack-dev-server": "^2.4.5"
+    "webpack-dev-server": "^2.4.5",
+    "deep-freeze": "0.0.1",
+    "jest": "^20.0.4"
   },
   "dependencies": {
     "@mapbox/mapbox-gl-style-spec": "^9.0.0",
     "async": "^2.5.0",
+    "extract-css": "^1.0.3",
     "isomorphic-fetch": "^2.2.1",
     "mapbox-to-ol-style": "^2.5.2",
     "ol": "^4.1.1",

@@ -17,7 +17,7 @@ import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
 // This will have webpack include all of the SDK styles.
-import '@boundlessgeo/sdk/stylesheet/sdk.css';
+import '@boundlessgeo/sdk/stylesheet/sdk.scss';
 
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
@@ -205,6 +205,11 @@ function main() {
     }
   };
 
+  // Cluster points on the map
+  const clusterPoints = () => {
+    store.dispatch(mapActions.clusterPoints('points', !store.getState().map.sources.points.cluster));
+  };
+
   // Removing features uses MapBox GL Spec filters.
   const removeRandomPoints = () => {
     store.dispatch(mapActions.removeFeatures('points', ['==', 'isRandom', true]));
@@ -264,6 +269,7 @@ function main() {
       <button className="sdk-btn" onClick={zoomToNullIsland}>Zoom to Null Island</button>
       <button className="sdk-btn" onClick={addRandomPoints}>Add 10 random points</button>
       <button className="sdk-btn blue" onClick={removeRandomPoints}>Remove random points</button>
+      <button className="sdk-btn" onClick={clusterPoints}>Cluster Points</button>
       <button className="sdk-btn" onClick={updateMinzoom}>Update Min Zoom</button>
       <InputField />
 
