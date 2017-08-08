@@ -1,7 +1,7 @@
 /** Demo of layer list in an SDK map.
  *
  *  Contains a Map and demonstrates adding many types of layers
- *  And a layer list componet to manage the layers
+ *  And a layer list component to manage the layers
  *
  */
 
@@ -74,8 +74,10 @@ function main() {
 
   // This is called by the onClick, keeping the onClick HTML clean
   const runFetchGeoJSON = () => {
-    const url = './data/airports.json';
-    addLayerFromGeoJSON(url, 'dynamic-source');
+    // const url = './data/airports.json';
+    // addLayerFromGeoJSON(url, 'dynamic-source');
+    store.dispatch(mapActions.addSource('dynamic-source',
+      { type: 'geojson', data: './data/airports.json' }));
   };
   runFetchGeoJSON();
   // 'geojson' sources allow rendering a vector layer
@@ -131,7 +133,7 @@ function main() {
   store.dispatch(mapActions.addSource('states', {
     type: 'raster',
     tileSize: 256,
-    tiles: ['https://ahocevar.com/geoserver/gwc/service/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/png&SRS=EPSG:900913&LAYERS=topp:states&STYLES=&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}'],
+    tiles: ['https://demo.boundlessgeo.com/geoserver/gwc/service/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/png&SRS=EPSG:900913&LAYERS=topp:states&STYLES=&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}'],
   }));
 
   // add the wms layer
