@@ -1,0 +1,48 @@
+/* HTML Reset */
+
+/* App specific styles */
+.sdk-layerlist {
+  margin: 0;
+  padding: 0;
+  max-width: 500px;
+}
+.sdk-layerlist li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: solid #999999 1px;
+  padding: .5rem;
+}
+.sdk-layerlist li:last-child {
+  border-bottom: solid transparent 1px;
+}
+
+.sdk-layerlist .layer {
+  line-height: 1;
+}
+.sdk-layerlist .layer .name {
+  flex: 1;
+}
+.sdk-layerlist .layer .name::first-letter {
+  text-transform: capitalize;
+}
+.sdk-layerlist .layer .checkbox {
+  line-height: 1;
+  margin-right: .5rem;
+}
+.sdk-layerlist .layer .btn-container button {
+  background-color: transparent;
+  border-color: orange;
+  color: #333333;
+  line-height: 1;
+  margin:  2px;
+  padding: 6px;
+  font-weight: normal !important;
+  font-size: 12px !important;
+  outline: none;
+}
+
+.sdk-layerlist .layer .btn-container button:hover, .sdk-layerlist .layer .btn-container button:focus {
+	background: orange;
+  color: #f1f1f1;
+}
