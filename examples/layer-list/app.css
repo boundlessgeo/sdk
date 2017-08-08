@@ -38,4 +38,11 @@ line-height: 1;
   padding: 6px;
   font-weight: normal !important;
   font-size: 12px !important;
+  outline: none;
+}
+
+.sdk-layerlist .layer .btn-container button:hover, .sdk-layerlist .layer .btn-container button:focus {
+	background: orange;
+  color: #f1f1f1;
+
 }
