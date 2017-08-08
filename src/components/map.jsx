@@ -661,6 +661,46 @@ export class Map extends React.Component {
     }
   }
 
+  /** Query the map and the appropriate layers.
+   *
+   *  @param evt - The click event that kicked off the query.
+   *
+   *  @returns Promise.all promise.
+   */
+  queryMap(evt) {
+    // get the map projection
+    const map_prj = this.map.getView().getProjection();
+
+    // this is the standard "get features when clicking"
+    //  business.
+    const features_promise = new Promise((resolve) => {
+      const features_by_layer = {};
+
+      this.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+        // get the gl-name for the layer from the openlayer's layer.
+        const layer_name = layer.get('name');
+        // use that name as the key for the features-by-layer object,
+        // and initialize the array if the layer hasn't been used.
+        if (features_by_layer[layer_name] === undefined) {
+          features_by_layer[layer_name] = [];
+        }
+        // ensure the features are in 4326 when sent back to the caller.
+        features_by_layer[layer_name].push(GEOJSON_FORMAT.writeFeatureObject(feature, {
+          featureProjection: map_prj,
+          dataProjection: 'EPSG:4326',
+        }));
+      });
+
+      resolve(features_by_layer);
+    });
+
+    const promises = [features_promise];
+
+    // add other asynch queries here.
+
+    return Promise.all(promises);
+  }
+
   /** Initialize the map */
   configureMap() {
     // determine the map's projection.
@@ -700,16 +740,9 @@ export class Map extends React.Component {
 
         // if includeFeaturesOnClick is true then query for the
         //  features on the map.
-        const click_features = [];
+        let features_promises = null;
         if (this.props.includeFeaturesOnClick) {
-          this.map.forEachFeatureAtPixel(evt.pixel, (feature) => {
-            // ship the working projection for the features back to the
-            //  caller as 4326 for consistency sake.
-            click_features.push(GEOJSON_FORMAT.writeFeatureObject(feature, {
-              featureProjection: map_prj,
-              dataProjection: 'EPSG:4326',
-            }));
-          });
+          features_promises = this.queryMap(evt);
         }
 
         // ensure the coordinate is also in 4326
@@ -722,7 +755,7 @@ export class Map extends React.Component {
         };
 
         // send the clicked-on coordinate and the list of features
-        this.props.onClick(this, coordinate, click_features);
+        this.props.onClick(this, coordinate, features_promises);
       }
     });
 

@@ -176,14 +176,30 @@ function main() {
       store={store}
       initialPopups={[<NullIslandPopup coordinate={[0, 0]} closeable={false} />]}
       includeFeaturesOnClick
-      onClick={(map, xy, features) => {
-        if (features.length === 0) {
-          // no features, :( Let the user know nothing was there.
-          map.addPopup(<SdkPopup coordinate={xy} closeable><i>No features found.</i></SdkPopup>);
-        } else {
-          // Show the super advanced fun popup!
-          map.addPopup(<MarkFeaturesPopup coordinate={xy} features={features} closeable />);
-        }
+      onClick={(map, xy, featuresPromise) => {
+        featuresPromise.then((featureGroups) => {
+          // setup an array for all the features returned in the promise.
+          let features = [];
+
+          // featureGroups is an array of objects. The key of each object
+          // is a layer from the map.
+          for (let g = 0, gg = featureGroups.length; g < gg; g++) {
+            // collect every feature from each layer.
+            const layers = Object.keys(featureGroups[g]);
+            for (let l = 0, ll = layers.length; l < ll; l++) {
+              const layer = layers[l];
+              features = features.concat(featureGroups[g][layer]);
+            }
+          }
+
+          if (features.length === 0) {
+            // no features, :( Let the user know nothing was there.
+            map.addPopup(<SdkPopup coordinate={xy} closeable><i>No features found.</i></SdkPopup>);
+          } else {
+            // Show the super advanced fun popup!
+            map.addPopup(<MarkFeaturesPopup coordinate={xy} features={features} closeable />);
+          }
+        });
       }}
     />
   ), document.getElementById('map'));
