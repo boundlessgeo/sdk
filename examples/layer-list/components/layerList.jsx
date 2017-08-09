@@ -14,6 +14,27 @@ const isLayerVisible = (layer) => {
 };
 
 class layerList extends React.PureComponent {
+  getLayerIndexById(id) {
+    const layers = this.props.layers;
+    for (let i = layers.length - 1, ii = 0; i >= ii; i--) {
+      if (layers[i].id === id) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  moveLayerUp(id) {
+    const index = this.getLayerIndexById(id);
+    if (index < this.props.layers.length - 1) {
+      this.props.moveLayer(this.props.layers[index + 1].id, id);
+    }
+  }
+  moveLayerDown(id) {
+    const index = this.getLayerIndexById(id);
+    if (index > 0) {
+      this.props.moveLayer(id, this.props.layers[index - 1].id);
+    }
+  }
   buildListOfLayers(layers) {
     const list = [];
     for (let i = layers.length - 1, ii = 0; i >= ii; i--) {
@@ -27,34 +48,13 @@ class layerList extends React.PureComponent {
         checked={is_checked}
       />);
       const moveButtons = (<span>
-        <button className="sdk-btn" onClick={() => { this.moveLayerUp(layer.id) }}>Move Up</button>
-        <button className="sdk-btn" onClick={() => { this.moveLayerDown(layer.id) }}>Move down</button>
+        <button className="sdk-btn" onClick={() => { this.moveLayerUp(layer.id); }}>Move Up</button>
+        <button className="sdk-btn" onClick={() => { this.moveLayerDown(layer.id); }}>Move down</button>
       </span>);
 
-      list.push(<li  className="layer" key={i}><span className="checkbox">{checkbox}</span> <span className="name">{layer.id}</span><span className="btn-container">{moveButtons}</span></li>);
+      list.push(<li className="layer" key={i}><span className="checkbox">{checkbox}</span> <span className="name">{layer.id}</span><span className="btn-container">{moveButtons}</span></li>);
     }
     return (<ul className="sdk-layerlist">{list}</ul>);
-  }
-  //this.props.moveLayer(layer.id, layers[i - 1].id); }
-  moveLayerUp(id) {
-    const index = this.getLayerIndexById(id);
-    if(index < this.props.layers.length - 1){
-      this.props.moveLayer(this.props.layers[index + 1].id, id);
-    }
-  }
-  moveLayerDown(id) {
-    const index = this.getLayerIndexById(id);
-    if(index > 0){
-      this.props.moveLayer(id, this.props.layers[index - 1].id);
-    }
-  }
-  getLayerIndexById(id){
-    const layers = this.props.layers;
-    for (let i = layers.length - 1, ii = 0; i >= ii; i--) {
-      if (layers[i].id === id){
-        return i;
-      }
-    }
   }
   render() {
     return this.buildListOfLayers(this.props.layers);
