@@ -73,11 +73,15 @@ function main() {
         error => console.error('An error occured.', error),
       )
       // addFeatures with the features, source name, and crs
+<<<<<<< 8a7e367b939c6b1e27a979da5076c6e739e2cb76
 <<<<<<< 81076615dcd38e1deda120055a39fa958a76c315
       .then(json => store.dispatch(mapActions.addFeatures(sourceName, json)));
 =======
       .then(json => store.dispatch(mapActions.addFeatures(sourceName, json.features, json.crs)));
 >>>>>>> Adding in files
+=======
+      .then(json => store.dispatch(mapActions.addFeatures(sourceName, json)));
+>>>>>>> Linting
   };
 
   // This is called by the onClick, keeping the onClick HTML clean
