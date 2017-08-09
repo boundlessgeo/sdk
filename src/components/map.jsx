@@ -1,6 +1,21 @@
+/*
+ * Copyright 2015-present Boundless Spatial Inc., http://boundlessgeo.com
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
 /** Provide an OpenLayers map which reflects the
  *  state of the  store.
  */
+
+import fetch from 'isomorphic-fetch';
 
 import uuid from 'uuid';
 
@@ -44,7 +59,7 @@ import DrawInteraction from 'ol/interaction/draw';
 import ModifyInteraction from 'ol/interaction/modify';
 import SelectInteraction from 'ol/interaction/select';
 
-import { setView } from '../actions/map';
+import { setView, setRotation } from '../actions/map';
 import { INTERACTIONS, LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
 import { dataVersionKey } from '../reducers/map';
 
@@ -52,7 +67,7 @@ import { setMeasureFeature, clearMeasureFeature } from '../actions/drawing';
 
 import ClusterSource from '../source/cluster';
 
-import { parseQueryString, jsonEquals, getLayerById, getMin, getMax } from '../util';
+import { parseQueryString, jsonEquals, getLayerById, getMin, getMax, degreesToRadians, radiansToDegrees } from '../util';
 
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
@@ -142,14 +157,31 @@ function configureMvtSource(glSource) {
   return source;
 }
 
-function updateGeojsonSource(olSource, glSource, opt_mapProjection = 'EPSG:3857') {
-  // parse the new features,
+function updateGeojsonSource(olSource, glSource, mapProjection) {
+  // setup a feature promise to handle async loading
+  // of features.
+  let features_promise;
 
-  let features;
-
-  if (glSource.data.features) {
-    const readFeatureOpt = { featureProjection: opt_mapProjection };
-    features = GEOJSON_FORMAT.readFeatures(glSource.data, readFeatureOpt);
+  // if the data is a string, assume its a url
+  if (typeof glSource.data === 'string') {
+    features_promise = new Promise((resolve) => {
+      // instead of just returning the fetch promise,
+      // this ensures that the features are always resolved
+      //  to SOMETHING.
+      fetch(glSource.data)
+        .then(response => response.json())
+        .then((features) => {
+          resolve(features);
+        })
+        .catch(() => {
+          resolve(null);
+        });
+    });
+  } else if (typeof glSource.data === 'object'
+    && (glSource.data.type === 'Feature' || glSource.data.type === 'FeatureCollection')) {
+    features_promise = new Promise((resolve) => {
+      resolve(glSource.data);
+    });
   }
 
   let vector_src = olSource;
@@ -158,7 +190,6 @@ function updateGeojsonSource(olSource, glSource, opt_mapProjection = 'EPSG:3857'
   //  the actual data is stored on the source's source.
   if (glSource.cluster) {
     vector_src = olSource.getSource();
-
     if (glSource.clusterRadius !== olSource.getDistance()) {
       olSource.setDistance(glSource.clusterRadius);
     }
@@ -167,9 +198,24 @@ function updateGeojsonSource(olSource, glSource, opt_mapProjection = 'EPSG:3857'
   // clear the layer WITHOUT dispatching remove events.
   vector_src.clear(true);
 
-  if (features) {
-    // bulk load the feature data
-    vector_src.addFeatures(features);
+  // if data is undefined then no promise would
+  // have been created.
+  if (features_promise) {
+    // when the feature promise resolves,
+    // add those features to the source.
+    features_promise.then((features) => {
+      // features could be null, in which case there
+      //  are no features to add.
+      if (features) {
+        // setup the projection options.
+        const readFeatureOpt = { featureProjection: mapProjection };
+
+        // bulk load the feature data
+        vector_src.addFeatures(GEOJSON_FORMAT.readFeatures(features, readFeatureOpt));
+      }
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 }
 
@@ -271,11 +317,14 @@ export class Map extends React.Component {
     // compare the centers
     if (nextProps.map.center[0] !== this.props.map.center[0]
       || nextProps.map.center[1] !== this.props.map.center[1]
-      || nextProps.map.zoom !== this.props.map.zoom) {
+      || nextProps.map.zoom !== this.props.map.zoom
+      || nextProps.map.bearing !== this.props.map.bearing) {
       // convert the center point to map coordinates.
       const center = Proj.transform(nextProps.map.center, 'EPSG:4326', map_proj);
+      const rotation = degreesToRadians(nextProps.map.bearing);
       this.map.getView().setCenter(center);
       this.map.getView().setZoom(nextProps.map.zoom);
+      this.map.getView().setRotation(rotation);
     }
 
     // check the sources diff
@@ -774,6 +823,9 @@ export class Map extends React.Component {
     // determine the map's projection.
     const map_proj = this.props.projection;
 
+    // determine the map's rotation.
+    const rotation = degreesToRadians(this.props.map.bearing);
+
     // reproject the initial center based on that projection.
     const center = Proj.transform(this.props.map.center, 'EPSG:4326', map_proj);
 
@@ -784,6 +836,7 @@ export class Map extends React.Component {
       view: new View({
         center,
         zoom: this.props.map.zoom,
+        rotation,
         projection: map_proj,
       }),
     });
@@ -948,6 +1001,7 @@ Map.propTypes = {
   map: PropTypes.shape({
     center: PropTypes.array,
     zoom: PropTypes.number,
+    bearing: PropTypes.number,
     metadata: PropTypes.object,
     layers: PropTypes.array,
     sources: PropTypes.object,
@@ -975,6 +1029,7 @@ Map.defaultProps = {
   map: {
     center: [0, 0],
     zoom: 2,
+    bearing: 0,
     metadata: {},
     layers: [],
     sources: {},
@@ -1019,7 +1074,9 @@ function mapDispatchToProps(dispatch) {
     setView: (view) => {
       // transform the center to 4326 before dispatching the action.
       const center = Proj.transform(view.getCenter(), view.getProjection(), 'EPSG:4326');
+      const rotation = radiansToDegrees(view.getRotation());
       dispatch(setView(center, view.getZoom()));
+      dispatch(setRotation(rotation));
     },
     setMeasureGeometry: (geometry, projection) => {
       const geom = GEOJSON_FORMAT.writeGeometryObject(geometry, {

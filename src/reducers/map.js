@@ -1,3 +1,16 @@
+/*
+ * Copyright 2015-present Boundless Spatial Inc., http://boundlessgeo.com
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
 /** Reducer to implement mapbox style document.
  */
 
@@ -19,6 +32,7 @@ const defaultState = {
   name: 'default',
   center: [0, 0],
   zoom: 3,
+  bearing: 0,
   metadata: defaultMetadata(),
   sources: {},
   layers: [],
@@ -167,8 +181,14 @@ function updateLayer(state, action) {
 function addSource(state, action) {
   const new_source = {};
   new_source[action.sourceName] = Object.assign({}, action.sourceDef);
-  if (action.sourceDef.type !== 'raster') {
-    new_source[action.sourceName].data = Object.assign({}, action.sourceDef.data);
+  if (action.sourceDef.type === 'geojson') {
+    if (action.sourceDef.data === undefined || action.sourceDef.data === null) {
+      new_source[action.sourceName].data = {};
+    } else if (typeof action.sourceDef.data === 'object') {
+      new_source[action.sourceName].data = Object.assign({}, action.sourceDef.data);
+    } else {
+      new_source[action.sourceName].data = action.sourceDef.data;
+    }
   }
 
   const new_metadata = {};
@@ -379,6 +399,8 @@ export default function MapReducer(state = defaultState, action) {
       return Object.assign({}, state, { name: action.name });
     case MAP.SET_SPRITE:
       return Object.assign({}, state, { sprite: action.sprite });
+    case MAP.SET_ROTATION:
+      return Object.assign({}, state, { bearing: action.degrees });
     case MAP.ADD_LAYER:
       return addLayer(state, action);
     case MAP.REMOVE_LAYER:

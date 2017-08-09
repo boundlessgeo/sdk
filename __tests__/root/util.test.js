@@ -22,6 +22,21 @@ describe('util', () => {
     expect(util.getLayerById(layers, 'foo')).toEqual(null);
   });
 
+  it('converts degrees to radians', () => {
+    expect(util.degreesToRadians(0)).toEqual(0);
+    expect(util.degreesToRadians(1)).toBeCloseTo(0.017);
+    expect(util.degreesToRadians(45)).toBeCloseTo(0.785);
+    expect(util.degreesToRadians(90)).toBeCloseTo(1.570);
+    expect(util.degreesToRadians(360)).toBeCloseTo(6.283);
+  });
+
+  it('converts radians to degrees', () => {
+    expect(util.radiansToDegrees(0)).toEqual(0);
+    expect(util.radiansToDegrees(1)).toBeCloseTo(57.295);
+    expect(util.radiansToDegrees(2)).toBeCloseTo(114.591);
+    expect(util.radiansToDegrees(7)).toBeCloseTo(401.070);
+  });
+
   it('compares two objects for equality', () => {
     const paint = {
       'circle-radius': 5,

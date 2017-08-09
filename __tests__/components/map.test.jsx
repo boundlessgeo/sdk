@@ -14,7 +14,7 @@ import TileJSONSource from 'ol/source/tilejson';
 import TileWMSSource from 'ol/source/tilewms';
 
 import { createStore, combineReducers } from 'redux';
-import { jsonEquals } from '../../src/util';
+import { jsonEquals, radiansToDegrees } from '../../src/util';
 
 import ConnectedMap, { Map } from '../../src/components/map';
 import SdkPopup from '../../src/components/map/popup';
@@ -22,6 +22,7 @@ import MapReducer from '../../src/reducers/map';
 import PrintReducer from '../../src/reducers/print';
 import * as MapActions from '../../src/actions/map';
 import * as PrintActions from '../../src/actions/print';
+
 
 describe('Map component', () => {
   it('should render without throwing an error', () => {
@@ -508,6 +509,25 @@ describe('Map component', () => {
     });
 
     expect(store.getState().map.center).toEqual([0, 0]);
+  });
+
+  it('should trigger the setRotation callback', () => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+    }));
+
+    const wrapper = mount(<ConnectedMap store={store} />);
+    const sdk_map = wrapper.instance().getWrappedInstance();
+
+    store.dispatch(MapActions.setRotation(20));
+    expect(store.getState().map.bearing).toEqual(20);
+
+    sdk_map.map.getView().setRotation(5);
+    sdk_map.map.dispatchEvent({
+      type: 'moveend',
+    });
+
+    expect(store.getState().map.bearing).toEqual(radiansToDegrees(5));
   });
 
   it('should trigger renderSync on export image', () => {
