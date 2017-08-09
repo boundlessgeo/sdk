@@ -475,13 +475,18 @@ describe('Map component', () => {
     const store = createStore(combineReducers({
       map: MapReducer,
     }));
-    const onClick = () => { };
+    const onClick = (map, xy, featuresPromise) => {
+      // check that something looking like a promise
+      // was returned.
+      expect(typeof featuresPromise.then).toBe('function');
+    };
 
     // create a props dictionary which
     //  can include a spy.
     const props = {
       store,
       onClick,
+      includeFeaturesOnClick: true,
     };
     spyOn(props, 'onClick');
 
