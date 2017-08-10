@@ -109,4 +109,16 @@ describe('tests for the geojson-type map sources', () => {
 
     testGeojsonData(done, 'http://example.com/test.geojson', 2);
   });
+
+  it('tries to fetch a geojson file that does not exist', (done) => {
+    testGeojsonData(done, 'http://example.com/no-where.geojson', 0);
+  });
+
+  it('fetches a bad geojson file', (done) => {
+    nock('http://example.com')
+      .get('/bad.geojson')
+      .reply(200, 'alphabet soup');
+
+    testGeojsonData(done, 'http://example.com/bad.geojson', 0);
+  });
 });
