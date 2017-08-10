@@ -127,7 +127,7 @@ function updateGeojsonSource(olSource, glSource, opt_mapProjection = 'EPSG:3857'
 
   let features;
 
-  if (glSource.data.features) {
+  if (glSource.data.type === 'Feature' || glSource.data.features) {
     const readFeatureOpt = { featureProjection: opt_mapProjection };
     features = GEOJSON_FORMAT.readFeatures(glSource.data, readFeatureOpt);
   }
