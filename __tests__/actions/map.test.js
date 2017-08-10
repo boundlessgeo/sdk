@@ -33,6 +33,15 @@ describe('actions', () => {
     expect(actions.setMapName(name)).toEqual(expectedAction);
   });
 
+  it('should create an action to set the map rotation', () => {
+    const degrees = 45;
+    const expectedAction = {
+      type: MAP.SET_ROTATION,
+      degrees,
+    };
+    expect(actions.setRotation(degrees)).toEqual(expectedAction);
+  });
+
   it('should create an action to add a layer', () => {
     const layerDef = {
       id: 'osm',

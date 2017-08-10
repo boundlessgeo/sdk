@@ -19,6 +19,7 @@ const defaultState = {
   name: 'default',
   center: [0, 0],
   zoom: 3,
+  bearing: 0,
   metadata: defaultMetadata(),
   sources: {},
   layers: [],
@@ -385,6 +386,8 @@ export default function MapReducer(state = defaultState, action) {
       return Object.assign({}, state, { name: action.name });
     case MAP.SET_SPRITE:
       return Object.assign({}, state, { sprite: action.sprite });
+    case MAP.SET_ROTATION:
+      return Object.assign({}, state, { bearing: action.degrees });
     case MAP.ADD_LAYER:
       return addLayer(state, action);
     case MAP.REMOVE_LAYER:

@@ -20,6 +20,13 @@ export function setMapName(name) {
   };
 }
 
+export function setRotation(degrees) {
+  return {
+    type: MAP.SET_ROTATION,
+    degrees,
+  };
+}
+
 export function addLayer(layerDef, layerTitle, positionId) {
   return {
     type: MAP.ADD_LAYER,

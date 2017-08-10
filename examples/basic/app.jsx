@@ -256,7 +256,7 @@ function main() {
   };
 
   // place the map on the page.
-  ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
+  ReactDOM.render(<SdkMap store={store} showZoomSlider />, document.getElementById('map'));
 
   // add some buttons to demo some actions.
   ReactDOM.render((

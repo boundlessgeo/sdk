@@ -25,8 +25,10 @@ import Sphere from 'ol/sphere';
 
 import TileLayer from 'ol/layer/tile';
 import XyzSource from 'ol/source/xyz';
+import TileWMSSource from 'ol/source/tilewms';
 import TileJSON from 'ol/source/tilejson';
 import TileGrid from 'ol/tilegrid';
+import ZoomControl from 'ol/control/zoomslider';
 
 import VectorTileLayer from 'ol/layer/vectortile';
 import VectorTileSource from 'ol/source/vectortile';
@@ -44,7 +46,7 @@ import DrawInteraction from 'ol/interaction/draw';
 import ModifyInteraction from 'ol/interaction/modify';
 import SelectInteraction from 'ol/interaction/select';
 
-import { setView } from '../actions/map';
+import { setView, setRotation } from '../actions/map';
 import { INTERACTIONS, LAYER_VERSION_KEY, SOURCE_VERSION_KEY } from '../constants';
 import { dataVersionKey } from '../reducers/map';
 
@@ -52,7 +54,7 @@ import { setMeasureFeature, clearMeasureFeature } from '../actions/drawing';
 
 import ClusterSource from '../source/cluster';
 
-import { jsonEquals, getLayerById, getMin, getMax } from '../util';
+import { parseQueryString, jsonEquals, getLayerById, getMin, getMax, degreesToRadians, radiansToDegrees } from '../util';
 
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
@@ -69,16 +71,34 @@ function getVersion(obj, key) {
   return obj.metadata[key];
 }
 
-function configureXyzSource(glSource, mapProjection) {
-  const source = new XyzSource({
+function configureTileSource(glSource, mapProjection) {
+  const tile_url = glSource.tiles[0];
+  const commonProps = {
     attributions: glSource.attribution,
     minZoom: glSource.minzoom,
     maxZoom: 'maxzoom' in glSource ? glSource.maxzoom : 22,
     tileSize: glSource.tileSize || 512,
-    urls: glSource.tiles,
     crossOrigin: 'crossOrigin' in glSource ? glSource.crossOrigin : 'anonymous',
     projection: mapProjection,
-  });
+  };
+  // check to see if the url is a wms request.
+  if (tile_url.toUpperCase().indexOf('SERVICE=WMS') >= 0) {
+    const urlParts = glSource.tiles[0].split('?');
+    const params = parseQueryString(urlParts[1]);
+    const keys = Object.keys(params);
+    for (let i = 0, ii = keys.length; i < ii; ++i) {
+      if (keys[i].toUpperCase() === 'REQUEST') {
+        delete params[keys[i]];
+      }
+    }
+    return new TileWMSSource(Object.assign({
+      url: urlParts[0],
+      params,
+    }, commonProps));
+  }
+  const source = new XyzSource(Object.assign({
+    urls: glSource.tiles,
+  }, commonProps));
 
   source.setTileLoadFunction((tile, src) => {
     // copy the src string.
@@ -223,7 +243,7 @@ function configureSource(glSource, mapProjection) {
   // tiled raster layer.
   if (glSource.type === 'raster') {
     if ('tiles' in glSource) {
-      return configureXyzSource(glSource, mapProjection);
+      return configureTileSource(glSource, mapProjection);
     } else if (glSource.url) {
       return configureTileJSONSource(glSource);
     }
@@ -284,11 +304,14 @@ export class Map extends React.Component {
     // compare the centers
     if (nextProps.map.center[0] !== this.props.map.center[0]
       || nextProps.map.center[1] !== this.props.map.center[1]
-      || nextProps.map.zoom !== this.props.map.zoom) {
+      || nextProps.map.zoom !== this.props.map.zoom
+      || nextProps.map.bearing !== this.props.map.bearing) {
       // convert the center point to map coordinates.
       const center = Proj.transform(nextProps.map.center, 'EPSG:4326', map_proj);
+      const rotation = degreesToRadians(nextProps.map.bearing);
       this.map.getView().setCenter(center);
       this.map.getView().setZoom(nextProps.map.zoom);
+      this.map.getView().setRotation(rotation);
     }
 
     // check the sources diff
@@ -706,6 +729,38 @@ export class Map extends React.Component {
     }
   }
 
+  handleWMSGetFeatureInfo(layer, promises, evt) {
+    const map_prj = this.map.getView().getProjection();
+    const map_resolution = this.map.getView().getResolution();
+    if (layer.metadata['bnd:queryable'] && (!layer.layout || (layer.layout.visibility && layer.layout.visibility !== 'none'))) {
+      const source = this.sources[layer.source];
+      if (source instanceof TileWMSSource) {
+        promises.push(new Promise((resolve) => {
+          const features_by_layer = {};
+          const layer_name = layer.id;
+          const url = this.sources[layer.source].getGetFeatureInfoUrl(
+            evt.coordinate, map_resolution, map_prj, {
+              INFO_FORMAT: 'application/json',
+            },
+          );
+          fetch(url).then(
+            response => response.json(),
+            error => console.error('An error occured.', error),
+          )
+          .then((json) => {
+            features_by_layer[layer_name] = GEOJSON_FORMAT.writeFeaturesObject(
+              GEOJSON_FORMAT.readFeatures(json), {
+                featureProjection: GEOJSON_FORMAT.readProjection(json),
+                dataProjection: 'EPSG:4326',
+              },
+            ).features;
+            resolve(features_by_layer);
+          });
+        }));
+      }
+    }
+  }
+
   /** Query the map and the appropriate layers.
    *
    *  @param evt - The click event that kicked off the query.
@@ -741,7 +796,11 @@ export class Map extends React.Component {
 
     const promises = [features_promise];
 
-    // add other asynch queries here.
+    // add other async queries here.
+    for (let i = 0, ii = this.props.map.layers.length; i < ii; ++i) {
+      const layer = this.props.map.layers[i];
+      this.handleWMSGetFeatureInfo(layer, promises, evt);
+    }
 
     return Promise.all(promises);
   }
@@ -750,6 +809,9 @@ export class Map extends React.Component {
   configureMap() {
     // determine the map's projection.
     const map_proj = this.props.projection;
+
+    // determine the map's rotation.
+    const rotation = degreesToRadians(this.props.map.bearing);
 
     // reproject the initial center based on that projection.
     const center = Proj.transform(this.props.map.center, 'EPSG:4326', map_proj);
@@ -761,10 +823,14 @@ export class Map extends React.Component {
       view: new View({
         center,
         zoom: this.props.map.zoom,
+        rotation,
         projection: map_proj,
       }),
     });
 
+    if (this.props.showZoomSlider) {
+      this.map.addControl(new ZoomControl());
+    }
     // when the map moves update the location in the state
     this.map.on('moveend', () => {
       this.props.setView(this.map.getView());
@@ -922,6 +988,7 @@ Map.propTypes = {
   map: PropTypes.shape({
     center: PropTypes.array,
     zoom: PropTypes.number,
+    bearing: PropTypes.number,
     metadata: PropTypes.object,
     layers: PropTypes.array,
     sources: PropTypes.object,
@@ -931,6 +998,7 @@ Map.propTypes = {
     interaction: PropTypes.string,
     sourceName: PropTypes.string,
   }),
+  showZoomSlider: PropTypes.bool,
   initialPopups: PropTypes.arrayOf(PropTypes.object),
   setView: PropTypes.func,
   includeFeaturesOnClick: PropTypes.bool,
@@ -948,6 +1016,7 @@ Map.defaultProps = {
   map: {
     center: [0, 0],
     zoom: 2,
+    bearing: 0,
     metadata: {},
     layers: [],
     sources: {},
@@ -957,6 +1026,7 @@ Map.defaultProps = {
     interaction: null,
     source: null,
   },
+  showZoomSlider: false,
   initialPopups: [],
   setView: () => {
     // swallow event.
@@ -991,7 +1061,9 @@ function mapDispatchToProps(dispatch) {
     setView: (view) => {
       // transform the center to 4326 before dispatching the action.
       const center = Proj.transform(view.getCenter(), view.getProjection(), 'EPSG:4326');
+      const rotation = radiansToDegrees(view.getRotation());
       dispatch(setView(center, view.getZoom()));
+      dispatch(setRotation(rotation));
     },
     setMeasureGeometry: (geometry, projection) => {
       const geom = GEOJSON_FORMAT.writeGeometryObject(geometry, {

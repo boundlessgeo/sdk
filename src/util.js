@@ -120,3 +120,23 @@ export function reprojectGeoJson(geoJSON, destProj = 'EPSG:4326') {
     GEOJSON_FORMAT.readFeatures(new_data, readFeatureOptions), writeFeatureOptions);
   return features.features;
 }
+
+/** Convert degrees to radians.
+ *
+ *  @param degrees - number, Bearing value on gl_map.
+ *
+ * @returns radians - number, rotation value on ol_map.
+ */
+export function degreesToRadians(degrees) {
+  return (degrees * Math.PI) / 180;
+}
+
+/** Convert radians to degrees.
+ *
+ *  @param radians - number, rotation value on ol_map.
+ *
+ * @returns degrees - number, bearing value on gl_map.
+ */
+export function radiansToDegrees(radians) {
+  return (radians * 180) / Math.PI;
+}

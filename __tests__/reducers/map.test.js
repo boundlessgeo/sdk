@@ -14,6 +14,7 @@ describe('map reducer', () => {
       name: 'default',
       center: [0, 0],
       zoom: 3,
+      bearing: 0,
       metadata: {
         'bnd:source-version': 0,
         'bnd:layer-version': 0,
@@ -44,6 +45,7 @@ describe('map reducer', () => {
       name: 'default',
       center: [0, 0],
       zoom: 3,
+      bearing: 0,
       metadata: {
         'bnd:source-version': 0,
         'bnd:layer-version': 1,
@@ -454,6 +456,7 @@ describe('map reducer', () => {
       name: 'default',
       center: [0, 0],
       zoom: 3,
+      bearing: 0,
       sources: {
         osm: raster_source,
       },
@@ -474,6 +477,7 @@ describe('map reducer', () => {
       name: 'default',
       center: [0, 0],
       zoom: 3,
+      bearing: 0,
       sources: {
         radar: { ...image_source },
       },
@@ -517,7 +521,7 @@ describe('map reducer', () => {
     };
     deepFreeze(state);
     deepFreeze(action);
-    expect(reducer(undefined, action)).toEqual({
+    expect(reducer(state, action)).toEqual({
       version: 8,
       name: 'default',
       center: [0, 0],
@@ -869,7 +873,7 @@ describe('map reducer', () => {
     expect(reducer(state, null_action).layers).toEqual([layer_a, layer_b]);
   });
 
-  it('should update the map metadata', () => {
+  it('should change the map sprite', () => {
     const state = {
       version: 8,
       name: 'default',
@@ -883,17 +887,38 @@ describe('map reducer', () => {
       },
       layers: [],
     };
-
     const sprite_root = './my-sprites';
     const sprite_action = {
       type: MAP.SET_SPRITE,
       sprite: sprite_root,
     };
-
     expect(reducer(state, sprite_action).sprite).toEqual(sprite_root);
   });
 
-  it('should change the maps sprite', () => {
+  it('should change the map rotation', () => {
+    const state = {
+      version: 8,
+      name: 'default',
+      center: [0, 0],
+      zoom: 3,
+      bearing: 0,
+      sources: {},
+      metadata: {
+        'bnd:source-version': 0,
+        'bnd:layer-version': 0,
+        'bnd:data-version:points': 0,
+      },
+      layers: [],
+    };
+    const degs = 15;
+    const rotation_action = {
+      type: MAP.SET_ROTATION,
+      degrees: degs,
+    };
+    expect(reducer(state, rotation_action).bearing).toEqual(degs);
+  });
+
+  it('should update the map metadata', () => {
     const state = {
       version: 8,
       name: 'default',
