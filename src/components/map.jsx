@@ -144,12 +144,9 @@ function configureMvtSource(glSource) {
 function updateGeojsonSource(olSource, glSource, opt_mapProjection = 'EPSG:3857') {
   // parse the new features,
 
-  let features;
+  const readFeatureOpt = { featureProjection: opt_mapProjection };
 
-  if (glSource.data.features) {
-    const readFeatureOpt = { featureProjection: opt_mapProjection };
-    features = GEOJSON_FORMAT.readFeatures(glSource.data, readFeatureOpt);
-  }
+  const features = GEOJSON_FORMAT.readFeatures(glSource.data, readFeatureOpt);
 
   let vector_src = olSource;
 
@@ -166,10 +163,8 @@ function updateGeojsonSource(olSource, glSource, opt_mapProjection = 'EPSG:3857'
   // clear the layer WITHOUT dispatching remove events.
   vector_src.clear(true);
 
-  if (features) {
-    // bulk load the feature data
-    vector_src.addFeatures(features);
-  }
+  // bulk load the feature data
+  vector_src.addFeatures(features);
 }
 
 
