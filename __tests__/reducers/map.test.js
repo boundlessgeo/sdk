@@ -475,7 +475,7 @@ describe('map reducer', () => {
       center: [0, 0],
       zoom: 3,
       sources: {
-        radar: { ...image_source, data: {} },
+        radar: { ...image_source },
       },
       metadata: {
         'bnd:source-version': 1,

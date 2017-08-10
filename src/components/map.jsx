@@ -2,6 +2,8 @@
  *  state of the  store.
  */
 
+import fetch from 'isomorphic-fetch';
+
 import uuid from 'uuid';
 
 import PropTypes from 'prop-types';
@@ -122,14 +124,31 @@ function configureMvtSource(glSource) {
   return source;
 }
 
-function updateGeojsonSource(olSource, glSource, opt_mapProjection = 'EPSG:3857') {
-  // parse the new features,
+function updateGeojsonSource(olSource, glSource, mapProjection) {
+  // setup a feature promise to handle async loading
+  // of features.
+  let features_promise;
 
-  let features;
-
-  if (glSource.data.type === 'Feature' || glSource.data.features) {
-    const readFeatureOpt = { featureProjection: opt_mapProjection };
-    features = GEOJSON_FORMAT.readFeatures(glSource.data, readFeatureOpt);
+  // if the data is a string, assume its a url
+  if (typeof glSource.data === 'string') {
+    features_promise = new Promise((resolve) => {
+      // instead of just returning the fetch promise,
+      // this ensures that the features are always resolved
+      //  to SOMETHING.
+      fetch(glSource.data)
+        .then(response => response.json())
+        .then((features) => {
+          resolve(features);
+        })
+        .catch(() => {
+          resolve(null);
+        });
+    });
+  } else if (typeof glSource.data === 'object'
+    && (glSource.data.type === 'Feature' || glSource.data.type === 'FeatureCollection')) {
+    features_promise = new Promise((resolve) => {
+      resolve(glSource.data);
+    });
   }
 
   let vector_src = olSource;
@@ -138,7 +157,6 @@ function updateGeojsonSource(olSource, glSource, opt_mapProjection = 'EPSG:3857'
   //  the actual data is stored on the source's source.
   if (glSource.cluster) {
     vector_src = olSource.getSource();
-
     if (glSource.clusterRadius !== olSource.getDistance()) {
       olSource.setDistance(glSource.clusterRadius);
     }
@@ -147,9 +165,24 @@ function updateGeojsonSource(olSource, glSource, opt_mapProjection = 'EPSG:3857'
   // clear the layer WITHOUT dispatching remove events.
   vector_src.clear(true);
 
-  if (features) {
-    // bulk load the feature data
-    vector_src.addFeatures(features);
+  // if data is undefined then no promise would
+  // have been created.
+  if (features_promise) {
+    // when the feature promise resolves,
+    // add those features to the source.
+    features_promise.then((features) => {
+      // features could be null, in which case there
+      //  are no features to add.
+      if (features) {
+        // setup the projection options.
+        const readFeatureOpt = { featureProjection: mapProjection };
+
+        // bulk load the feature data
+        vector_src.addFeatures(GEOJSON_FORMAT.readFeatures(features, readFeatureOpt));
+      }
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 }
 

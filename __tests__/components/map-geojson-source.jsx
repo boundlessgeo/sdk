@@ -2,23 +2,21 @@
  *
  */
 
+/* global it, describe, expect, beforeEach, afterEach */
+
 import React from 'react';
-
 import { createStore, combineReducers } from 'redux';
-
 import { mount } from 'enzyme';
-
-import SdkMap from '../../src/components/map';
-import SdkPopup from '../../src/components/map/popup';
-import MapReducer from '../../src/reducers/map';
-import * as MapActions from '../../src/actions/map';
 import nock from 'nock';
 
+import SdkMap from '../../src/components/map';
+import MapReducer from '../../src/reducers/map';
+import * as MapActions from '../../src/actions/map';
 
 
 describe('tests for the geojson-type map sources', () => {
-  let store = null;
-  let map = undefined;
+  let map;
+  let store;
 
   beforeEach(() => {
     store = createStore(combineReducers({
@@ -37,7 +35,7 @@ describe('tests for the geojson-type map sources', () => {
     expect(map).not.toBe(undefined);
   });
 
-  function testGeojsonData(data, nFeatures) {
+  function testGeojsonData(done, data, nFeatures) {
     const src_name = 'test-source';
     store.dispatch(MapActions.addSource(src_name, {
       type: 'geojson',
@@ -48,20 +46,23 @@ describe('tests for the geojson-type map sources', () => {
     expect(map.sources[src_name]).not.toBe(undefined);
 
     // check the feature count matches.
-    const src = map.sources[src_name];
-    expect(src.getFeatures().length).toBe(nFeatures);
+    setTimeout(() => {
+      const src = map.sources[src_name];
+      expect(src.getFeatures().length).toBe(nFeatures);
+      done();
+    }, 100);
   }
 
-  it('handles undefined data', () => {
-    testGeojsonData(undefined, 0);
+  it('handles undefined data', (done) => {
+    testGeojsonData(done, undefined, 0);
   });
 
-  it('adds a geojson source with an empty object', () => {
-    testGeojsonData({}, 0);
+  it('adds a geojson source with an empty object', (done) => {
+    testGeojsonData(done, {}, 0);
   });
 
-  it('adds a geojson source with a single feature', () => {
-    testGeojsonData({
+  it('adds a geojson source with a single feature', (done) => {
+    testGeojsonData(done, {
       type: 'Feature',
       geometry: {
         type: 'Point',
@@ -96,29 +97,16 @@ describe('tests for the geojson-type map sources', () => {
     }],
   };
 
-  it('adds a geojson feature collection with two features', () => {
-    testGeojsonData(feature_collection, 2);
+  it('adds a geojson feature collection with two features', (done) => {
+    testGeojsonData(done, feature_collection, 2);
   });
 
   it('adds a geojson feature collection from a url', (done) => {
     // mock up the url to call
-    nock('http://example.com/')
-      .get('test.geojson')
+    nock('http://example.com')
+      .get('/test.geojson')
       .reply(200, JSON.stringify(feature_collection));
 
-    // set the data to a URI string.
-    const src_name = 'test-source';
-    store.dispatch(MapActions.addSource(src_name, {
-      type: 'geojson',
-      data: 'http://example.com/test.geojson',
-    }));
-
-    // need a slight delay to let nock fetch the actions.
-    setTimeout(() => {
-      const n = feature_collection.features.length;
-      expect(map.sources[src_name].getFeatures().length).toBe(n);
-      done();
-    }, 300);
-
+    testGeojsonData(done, 'http://example.com/test.geojson', 2);
   });
 });

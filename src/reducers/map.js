@@ -168,7 +168,13 @@ function addSource(state, action) {
   const new_source = {};
   new_source[action.sourceName] = Object.assign({}, action.sourceDef);
   if (action.sourceDef.type !== 'raster') {
-    new_source[action.sourceName].data = Object.assign({}, action.sourceDef.data);
+    if (action.sourceDef === undefined || action.sourceDef === null) {
+      new_source[action.sourceName].data = {};
+    } else if (typeof action.sourceDef.data === 'object') {
+      new_source[action.sourceName].data = Object.assign({}, action.sourceDef.data);
+    } else {
+      new_source[action.sourceName].data = action.sourceDef.data;
+    }
   }
 
   const new_metadata = {};
