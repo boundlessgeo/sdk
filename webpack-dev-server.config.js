@@ -61,6 +61,10 @@ const config = {
       'webpack/hot/only-dev-server',
       './examples/rotating/app.jsx',
     ],
+    geolocation: [
+      'webpack/hot/only-dev-server',
+      './examples/geolocation/app.jsx',
+    ],
   },
   // Server Configuration options
   devServer: {
