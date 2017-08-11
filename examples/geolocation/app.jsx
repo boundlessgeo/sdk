@@ -63,9 +63,9 @@ function main() {
     },
   }));
 
-  // Show null island as a layer.
+  // Show the user's current location as a layer.
   store.dispatch(mapActions.addLayer({
-    id: 'null-island',
+    id: 'current-location',
     source: 'points',
     type: 'circle',
     paint: {
@@ -76,7 +76,7 @@ function main() {
   }));
 
   function success(position) {
-    ReactDOM.unmountComponentAtNode(document.getElementById('loading'));
+    document.getElementById('status').innerHTML = '';
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
     store.dispatch(mapActions.addFeatures('points', [{
@@ -93,11 +93,11 @@ function main() {
   }
 
   function error() {
-    ReactDOM.render(<p>Unable to retrieve your location</p>, document.getElementById('controls'));
+    document.getElementById('status').innerHTML = 'Unable to retrieve your location';
   }
 
   const geolocate = () => {
-    ReactDOM.render(<p>Locating...</p>, document.getElementById('loading'));
+    document.getElementById('status').innerHTML = 'Locating...';
     navigator.geolocation.getCurrentPosition(success, error);
   };
 
@@ -119,6 +119,7 @@ function main() {
     <div>
       <button className="sdk-btn" onClick={geolocate}>Locate User</button>
       <button className="sdk-btn" onClick={initialExtent}>Zoom to Initial Extent</button>
+      <p id="status" />
     </div>
   ), document.getElementById('controls'));
 }
