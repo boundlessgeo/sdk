@@ -13,7 +13,7 @@ const isLayerVisible = (layer) => {
   return true;
 };
 
-class layerList extends React.PureComponent {
+class LayerList extends React.PureComponent {
   getLayerIndexById(id) {
     const layers = this.props.layers;
     for (let i = layers.length - 1, ii = 0; i >= ii; i--) {
@@ -82,7 +82,7 @@ class layerList extends React.PureComponent {
   }
 }
 
-layerList.propTypes = {
+LayerList.propTypes = {
   toggleVisibility: PropTypes.func.isRequired,
   moveLayer: PropTypes.func.isRequired,
   layers: PropTypes.arrayOf(PropTypes.shape({
@@ -91,11 +91,9 @@ layerList.propTypes = {
   })).isRequired,
 };
 
-layerList.defaultProps = {
+LayerList.defaultProps = {
 
 };
-
-// export default layerList;
 
 function mapStateToProps(state) {
   return {
@@ -114,4 +112,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(layerList);
+export default connect(mapStateToProps, mapDispatchToProps)(LayerList);
