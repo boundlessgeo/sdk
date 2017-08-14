@@ -111,7 +111,10 @@ function main() {
   class TrackPosition extends React.PureComponent {
     constructor(props) {
       super(props);
-      this.state = { locating: false };
+      this.state = {
+        locating: false,
+        error: false,
+      };
       this.geolocate = this.geolocate.bind(this);
       this.success = this.success.bind(this);
       this.error = this.error.bind(this);
@@ -132,7 +135,6 @@ function main() {
     //   return false;
     // }
     success(position) {
-      // this.setState({ loading: false });
       // document.getElementById('status').innerHTML = '';
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
@@ -153,13 +155,10 @@ function main() {
       console.log('there was an error!')
       // document.getElementById('status').innerHTML = 'Unable to retrieve your location';
       this.notLocating();
+      this.setState({ error: true });
     }
     geolocate() {
       // document.getElementById('status').innerHTML = 'Locating...';
-      // this.loading = true;
-      // this.updateStatus();
-      // this.success();
-      // this.setState({ loading: true });
       this.isLocating();
       navigator.geolocation.getCurrentPosition(this.success, this.error);
     }
@@ -172,10 +171,15 @@ function main() {
         statusText =
           (<div>Locate Me!</div>);
       }
+      let errorText;
+      if (this.state.error === true) {
+        errorText = (<div>Unable to retrieve your location</div>);
+      }
       return (
         <div className="tracking">
-          <button className="sdk-btn" onClick={this.geolocate}>Buttons</button>
+          <button className="sdk-btn" onClick={this.geolocate}>Geolocate</button>
           <div>{ statusText }</div>
+          <div>{ errorText }</div>
         </div>
       );
     }
