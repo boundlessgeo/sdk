@@ -76,15 +76,15 @@ function main() {
     },
   }));
 
-  const initialExtent = () => {
-    store.dispatch(mapActions.setView([-93, 45], 2));
-    store.dispatch(mapActions.removeFeatures('points', [{
-      type: 'Feature',
-      properties: {
-        title: 'User Location',
-      },
-    }]));
-  };
+  // const initialExtent = () => {
+  //   store.dispatch(mapActions.setView([-93, 45], 2));
+  //   store.dispatch(mapActions.removeFeatures('points', [{
+  //     type: 'Feature',
+  //     properties: {
+  //       title: 'User Location',
+  //     },
+  //   }]));
+  // };
 
   // Component to track user's position.
   class TrackPosition extends React.PureComponent {
@@ -101,6 +101,7 @@ function main() {
       this.isLocating = this.isLocating.bind(this);
       this.notLocating = this.notLocating.bind(this);
       this.findUser = this.findUser.bind(this);
+      this.initialExtent = this.initialExtent.bind(this);
     }
     isLocating() {
       this.setState({ locating: true });
@@ -124,23 +125,29 @@ function main() {
       }]));
       store.dispatch(mapActions.setView([longitude, latitude], 17));
       this.setState({ latitude, longitude });
-      this.notLocating();
+      // this.notLocating();
     }
     error() {
-      this.notLocating();
+      // this.notLocating();
       this.setState({ error: true });
     }
     findUser() {
+      // this.isLocating();
       navigator.geolocation.getCurrentPosition(this.success, this.error);
     }
     geolocate() {
       this.isLocating();
-      this.intervalId = setInterval(this.findUser, 1000);
-      // setInterval(
-      //   navigator.geolocation.getCurrentPosition(this.success, this.error),
-      //   this.props.refreshInterval,
-      // );
-      // navigator.geolocation.getCurrentPosition(this.success, this.error);
+      this.intervalId = setInterval(this.findUser, this.props.refreshInterval);
+    }
+    initialExtent() {
+      this.notLocating();
+      store.dispatch(mapActions.setView([-93, 45], 2));
+      store.dispatch(mapActions.removeFeatures(this.props.targetSource, [{
+        type: 'Feature',
+        properties: {
+          title: 'User Location',
+        },
+      }]));
     }
     render() {
       let statusText;
@@ -153,7 +160,7 @@ function main() {
       }
       let errorText;
       if (this.state.error === true) {
-        errorText = (<div>Unable to retrieve your location</div>);
+        errorText = (<div>Error retrieving your location</div>);
       }
       let currentLocation;
       if (this.props.showLocation && (this.state.latitude && this.state.longitude)) {
@@ -164,6 +171,7 @@ function main() {
       return (
         <div className="tracking">
           <button className="sdk-btn" onClick={this.geolocate}>Geolocate</button>
+          <button className="sdk-btn" onClick={this.initialExtent}>Zoom to Initial Extent and Stop Locating</button>
           <div>{ currentLocation }</div>
           <div>{ statusText }</div>
           <div>{ errorText }</div>
@@ -180,7 +188,7 @@ function main() {
 
   TrackPosition.defaultProps = {
     showLocation: false,
-    refreshInterval: 500,
+    refreshInterval: 10000,
   };
 
   // place the map on the page.
@@ -190,7 +198,6 @@ function main() {
   ReactDOM.render((
     <div>
       <TrackPosition targetSource={'points'} />
-      <button className="sdk-btn" onClick={initialExtent}>Zoom to Initial Extent</button>
     </div>
   ), document.getElementById('controls'));
 }
