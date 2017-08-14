@@ -76,27 +76,6 @@ function main() {
     },
   }));
 
-  // function success(position) {
-  //   document.getElementById('status').innerHTML = '';
-  //   const latitude = position.coords.latitude;
-  //   const longitude = position.coords.longitude;
-  //   store.dispatch(mapActions.addFeatures('points', [{
-  //     type: 'Feature',
-  //     properties: {
-  //       title: 'User Location',
-  //     },
-  //     geometry: {
-  //       type: 'Point',
-  //       coordinates: [longitude, latitude],
-  //     },
-  //   }]));
-  //   store.dispatch(mapActions.setView([longitude, latitude], 18));
-  // }
-
-  // function error() {
-  //   document.getElementById('status').innerHTML = 'Unable to retrieve your location';
-  // }
-
   const initialExtent = () => {
     store.dispatch(mapActions.setView([-93, 45], 2));
     store.dispatch(mapActions.removeFeatures('points', [{
@@ -115,11 +94,13 @@ function main() {
         locating: false,
         error: false,
       };
+      this.intervalId = null;
       this.geolocate = this.geolocate.bind(this);
       this.success = this.success.bind(this);
       this.error = this.error.bind(this);
       this.isLocating = this.isLocating.bind(this);
       this.notLocating = this.notLocating.bind(this);
+      this.findUser = this.findUser.bind(this);
     }
     isLocating() {
       this.setState({ locating: true });
@@ -127,18 +108,11 @@ function main() {
     notLocating() {
       this.setState({ locating: false });
     }
-    // shouldComponentUpdate(nextState) {
-    //   // console.log('nextState', nextState);
-    //   if (this.state.loading !== nextState.loading) {
-    //     return true;
-    //   }
-    //   return false;
-    // }
     success(position) {
-      // document.getElementById('status').innerHTML = '';
+      this.setState({ error: false });
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
-      store.dispatch(mapActions.addFeatures('points', [{
+      store.dispatch(mapActions.addFeatures(this.props.targetSource, [{
         type: 'Feature',
         properties: {
           title: 'User Location',
@@ -153,14 +127,20 @@ function main() {
       this.notLocating();
     }
     error() {
-      // document.getElementById('status').innerHTML = 'Unable to retrieve your location';
       this.notLocating();
       this.setState({ error: true });
     }
-    geolocate() {
-      // document.getElementById('status').innerHTML = 'Locating...';
-      this.isLocating();
+    findUser() {
       navigator.geolocation.getCurrentPosition(this.success, this.error);
+    }
+    geolocate() {
+      this.isLocating();
+      this.intervalId = setInterval(this.findUser, 1000);
+      // setInterval(
+      //   navigator.geolocation.getCurrentPosition(this.success, this.error),
+      //   this.props.refreshInterval,
+      // );
+      // navigator.geolocation.getCurrentPosition(this.success, this.error);
     }
     render() {
       let statusText;
@@ -194,10 +174,13 @@ function main() {
 
   TrackPosition.propTypes = {
     showLocation: PropTypes.bool,
+    targetSource: PropTypes.string.isRequired,
+    refreshInterval: PropTypes.number,
   };
 
   TrackPosition.defaultProps = {
     showLocation: false,
+    refreshInterval: 500,
   };
 
   // place the map on the page.
@@ -206,7 +189,7 @@ function main() {
   // add some buttons to demo some actions.
   ReactDOM.render((
     <div>
-      <TrackPosition />
+      <TrackPosition targetSource={'points'} />
       <button className="sdk-btn" onClick={initialExtent}>Zoom to Initial Extent</button>
     </div>
   ), document.getElementById('controls'));
