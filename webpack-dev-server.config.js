@@ -61,6 +61,10 @@ const config = {
       'webpack/hot/only-dev-server',
       './examples/rotating/app.jsx',
     ],
+    'layer-list': [
+      'webpack/hot/only-dev-server',
+      './examples/layer-list/app.jsx'
+    ],
   },
   // Server Configuration options
   devServer: {
