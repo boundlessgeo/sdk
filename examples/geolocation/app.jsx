@@ -149,10 +149,10 @@ function main() {
         },
       }]));
       store.dispatch(mapActions.setView([longitude, latitude], 17));
+      this.setState({ latitude, longitude });
       this.notLocating();
     }
     error() {
-      console.log('there was an error!')
       // document.getElementById('status').innerHTML = 'Unable to retrieve your location';
       this.notLocating();
       this.setState({ error: true });
@@ -175,9 +175,16 @@ function main() {
       if (this.state.error === true) {
         errorText = (<div>Unable to retrieve your location</div>);
       }
+      let currentLocation;
+      if (this.state.latitude && this.state.longitude) {
+        currentLocation = (
+          <div>Current Location: {this.state.latitude}, {this.state.longitude}</div>
+        );
+      }
       return (
         <div className="tracking">
           <button className="sdk-btn" onClick={this.geolocate}>Geolocate</button>
+          <div>{ currentLocation }</div>
           <div>{ statusText }</div>
           <div>{ errorText }</div>
         </div>
