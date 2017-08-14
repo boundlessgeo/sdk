@@ -35,6 +35,9 @@ class LayerList extends React.PureComponent {
       this.props.moveLayer(id, this.props.layers[index - 1].id);
     }
   }
+  removeLayer(id) {
+    this.props.removeLayer(id);
+  }
   buildListOfLayers(layers) {
     const list = [];
     for (let i = layers.length - 1, ii = 0; i >= ii; i--) {
@@ -43,13 +46,13 @@ class LayerList extends React.PureComponent {
 
       const checkbox = (<input
         type="checkbox"
-        onChange={() => { }}
         onClick={() => { this.props.toggleVisibility(layer.id, is_checked); }}
         checked={is_checked}
       />);
       const moveButtons = (<span>
         <button className="sdk-btn" onClick={() => { this.moveLayerUp(layer.id); }}>Move Up</button>
         <button className="sdk-btn" onClick={() => { this.moveLayerDown(layer.id); }}>Move down</button>
+        <button className="sdk-btn" onClick={() => { this.removeLayer(layer.id); }}>Remove Layer</button>
       </span>);
 
       list.push(<li className="layer" key={i}><span className="checkbox">{checkbox}</span> <span className="name">{layer.id}</span><span className="btn-container">{moveButtons}</span></li>);
@@ -108,6 +111,9 @@ function mapDispatchToProps(dispatch) {
     },
     moveLayer: (layerId, targetId) => {
       dispatch(mapActions.orderLayer(layerId, targetId));
+    },
+    removeLayer: (layerId) => {
+      dispatch(mapActions.removeLayer(layerId));
     },
   };
 }

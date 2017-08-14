@@ -5,8 +5,7 @@
  *
  */
 
-import { createStore, combineReducers, applyMiddleware } from 'redux';
-import thunkMiddleware from 'redux-thunk';
+import { createStore, combineReducers } from 'redux';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -20,8 +19,7 @@ import LayerList from './components/layerList';
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
   map: SdkMapReducer,
-}), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
-   applyMiddleware(thunkMiddleware));
+}), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 
 function main() {
   // Start with a reasonable global view of hte map.
@@ -60,22 +58,9 @@ function main() {
       'circle-stroke-color': '#00ff11',
     },
   }));
-  // Fetch the geoJson file from a url and add it to the map at the named source
-  const addLayerFromGeoJSON = (url, sourceName) => {
-    // Fetch URL
-    fetch(url)
-      .then(
-        response => response.json(),
-        error => console.error('An error occured.', error),
-      )
-      // addFeatures with the features, source name, and crs
-      .then(json => store.dispatch(mapActions.addFeatures(sourceName, json)));
-  };
 
   // This is called by the onClick, keeping the onClick HTML clean
   const runFetchGeoJSON = () => {
-    // const url = './data/airports.json';
-    // addLayerFromGeoJSON(url, 'dynamic-source');
     store.dispatch(mapActions.addSource('dynamic-source',
       { type: 'geojson', data: './data/airports.json' }));
   };
@@ -133,7 +118,7 @@ function main() {
   store.dispatch(mapActions.addSource('states', {
     type: 'raster',
     tileSize: 256,
-    tiles: ['https://demo.boundlessgeo.com/geoserver/gwc/service/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/png&SRS=EPSG:900913&LAYERS=topp:states&STYLES=&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}'],
+    tiles: ['https://demo.boundlessgeo.com/geoserver/usa/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/png&SRS=EPSG:900913&LAYERS=topp:states&STYLES=&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}'],
   }));
 
   // add the wms layer
