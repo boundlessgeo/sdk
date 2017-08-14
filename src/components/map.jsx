@@ -72,7 +72,7 @@ import { parseQueryString, jsonEquals, getLayerById, getMin, getMax, degreesToRa
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
 const WGS84_SPHERE = new Sphere(6378137);
-
+const MAPBOX_PROTOCOL = 'mapbox://';
 
 /** This variant of getVersion differs as it allows
  *  for undefined values to be returned.
@@ -145,9 +145,23 @@ function configureImageSource(glSource) {
   return source;
 }
 
-function configureMvtSource(glSource) {
+function configureMvtSource(glSource, accessToken) {
+  const url = glSource.url;
+  let urls;
+  if (url.indexOf(MAPBOX_PROTOCOL) === 0) {
+    const mapid = url.replace(MAPBOX_PROTOCOL, '');
+    const suffix = glSource.type === 'vector' ? 'vector.pbf' : 'png';
+    const hosts = ['a', 'b', 'c', 'd'];
+    urls = [];
+    for (let i = 0, ii = hosts.length; i < ii; ++i) {
+      const host = hosts[i];
+      urls.push(`https://${host}.tiles.mapbox.com/v4/${mapid}/{z}/{x}/{y}.${suffix}?access_token=${accessToken}`);
+    }
+  } else {
+    urls = [url];
+  }
   const source = new VectorTileSource({
-    url: glSource.url,
+    urls,
     tileGrid: TileGrid.createXYZ({ maxZoom: 22 }),
     tilePixelRatio: 16,
     format: new MvtFormat(),
@@ -252,7 +266,7 @@ function configureGeojsonSource(glSource, mapProjection) {
   return new_src;
 }
 
-function configureSource(glSource, mapProjection) {
+function configureSource(glSource, mapProjection, accessToken) {
   // tiled raster layer.
   if (glSource.type === 'raster') {
     if ('tiles' in glSource) {
@@ -265,7 +279,7 @@ function configureSource(glSource, mapProjection) {
   } else if (glSource.type === 'image') {
     return configureImageSource(glSource);
   } else if (glSource.type === 'vector') {
-    return configureMvtSource(glSource);
+    return configureMvtSource(glSource, accessToken);
   }
   return null;
 }
@@ -428,7 +442,8 @@ export class Map extends React.Component {
       //  list of sources.
       if (!(src_name in this.sources)) {
         const proj = this.map.getView().getProjection();
-        this.sources[src_name] = configureSource(sourcesDef[src_name], proj);
+        this.sources[src_name] = configureSource(sourcesDef[src_name], proj,
+          this.props.accessToken);
       }
 
       // Check to see if there was a clustering change.
@@ -640,7 +655,13 @@ export class Map extends React.Component {
       }));
     }
 
-    return fetch(`${map.sprite}.json`)
+    let spriteUrl;
+    if (map.sprite.indexOf(MAPBOX_PROTOCOL) === 0) {
+      spriteUrl = `${this.props.baseUrl}/sprite?access_token=${this.props.accessToken}`;
+    } else {
+      spriteUrl = `${map.sprite}.json`;
+    }
+    return fetch(spriteUrl)
       .then(r => r.json())
       .then((spriteJson) => {
         // store the spite data for later styling.
@@ -1029,6 +1050,8 @@ Map.propTypes = {
   initialPopups: PropTypes.arrayOf(PropTypes.object),
   setView: PropTypes.func,
   includeFeaturesOnClick: PropTypes.bool,
+  baseUrl: PropTypes.string,
+  accessToken: PropTypes.string,
   onClick: PropTypes.func,
   onFeatureDrawn: PropTypes.func,
   onFeatureModified: PropTypes.func,
@@ -1040,6 +1063,8 @@ Map.propTypes = {
 
 Map.defaultProps = {
   projection: 'EPSG:3857',
+  baseUrl: '',
+  accessToken: '',
   map: {
     center: [0, 0],
     zoom: 2,

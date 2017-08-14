@@ -63,6 +63,10 @@ describe('Map component', () => {
         type: 'vector',
         url: 'https://{a-d}.tiles.mapbox.com/v4/mapbox.mapbox-streets-v6/{z}/{x}/{y}.vector.pbf?access_token=test_key',
       },
+      mapbox: {
+        url: 'mapbox://mapbox.mapbox-streets-v7',
+        type: 'vector',
+      },
     };
     const layers = [
       {
@@ -84,6 +88,9 @@ describe('Map component', () => {
         id: 'mvt-layer',
         source: 'mvt',
       }, {
+        id: 'mapbox-layer',
+        source: 'mapbox',
+      }, {
         id: 'purple-points',
         ref: 'sample-points',
         paint: {
@@ -100,7 +107,11 @@ describe('Map component', () => {
 
     const center = [0, 0];
     const zoom = 2;
-    const wrapper = mount(<Map map={{ center, zoom, sources, layers, metadata }} />);
+    const apiKey = 'foo';
+    const wrapper = mount(<Map
+      accessToken={apiKey}
+      map={{ center, zoom, sources, layers, metadata }}
+    />);
     const map = wrapper.instance().map;
     expect(map).toBeDefined();
     expect(map).toBeInstanceOf(olMap);
@@ -111,7 +122,8 @@ describe('Map component', () => {
     expect(map.getLayers().item(1).getSource().getParams().REQUEST).toBe(undefined);
     expect(map.getLayers().item(2)).toBeInstanceOf(VectorLayer);
     expect(map.getLayers().item(3)).toBeInstanceOf(VectorTileLayer);
-
+    const expected = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${apiKey}`;
+    expect(map.getLayers().item(4).getSource().getUrls()[0]).toBe(expected);
     // move the map.
     wrapper.setProps({
       zoom: 4,
@@ -826,6 +838,32 @@ describe('Map component async', () => {
       done();
     }, 300);
   });
+
+  it('should set spriteData using mapbox://', (done) => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+    }));
+
+    const baseUrl = 'https://api.mapbox.com/styles/v1/mapbox/bright-v9';
+    const apiKey = 'foo';
+    const wrapper = mount(<ConnectedMap baseUrl={baseUrl} accessToken={apiKey} store={store} />);
+    const map = wrapper.instance().getWrappedInstance();
+
+    // eslint-disable-next-line
+    const spritesJson = {"accommodation_camping": {"y": 0, "width": 20, "pixelRatio": 1, "x": 0, "height": 20}, "amenity_firestation": {"y": 0, "width": 50, "pixelRatio": 1, "x": 20, "height": 50}};
+
+    nock(baseUrl)
+      .get(`/sprite?access_token=${apiKey}`)
+      .reply(200, spritesJson);
+
+    store.dispatch(MapActions.setSprite('mapbox://sprites/mapbox/bright-v9'));
+
+    setTimeout(() => {
+      expect(map.spriteData).toEqual(spritesJson);
+      done();
+    }, 300);
+  });
+
   it('should handle WMS GetFeatureInfo', () => {
     const store = createStore(combineReducers({
       map: MapReducer,
