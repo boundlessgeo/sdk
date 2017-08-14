@@ -115,10 +115,14 @@ function main() {
       this.geolocate = this.geolocate.bind(this);
       this.success = this.success.bind(this);
       this.error = this.error.bind(this);
-      this.updateStatus = this.updateStatus.bind(this);
+      this.isLocating = this.isLocating.bind(this);
+      this.notLocating = this.notLocating.bind(this);
     }
-    updateStatus() {
-      this.setState({ locating: !this.state.locating });
+    isLocating() {
+      this.setState({ locating: true });
+    }
+    notLocating() {
+      this.setState({ locating: false });
     }
     // shouldComponentUpdate(nextState) {
     //   // console.log('nextState', nextState);
@@ -143,11 +147,12 @@ function main() {
         },
       }]));
       store.dispatch(mapActions.setView([longitude, latitude], 17));
-      this.updateStatus();
+      this.notLocating();
     }
     error() {
+      console.log('there was an error!')
       // document.getElementById('status').innerHTML = 'Unable to retrieve your location';
-      this.updateStatus();
+      this.notLocating();
     }
     geolocate() {
       // document.getElementById('status').innerHTML = 'Locating...';
@@ -155,14 +160,9 @@ function main() {
       // this.updateStatus();
       // this.success();
       // this.setState({ loading: true });
+      this.isLocating();
       navigator.geolocation.getCurrentPosition(this.success, this.error);
     }
-    // let status;
-    // if (this.state.locating) {
-    //   status = 'Locating...';
-    // } else if (!this.state.locating) {
-    //   status = 'Locate Me!';
-    // }
     render() {
       let statusText;
       if (this.state.locating === true) {
@@ -178,12 +178,6 @@ function main() {
           <div>{ statusText }</div>
         </div>
       );
-      // let statusDiv;
-      // if (this.state.locating) {
-      //   statusDiv = <p>Locating...</p>;
-      // } else if (!this.state.locating) {
-      //   statusDiv = <p>Locate Me!</p>;
-      // }
     }
   }
 
