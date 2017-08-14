@@ -9,6 +9,7 @@ import thunkMiddleware from 'redux-thunk';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
 import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
@@ -96,11 +97,6 @@ function main() {
     document.getElementById('status').innerHTML = 'Unable to retrieve your location';
   }
 
-  const geolocate = () => {
-    document.getElementById('status').innerHTML = 'Locating...';
-    navigator.geolocation.getCurrentPosition(success, error);
-  };
-
   const initialExtent = () => {
     store.dispatch(mapActions.setView([-93, 45], 2));
     store.dispatch(mapActions.removeFeatures('points', [{
@@ -111,13 +107,74 @@ function main() {
     }]));
   };
 
+  // Component to track user's position.
+  class TrackPosition extends React.PureComponent {
+    constructor(props) {
+      super(props);
+      this.state = {
+        locating: false,
+      };
+    }
+    // shouldComponentUpdate(nextState) {
+    //   // console.log('nextState', nextState);
+    //   if (this.state.loading !== nextState.loading) {
+    //     return true;
+    //   }
+    //   return false;
+    // }
+    success(position) {
+      this.setState({ loading: false });
+      // document.getElementById('status').innerHTML = '';
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      store.dispatch(mapActions.addFeatures('points', [{
+        type: 'Feature',
+        properties: {
+          title: 'User Location',
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [longitude, latitude],
+        },
+      }]));
+      store.dispatch(mapActions.setView([longitude, latitude], 17));
+    }
+    geolocate = () => {
+      // document.getElementById('status').innerHTML = 'Locating...';
+      // this.loading = true;
+      console.log(this.props.refreshInterval)
+      this.setState({ loading: true });
+      navigator.geolocation.getCurrentPosition(success, error);
+    };
+    render() {
+      let loading_icon;
+      let status;
+      if (this.state.locating) {
+        status = 'Stop Tracking';
+      } else if (!this.state.locating) {
+        status = 'Start Tracking';
+      }
+      return (
+        <div className="tracking">
+          <button className="sdk-btn" onClick={this.geolocate}>{ loading_icon } { status }</button>
+        </div>
+      );
+    }
+  }
+
+  TrackPosition.propTypes = {
+    refreshInterval: PropTypes.number,
+    targetSource: PropTypes.string,
+    showLocation: PropTypes.bool,
+  };
+
   // place the map on the page.
   ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
 
   // add some buttons to demo some actions.
   ReactDOM.render((
     <div>
-      <button className="sdk-btn" onClick={geolocate}>Locate User</button>
+      <TrackPosition refreshInterval={3} />
       <button className="sdk-btn" onClick={initialExtent}>Zoom to Initial Extent</button>
       <p id="status" />
     </div>
