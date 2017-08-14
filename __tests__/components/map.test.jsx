@@ -226,6 +226,80 @@ describe('Map component', () => {
     expect(layer.getVisible()).toBe(false);
   });
 
+  it('should handle undefined center, zoom and bearing in constructor', () => {
+    const sources = {
+      tilejson: {
+        type: 'raster',
+        url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure',
+      },
+    };
+    const layers = [{
+      id: 'tilejson-layer',
+      source: 'tilejson',
+    }];
+
+    const metadata = {
+      'bnd:source-version': 0,
+      'bnd:layer-version': 0,
+    };
+    const wrapper = mount(<Map map={{ sources, layers, metadata }} />);
+
+    const instance = wrapper.instance();
+    const map = instance.map;
+    const view = map.getView();
+    // default values should get set
+    expect(view.getRotation()).toBe(0);
+    expect(view.getCenter()).toBe(null);
+    expect(view.getZoom()).toBe(undefined);
+  });
+
+  it('should handle undefined center, zoom, bearing in shouldComponentUpdate', () => {
+    const sources = {
+      tilejson: {
+        type: 'raster',
+        url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure',
+      },
+    };
+    const layers = [{
+      id: 'tilejson-layer',
+      source: 'tilejson',
+    }];
+
+    const metadata = {
+      'bnd:source-version': 0,
+      'bnd:layer-version': 0,
+    };
+    const center = [0, 0];
+    const zoom = 2;
+    const bearing = 45;
+    const wrapper = mount(<Map map={{ bearing, center, zoom, sources, layers, metadata }} />);
+
+    const instance = wrapper.instance();
+    const map = instance.map;
+    const view = map.getView();
+    // center in EPSG:4326
+    const centerWGS84 = view.getCenter();
+
+    const nextProps = {
+      map: {
+        center: undefined,
+        zoom: undefined,
+        bearing: undefined,
+        metadata: {
+          'bnd:source-version': 0,
+          'bnd:layer-version': 0,
+        },
+        sources,
+        layers,
+      },
+    };
+    instance.shouldComponentUpdate.call(instance, nextProps);
+    // previous values should still be valid
+    expect(radiansToDegrees(view.getRotation())).toBe(45);
+    expect(view.getZoom()).toBe(2);
+    expect(view.getCenter()).toBe(centerWGS84);
+  });
+
   it('should handle layout changes', () => {
     const sources = {
       geojson: {

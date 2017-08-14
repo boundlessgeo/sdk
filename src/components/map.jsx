@@ -315,15 +315,23 @@ export class Map extends React.Component {
     const map_proj = this.map.getView().getProjection();
 
     // compare the centers
-    if (nextProps.map.center[0] !== this.props.map.center[0]
-      || nextProps.map.center[1] !== this.props.map.center[1]
-      || nextProps.map.zoom !== this.props.map.zoom
-      || nextProps.map.bearing !== this.props.map.bearing) {
-      // convert the center point to map coordinates.
-      const center = Proj.transform(nextProps.map.center, 'EPSG:4326', map_proj);
-      const rotation = degreesToRadians(nextProps.map.bearing);
-      this.map.getView().setCenter(center);
+    if (nextProps.map.center !== undefined) {
+      // center has not been set yet or differs
+      if (this.props.map.center === undefined ||
+        (nextProps.map.center[0] !== this.props.map.center[0]
+        || nextProps.map.center[1] !== this.props.map.center[1])) {
+        // convert the center point to map coordinates.
+        const center = Proj.transform(nextProps.map.center, 'EPSG:4326', map_proj);
+        this.map.getView().setCenter(center);
+      }
+    }
+    // compare the zoom
+    if (nextProps.map.zoom !== undefined && (nextProps.map.zoom !== this.props.map.zoom)) {
       this.map.getView().setZoom(nextProps.map.zoom);
+    }
+    // compare the rotation
+    if (nextProps.map.bearing !== undefined && nextProps.map.bearing !== this.props.map.bearing) {
+      const rotation = degreesToRadians(nextProps.map.bearing);
       this.map.getView().setRotation(rotation);
     }
 
@@ -824,10 +832,16 @@ export class Map extends React.Component {
     const map_proj = this.props.projection;
 
     // determine the map's rotation.
-    const rotation = degreesToRadians(this.props.map.bearing);
+    let rotation;
+    if (this.props.map.bearing !== undefined) {
+      rotation = degreesToRadians(this.props.map.bearing);
+    }
 
     // reproject the initial center based on that projection.
-    const center = Proj.transform(this.props.map.center, 'EPSG:4326', map_proj);
+    let center;
+    if (this.props.map.center !== undefined) {
+      center = Proj.transform(this.props.map.center, 'EPSG:4326', map_proj);
+    }
 
     // intiialize the map.
     this.map = new OlMap({
