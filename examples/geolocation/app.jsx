@@ -176,7 +176,7 @@ function main() {
         errorText = (<div>Unable to retrieve your location</div>);
       }
       let currentLocation;
-      if (this.state.latitude && this.state.longitude) {
+      if (this.props.showLocation && (this.state.latitude && this.state.longitude)) {
         currentLocation = (
           <div>Current Location: {this.state.latitude}, {this.state.longitude}</div>
         );
@@ -191,6 +191,14 @@ function main() {
       );
     }
   }
+
+  TrackPosition.propTypes = {
+    showLocation: PropTypes.bool,
+  };
+
+  TrackPosition.defaultProps = {
+    showLocation: false,
+  };
 
   // place the map on the page.
   ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
