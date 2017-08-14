@@ -29,6 +29,9 @@ button.sdk-btn {
 }
 
 /** some OpenLayers styling tweaks */
+.ol-control {
+  border: solid 1px rgba(153, 153, 153, 0.45);
+}
 .ol-control button {
     background-color: rgba($sdk-blue, .8);
 
