@@ -76,26 +76,26 @@ function main() {
     },
   }));
 
-  function success(position) {
-    document.getElementById('status').innerHTML = '';
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
-    store.dispatch(mapActions.addFeatures('points', [{
-      type: 'Feature',
-      properties: {
-        title: 'User Location',
-      },
-      geometry: {
-        type: 'Point',
-        coordinates: [longitude, latitude],
-      },
-    }]));
-    store.dispatch(mapActions.setView([longitude, latitude], 18));
-  }
+  // function success(position) {
+  //   document.getElementById('status').innerHTML = '';
+  //   const latitude = position.coords.latitude;
+  //   const longitude = position.coords.longitude;
+  //   store.dispatch(mapActions.addFeatures('points', [{
+  //     type: 'Feature',
+  //     properties: {
+  //       title: 'User Location',
+  //     },
+  //     geometry: {
+  //       type: 'Point',
+  //       coordinates: [longitude, latitude],
+  //     },
+  //   }]));
+  //   store.dispatch(mapActions.setView([longitude, latitude], 18));
+  // }
 
-  function error() {
-    document.getElementById('status').innerHTML = 'Unable to retrieve your location';
-  }
+  // function error() {
+  //   document.getElementById('status').innerHTML = 'Unable to retrieve your location';
+  // }
 
   const initialExtent = () => {
     store.dispatch(mapActions.setView([-93, 45], 2));
@@ -111,9 +111,14 @@ function main() {
   class TrackPosition extends React.PureComponent {
     constructor(props) {
       super(props);
-      this.state = {
-        locating: false,
-      };
+      this.state = { locating: false };
+      this.geolocate = this.geolocate.bind(this);
+      this.success = this.success.bind(this);
+      this.error = this.error.bind(this);
+      this.updateStatus = this.updateStatus.bind(this);
+    }
+    updateStatus() {
+      this.setState({ locating: !this.state.locating });
     }
     // shouldComponentUpdate(nextState) {
     //   // console.log('nextState', nextState);
@@ -123,7 +128,7 @@ function main() {
     //   return false;
     // }
     success(position) {
-      this.setState({ loading: false });
+      // this.setState({ loading: false });
       // document.getElementById('status').innerHTML = '';
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
@@ -138,35 +143,49 @@ function main() {
         },
       }]));
       store.dispatch(mapActions.setView([longitude, latitude], 17));
+      this.updateStatus();
     }
-    geolocate = () => {
+    error() {
+      // document.getElementById('status').innerHTML = 'Unable to retrieve your location';
+      this.updateStatus();
+    }
+    geolocate() {
       // document.getElementById('status').innerHTML = 'Locating...';
       // this.loading = true;
-      console.log(this.props.refreshInterval)
-      this.setState({ loading: true });
-      navigator.geolocation.getCurrentPosition(success, error);
-    };
+      // this.updateStatus();
+      // this.success();
+      // this.setState({ loading: true });
+      navigator.geolocation.getCurrentPosition(this.success, this.error);
+    }
+    // let status;
+    // if (this.state.locating) {
+    //   status = 'Locating...';
+    // } else if (!this.state.locating) {
+    //   status = 'Locate Me!';
+    // }
     render() {
-      let loading_icon;
-      let status;
-      if (this.state.locating) {
-        status = 'Stop Tracking';
-      } else if (!this.state.locating) {
-        status = 'Start Tracking';
+      let statusText;
+      if (this.state.locating === true) {
+        statusText =
+          (<div>Locating!</div>);
+      } else if (this.state.locating === false) {
+        statusText =
+          (<div>Locate Me!</div>);
       }
       return (
         <div className="tracking">
-          <button className="sdk-btn" onClick={this.geolocate}>{ loading_icon } { status }</button>
+          <button className="sdk-btn" onClick={this.geolocate}>Buttons</button>
+          <div>{ statusText }</div>
         </div>
       );
+      // let statusDiv;
+      // if (this.state.locating) {
+      //   statusDiv = <p>Locating...</p>;
+      // } else if (!this.state.locating) {
+      //   statusDiv = <p>Locate Me!</p>;
+      // }
     }
   }
-
-  TrackPosition.propTypes = {
-    refreshInterval: PropTypes.number,
-    targetSource: PropTypes.string,
-    showLocation: PropTypes.bool,
-  };
 
   // place the map on the page.
   ReactDOM.render(<SdkMap store={store} />, document.getElementById('map'));
@@ -174,9 +193,8 @@ function main() {
   // add some buttons to demo some actions.
   ReactDOM.render((
     <div>
-      <TrackPosition refreshInterval={3} />
+      <TrackPosition />
       <button className="sdk-btn" onClick={initialExtent}>Zoom to Initial Extent</button>
-      <p id="status" />
     </div>
   ), document.getElementById('controls'));
 }
