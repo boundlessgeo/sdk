@@ -438,10 +438,10 @@ export class Map extends React.Component {
     let src_names = Object.keys(sourcesDef);
     for (let i = 0, ii = src_names.length; i < ii; i++) {
       const src_name = src_names[i];
+      const proj = this.map.getView().getProjection();
       // Add the source because it's not in the current
       //  list of sources.
       if (!(src_name in this.sources)) {
-        const proj = this.map.getView().getProjection();
         this.sources[src_name] = configureSource(sourcesDef[src_name], proj,
           this.props.accessToken);
       }
@@ -454,7 +454,7 @@ export class Map extends React.Component {
       if (src && (src.cluster !== sourcesDef[src_name].cluster
           || src.clusterRadius !== sourcesDef[src_name].clusterRadius)) {
         // reconfigure the source for clustering.
-        this.sources[src_name] = configureSource(sourcesDef[src_name]);
+        this.sources[src_name] = configureSource(sourcesDef[src_name], proj);
         // tell all the layers about it.
         this.updateLayerSource(src_name, this.props.map.layers);
       }
