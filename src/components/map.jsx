@@ -747,10 +747,6 @@ export class Map extends React.Component {
     }));
 
 
-    // move the element up a level to ensure
-    //  the rects are calculated correctly.
-    overlay.setElement(elem.firstChild);
-
     // set the popup id so we can match the component
     //  to the overlay.
     overlay.set('popupId', id);
