@@ -491,10 +491,13 @@ export class Map extends React.Component {
 
     const fake_style = {
       version: 8,
-      sprite: this.spriteData,
+      sprite: this.props.map.sprite,
       layers: render_layers,
     };
-    applyStyle(olLayer, fake_style, layers[0].source);
+
+    if (olLayer.setStyle) {
+      applyStyle(olLayer, fake_style, layers[0].source);
+    }
 
     // handle toggling the layer on or off
     olLayer.setVisible(render_layers.length > 0);
