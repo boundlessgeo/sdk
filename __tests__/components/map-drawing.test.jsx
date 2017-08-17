@@ -176,7 +176,7 @@ if (HAS_CANVAS) {
       spyOn(sdk_map, 'onFeatureEvent');
 
       // fake modifying a sample feature.
-      const features = sdk_map.layers.points.getSource().getFeatures();
+      const features = sdk_map.layers['test-points'].getSource().getFeatures();
       select.getFeatures().push(features[0]);
 
       modify.dispatchEvent({
@@ -208,13 +208,13 @@ if (HAS_CANVAS) {
       // get the select interaction
       const select = interactions.item(interactions.getLength() - 1);
       // eslint-disable-next-line no-underscore-dangle
-      expect(select.layerFilter_(sdk_map.layers.points)).toBe(true);
+      expect(select.layerFilter_(sdk_map.layers['test-points'])).toBe(true);
       // configure a spy, when a feature is selected onFeatureEvent
       //  should be called.
       spyOn(sdk_map, 'onFeatureEvent');
 
       // fake selecting a sample feature.
-      const features = sdk_map.layers.points.getSource().getFeatures();
+      const features = sdk_map.layers['test-points'].getSource().getFeatures();
       select.getFeatures().push(features[0]);
       select.dispatchEvent({
         type: 'select',
