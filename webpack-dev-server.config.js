@@ -65,6 +65,10 @@ const config = {
       'webpack/hot/only-dev-server',
       './examples/rotating/app.jsx',
     ],
+    'mb-bright': [
+      'webpack/hot/only-dev-server',
+      './examples/mb-bright/app.jsx',
+    ],
   },
   // Server Configuration options
   devServer: {
