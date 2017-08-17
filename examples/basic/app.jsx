@@ -75,33 +75,13 @@ function main() {
       'background-color': '#eee',
     },
   }));
-
-  // Show null island as a layer.
-  store.dispatch(mapActions.addLayer({
-    id: 'null-island',
-    source: 'points',
-    type: 'circle',
-    paint: {
-      'circle-radius': {
-        type: 'interval',
-        default: 3,
-        property: 'point_count',
-        stops: [
-          [0, 5], [2, 10], [3, 30],
-        ],
-      },
-      'circle-color': '#feb24c',
-      'circle-stroke-color': '#f03b20',
-    },
-  }));
-
   // The points source has both null island
   // and random points on it. This layer
   // will style all random points as purple instead
   // of orange.
   store.dispatch(mapActions.addLayer({
     id: 'random-points',
-    ref: 'null-island',
+    source: 'points',
     paint: {
       'circle-radius': 5,
       'circle-color': '#756bb1',
@@ -109,6 +89,21 @@ function main() {
     },
     filter: ['==', 'isRandom', true],
   }));
+
+  // Show null island as a layer.
+  store.dispatch(mapActions.addLayer({
+    id: 'null-island',
+    source: 'points',
+    type: 'circle',
+    paint: {
+      'circle-radius': 3,
+      'circle-color': '#feb24c',
+      'circle-stroke-color': '#f03b20',
+    },
+    filter: ['==', 'title', 'Null Island'],
+  }));
+
+
 
   /*
    * These are some example calls that were earlier prototyped in
