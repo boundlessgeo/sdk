@@ -18,7 +18,7 @@ import * as printActions from '@boundlessgeo/sdk/actions/print';
 // This will have webpack include all of the SDK styles.
 import '@boundlessgeo/sdk/stylesheet/sdk.scss';
 
-import { ACCESS_TOKEN } from './config';
+import CONFIG from './conf';
 
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
@@ -28,7 +28,6 @@ const store = createStore(combineReducers({
    applyMiddleware(thunkMiddleware));
 
 function main() {
-  //const url = 'https://raw.githubusercontent.com/boundlessgeo/ol-mapbox-style/master/example/data/wms.json';
   const url = 'https://raw.githubusercontent.com/mapbox/mapbox-gl-styles/master/styles/bright-v8.json';
   store.dispatch(mapActions.setContext({ url }));
 
@@ -40,8 +39,7 @@ function main() {
   // place the map on the page.
   ReactDOM.render(
     <SdkMap
-      ref={(m) => { window.map = m }}
-      accessToken={ACCESS_TOKEN}
+      accessToken={CONFIG.access_token}
       store={store}
       baseUrl={'https://api.mapbox.com/styles/v1/mapbox/bright-v9'}
       onExportImage={exportMapImage}

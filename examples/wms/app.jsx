@@ -25,8 +25,6 @@ const store = createStore(combineReducers({
 }), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
    applyMiddleware(thunkMiddleware));
 
-window.store = store;
-
 function main() {
   // start in the middle of america
   store.dispatch(mapActions.setView([-98, 40], 4));

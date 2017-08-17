@@ -103,8 +103,6 @@ function main() {
     filter: ['==', 'title', 'Null Island'],
   }));
 
-
-
   /*
    * These are some example calls that were earlier prototyped in
    *  the basic demo. They've been commented out for now but have been
