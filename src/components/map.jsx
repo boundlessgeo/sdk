@@ -24,7 +24,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 
-import getStyleFunction from 'mapbox-to-ol-style';
+import { applyBackground, applyStyle } from 'ol-mapbox-style';
 
 import OlMap from 'ol/map';
 import View from 'ol/view';
@@ -67,7 +67,7 @@ import { setMeasureFeature, clearMeasureFeature } from '../actions/drawing';
 
 import ClusterSource from '../source/cluster';
 
-import { parseQueryString, jsonEquals, getLayerById, getMin, getMax, degreesToRadians, radiansToDegrees } from '../util';
+import { parseQueryString, jsonEquals, getLayerById, degreesToRadians, radiansToDegrees } from '../util';
 
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
@@ -284,10 +284,14 @@ function configureSource(glSource, mapProjection, accessToken) {
   return null;
 }
 
-function getResolutionForZoom(map, zoom) {
-  const view = map.getView();
-  const max_rez = view.getMaxResolution();
-  return view.constrainResolution(max_rez, zoom - view.getMinZoom());
+/** Create a unique key for a group of layers
+ */
+function getLayerGroupName(layer_group) {
+  const all_names = [];
+  for (let i = 0, ii = layer_group.length; i < ii; i++) {
+    all_names.push(layer_group[i].id);
+  }
+  return `${layer_group[0].source}-${all_names.join(',')}`;
 }
 
 export class Map extends React.Component {
@@ -303,7 +307,7 @@ export class Map extends React.Component {
     this.sources = {};
 
     // hash of the openlayers layers in the map.
-    this.layers = [];
+    this.layers = {};
 
     // popups and their elements are stored as an ID managed hash.
     this.popups = {};
@@ -456,7 +460,7 @@ export class Map extends React.Component {
         // reconfigure the source for clustering.
         this.sources[src_name] = configureSource(sourcesDef[src_name], proj);
         // tell all the layers about it.
-        this.updateLayerSource(src_name, this.props.map.layers);
+        this.updateLayerSource(src_name);
       }
     }
 
@@ -471,56 +475,57 @@ export class Map extends React.Component {
     }
   }
 
-  /** Style the background.
-   */
-  configureBackground(layer) {
-    // TODO: Right now there is not a good way of using
-    //       the background-opacity attribute, there is no
-    //       DOM-based backgroundOpacity CSS style and applying
-    //       opacity to the element makes it all "fade".
-    if (layer.paint['background-pattern']) {
-      // TODO: We cannot implement the background pattern
-      //       until glyphs/symbology has been implemented.
-    } else {
-      this.mapdiv.style.backgroundColor = layer.paint['background-color'];
-    }
-  }
-
   /** This is a small bit of trickery that fakes
    *  `getStyleFunction` into rendering only THIS layer.
    */
-  fakeStyle(layer) {
-    // getStyleFunction(glStyle, source, resolutions, spriteData, spriteImageUrl, fonts) {
-    return getStyleFunction({
+  applyStyle(olLayer, layers) {
+    // filter out the layers which are not visible
+    const render_layers = [];
+    for (let i = 0, ii = layers.length; i < ii; i++) {
+      const layer = layers[i];
+      const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
+      if (is_visible) {
+        render_layers.push(layer);
+      }
+    }
+
+    const fake_style = {
       version: 8,
-      layers: [layer],
-    }, layer.source, undefined, this.spriteData, this.spriteImageUrl);
+      sprite: this.spriteData,
+      layers: render_layers,
+    };
+    applyStyle(olLayer, fake_style, layers[0].source);
+
+    // handle toggling the layer on or off
+    olLayer.setVisible(render_layers.length > 0);
   }
 
   /** Convert a GL-defined to an OpenLayers' layer.
    */
-  configureLayer(sourcesDef, layer) {
-    const layer_src = sourcesDef[layer.source];
-
-    switch (layer_src.type) {
+  configureLayer(sourceName, glSource, layers) {
+    const source = this.sources[sourceName];
+    let layer = null;
+    switch (glSource.type) {
       case 'raster':
         return new TileLayer({
-          source: this.sources[layer.source],
+          source,
         });
       case 'geojson':
-        return new VectorLayer({
-          source: this.sources[layer.source],
-          style: this.fakeStyle(layer),
+        layer = new VectorLayer({
+          source,
         });
+        this.applyStyle(layer, layers);
+        return layer;
       case 'vector':
-        return new VectorTileLayer({
-          source: this.sources[layer.source],
-          style: this.fakeStyle(layer),
+        layer = new VectorTileLayer({
+          source,
         });
+        this.applyStyle(layer, layers);
+        return layer;
       case 'image':
         return new ImageLayer({
-          source: this.sources[layer.source],
-          opacity: layer.paint ? layer.paint['raster-opacity'] : undefined,
+          source,
+          opacity: layers[0].paint ? layers[0].paint['raster-opacity'] : undefined,
         });
       default:
         // pass, let the function return null
@@ -530,18 +535,20 @@ export class Map extends React.Component {
     return null;
   }
 
-  updateLayerSource(sourceName, layersDef) {
-    for (let i = 0, ii = layersDef.length; i < ii; i++) {
-      if (layersDef[i].source === sourceName) {
-        this.layers[layersDef[i].id].setSource(this.sources[sourceName]);
+  updateLayerSource(sourceName) {
+    const layer_names = Object.keys(this.layers);
+    for (let i = 0, ii = layer_names.length; i < ii; i++) {
+      const name = layer_names[i];
+      if (name.split('-')[0] === sourceName) {
+        this.layers[name].setSource(this.sources[sourceName]);
       }
     }
   }
 
-  cleanupLayers(layersDef) {
+  cleanupLayers(layerNames) {
     const layer_exists = {};
-    for (let i = 0, ii = layersDef.length; i < ii; i++) {
-      layer_exists[layersDef[i].id] = true;
+    for (let i = 0, ii = layerNames.length; i < ii; i++) {
+      layer_exists[layerNames[i]] = true;
     }
 
     // check for layers which should be removed.
@@ -562,10 +569,13 @@ export class Map extends React.Component {
     // update the internal version counter.
     this.layersVersion = layerVersion;
 
-    // layers is an array.
+    // bin layers into groups based on their source.
+    const layer_groups = [];
+
+    let last_layer = null;
+    let layer_group = [];
     for (let i = 0, ii = layersDef.length; i < ii; i++) {
       let layer = layersDef[i];
-
       // check to see if this layer references another.
       if (layer.ref !== undefined) {
         // find the source layer
@@ -587,64 +597,66 @@ export class Map extends React.Component {
         layer = layer_def;
       }
 
+      // if the layers differ start a new layer group
+      if (last_layer === null || last_layer.source !== layer.source) {
+        if (layer_group.length > 0) {
+          layer_groups.push(layer_group);
+          layer_group = [];
+        }
+      }
+      layer_group.push(layer);
+      last_layer = layer;
+    }
+    if (layer_group.length > 0) {
+      layer_groups.push(layer_group);
+    }
+
+    const group_names = [];
+    for (let i = 0, ii = layer_groups.length; i < ii; i++) {
+      const lyr_group = layer_groups[i];
+      const group_name = getLayerGroupName(lyr_group);
+      group_names.push(group_name);
 
       // if the layer is not on the map, create it.
-      if (layer !== null && !(layer.id in this.layers)) {
-        if (layer.type === 'background') {
-          this.configureBackground(layer);
+      if (!(group_name in this.layers)) {
+        if (lyr_group[0].type === 'background') {
+          applyBackground(this.map, { layers: lyr_group });
         } else {
-          const new_layer = this.configureLayer(sourcesDef, layer);
-          new_layer.set('name', layer.id);
+          const source_name = lyr_group[0].source;
+          const source = sourcesDef[source_name];
+          const new_layer = this.configureLayer(source_name, source, lyr_group);
 
           // if the new layer has been defined, add it to the map.
           if (new_layer !== null) {
-            this.layers[layer.id] = new_layer;
-            this.map.addLayer(this.layers[layer.id]);
+            new_layer.set('name', group_name);
+            this.layers[group_name] = new_layer;
+            this.map.addLayer(this.layers[group_name]);
           }
         }
       }
 
-      // handle updating the layer.
-      if (layer !== null && layer.id in this.layers) {
-        const ol_layer = this.layers[layer.id];
-        const layer_src = sourcesDef[layer.source];
-
-        // check for min/max zoom changes on sources and layers
-        const maxzoom = getMin(layer_src.maxzoom, layer.maxzoom);
-        if (maxzoom) {
-          const minResolution = getResolutionForZoom(this.map, maxzoom);
-          ol_layer.setMinResolution(minResolution);
-        }
-
-        const minzoom = getMax(layer_src.minzoom, layer.minzoom);
-        if (minzoom) {
-          const maxResolution = getResolutionForZoom(this.map, minzoom);
-          ol_layer.setMaxResolution(maxResolution);
-        }
+      if (group_name in this.layers) {
+        const ol_layer = this.layers[group_name];
 
         // check for style changes, the OL style
         // is defined by filter and paint elements.
-        const current_layer = getLayerById(this.props.map.layers, layer.id);
-        if (current_layer !== null) {
-          const diff_filter = !jsonEquals(current_layer.filter, layer.filter);
-          const diff_paint = !jsonEquals(current_layer.paint, layer.paint);
-          const diff_layout = !jsonEquals(current_layer.layout, layer.layout);
-          if (diff_filter || diff_paint || (current_layer.type === 'symbol' && diff_layout)) {
-            ol_layer.setStyle(this.fakeStyle(layer));
-          }
+        // const current_layer = getLayerById(this.props.map.layers, group_name);
+        const current_layers = [];
+        for (let j = 0, jj = lyr_group.length; j < jj; j++) {
+          current_layers.push(getLayerById(lyr_group[j]));
         }
 
-        // check for visibility changes.
-        const is_visible = layer.layout ? layer.layout.visibility !== 'none' : true;
-        ol_layer.setVisible(is_visible);
+        if (!jsonEquals(lyr_group, current_layers)) {
+          this.applyStyle(ol_layer, lyr_group);
+        }
 
-        // ensure the display order hasn't changed.
+        // update the display order.
         ol_layer.setZIndex(i);
       }
     }
 
     // clean up layers which should be removed.
-    this.cleanupLayers(layersDef);
+    this.cleanupLayers(group_names);
   }
 
   configureSprite(map) {
@@ -672,7 +684,8 @@ export class Map extends React.Component {
         for (let i = 0, ii = map.layers.length; i < ii; i++) {
           const gl_layer = map.layers[i];
           if (gl_layer.type === 'symbol') {
-            this.layers[gl_layer.id].setStyle(this.fakeStyle(gl_layer));
+            // TODO: Update symbols
+            // this.layers[gl_layer.id].setStyle(this.fakeStyle(gl_layer));
           }
         }
       });
