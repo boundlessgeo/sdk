@@ -436,9 +436,9 @@ export class Map extends React.Component {
     //       of sources.  Currently, this will only detect
     //       additions and removals.
     let src_names = Object.keys(sourcesDef);
+    const proj = this.map.getView().getProjection();
     for (let i = 0, ii = src_names.length; i < ii; i++) {
       const src_name = src_names[i];
-      const proj = this.map.getView().getProjection();
       // Add the source because it's not in the current
       //  list of sources.
       if (!(src_name in this.sources)) {
