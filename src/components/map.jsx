@@ -351,12 +351,12 @@ export class Map extends React.Component {
 
     // check the sources diff
     const next_sources_version = getVersion(nextProps.map, SOURCE_VERSION_KEY);
-    if (this.sourcesVersion !== next_sources_version) {
+    if (next_sources_version === undefined || this.sourcesVersion !== next_sources_version) {
       // go through and update the sources.
       this.configureSources(nextProps.map.sources, next_sources_version);
     }
     const next_layer_version = getVersion(nextProps.map, LAYER_VERSION_KEY);
-    if (this.layersVersion !== next_layer_version) {
+    if (next_layer_version === undefined || this.layersVersion !== next_layer_version) {
       // go through and update the layers.
       this.configureLayers(nextProps.map.sources, nextProps.map.layers, next_layer_version);
     }
