@@ -46,7 +46,7 @@ class LayerList extends React.PureComponent {
 
       const checkbox = (<input
         type="checkbox"
-        onClick={() => { this.props.toggleVisibility(layer.id, is_checked); }}
+        onChange={() => { this.props.toggleVisibility(layer.id, is_checked); }}
         checked={is_checked}
       />);
       const moveButtons = (<span>
