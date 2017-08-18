@@ -1,5 +1,4 @@
-/* global saveAs */
-/** Demo of using the drawing, modify, and select interactions.
+/** Demonstrate the loading of a MapBox GL Style Spec document into SDK
  *
  */
 
