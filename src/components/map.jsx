@@ -294,6 +294,14 @@ function getLayerGroupName(layer_group) {
   return `${layer_group[0].source}-${all_names.join(',')}`;
 }
 
+/** Convert a zoom number to a resolution.
+ */
+function getResolutionForZoom(map, zoom) {
+  const view = map.getView();
+  const max_rez = view.getMaxResolution();
+  return view.constrainResolution(max_rez, zoom - view.getMinZoom());
+}
+
 export class Map extends React.Component {
 
   constructor(props) {
@@ -620,13 +628,14 @@ export class Map extends React.Component {
       const group_name = getLayerGroupName(lyr_group);
       group_names.push(group_name);
 
+      const source_name = lyr_group[0].source;
+      const source = sourcesDef[source_name];
+
       // if the layer is not on the map, create it.
       if (!(group_name in this.layers)) {
         if (lyr_group[0].type === 'background') {
           applyBackground(this.map, { layers: lyr_group });
         } else {
-          const source_name = lyr_group[0].source;
-          const source = sourcesDef[source_name];
           const new_layer = this.configureLayer(source_name, source, lyr_group);
 
           // if the new layer has been defined, add it to the map.
@@ -651,6 +660,14 @@ export class Map extends React.Component {
 
         if (!jsonEquals(lyr_group, current_layers)) {
           this.applyStyle(ol_layer, lyr_group);
+        }
+
+        // update the min/maxzooms
+        if (source.minzoom) {
+          ol_layer.setMinResolution(getResolutionForZoom(this.map, source.minzoom));
+        }
+        if (source.maxzoom) {
+          ol_layer.setMaxResolution(getResolutionForZoom(this.map, source.maxzoom));
         }
 
         // update the display order.

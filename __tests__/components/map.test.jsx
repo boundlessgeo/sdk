@@ -14,7 +14,7 @@ import TileJSONSource from 'ol/source/tilejson';
 import TileWMSSource from 'ol/source/tilewms';
 
 import { createStore, combineReducers } from 'redux';
-import { jsonEquals, radiansToDegrees } from '../../src/util';
+import { radiansToDegrees } from '../../src/util';
 
 import ConnectedMap, { Map } from '../../src/components/map';
 import SdkPopup from '../../src/components/map/popup';
@@ -343,15 +343,20 @@ describe('Map component', () => {
     };
     const center = [0, 0];
     const zoom = 2;
-    const wrapper = shallow(<Map map={{ center, zoom, sources, layers, metadata }} />);
+    const wrapper = mount(<Map map={{ center, zoom, sources, layers, metadata }} />);
     const instance = wrapper.instance();
-    instance.componentDidMount();
-    const style = instance.fakeStyle(layers[0]);
+
     const map = instance.map;
     const layer = map.getLayers().item(0);
     const ol_style = layer.getStyle();
-    const results = jsonEquals(style, ol_style);
-    expect(results).toEqual(true);
+
+    // test that the style has been set to something
+    expect(typeof ol_style).toEqual('function');
+
+    // This is the old test.
+    // It is not a valid test as both sides will always evaluate to a function
+    // const results = jsonEquals(style, ol_style);
+    // expect(results).toEqual(true);
   });
 
   it('handles updates to source and layer min/maxzoom values', () => {
@@ -377,41 +382,15 @@ describe('Map component', () => {
 
     const instance = wrapper.instance();
     const map = instance.map;
-    const layer = map.getLayers().item(0);
     const view = map.getView();
-    let max_rez = view.constrainResolution(
-    view.getMaxResolution(), layers[0].minzoom - view.getMinZoom());
-    expect(layer.getMaxResolution()).toEqual(max_rez);
-    let min_rez = view.constrainResolution(
-    view.getMinResolution(), layers[0].maxzoom - view.getMaxZoom());
-    expect(layer.getMinResolution()).toEqual(min_rez);
-    // min/max zoom values change on layer def
-    let nextProps = {
-      map: {
-        center,
-        zoom,
-        metadata: {
-          'bnd:source-version': 0,
-          'bnd:layer-version': 1,
-        },
-        sources,
-        layers: [{
-          id: 'tilejson-layer',
-          source: 'tilejson',
-          minzoom: 3,
-          maxzoom: 4,
-        }],
-      },
-    };
-    instance.shouldComponentUpdate.call(instance, nextProps);
-    max_rez = view.constrainResolution(
-    view.getMaxResolution(), nextProps.map.layers[0].minzoom - view.getMinZoom());
-    expect(layer.getMaxResolution()).toEqual(max_rez);
-    min_rez = view.constrainResolution(
-    view.getMinResolution(), nextProps.map.layers[0].maxzoom - view.getMaxZoom());
-    expect(layer.getMinResolution()).toEqual(min_rez);
+    const layer = map.getLayers().item(0);
+
+    // a number of tests have been removed from here as the
+    // GL-layer min/maxzoom are actually handled in the style
+    // functions.
+
     // min/max zoom values defined on source only
-    nextProps = {
+    let nextProps = {
       map: {
         center,
         zoom,
@@ -434,12 +413,14 @@ describe('Map component', () => {
       },
     };
     instance.shouldComponentUpdate.call(instance, nextProps);
-    max_rez = view.constrainResolution(
-    view.getMaxResolution(), nextProps.map.sources.tilejson.minzoom - view.getMinZoom());
+    let max_rez = view.constrainResolution(
+      view.getMaxResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMinZoom());
     expect(layer.getMaxResolution()).toEqual(max_rez);
-    min_rez = view.constrainResolution(
-    view.getMinResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMaxZoom());
+
+    let min_rez = view.constrainResolution(
+      view.getMaxResolution(), nextProps.map.sources.tilejson.minzoom - view.getMinZoom());
     expect(layer.getMinResolution()).toEqual(min_rez);
+
     // min.max zoom values defined on both source and layer def
     nextProps = {
       map: {
@@ -466,11 +447,12 @@ describe('Map component', () => {
       },
     };
     instance.shouldComponentUpdate.call(instance, nextProps);
+    // the layer minzoom will be handled in the style and *not* on the layer itself.
     max_rez = view.constrainResolution(
-    view.getMaxResolution(), nextProps.map.layers[0].minzoom - view.getMinZoom());
+      view.getMaxResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMinZoom());
     expect(layer.getMaxResolution()).toEqual(max_rez);
     min_rez = view.constrainResolution(
-      view.getMinResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMaxZoom());
+      view.getMinResolution(), nextProps.map.sources.tilejson.minzoom - view.getMaxZoom());
     expect(layer.getMinResolution()).toEqual(min_rez);
   });
 
