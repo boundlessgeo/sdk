@@ -69,6 +69,10 @@ const config = {
       'webpack/hot/only-dev-server',
       './examples/mb-bright/app.jsx',
     ],
+    geolocation: [
+      'webpack/hot/only-dev-server',
+      './examples/geolocation/app.jsx',
+    ],
   },
   // Server Configuration options
   devServer: {
