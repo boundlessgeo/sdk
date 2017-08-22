@@ -698,7 +698,9 @@ export class Map extends React.Component {
         if (layers.indexOf(sprite_layers[lyr]) >= 0) {
           const style_layers = [];
           for (let i = 0, ii = layers.length; i < ii; i++) {
-            style_layers.push(layers_by_id[layers[i]]);
+            if (layers_by_id[layers[i]]) {
+              style_layers.push(layers_by_id[layers[i]]);
+            }
           }
           this.applyStyle(this.layers[layer_groups[grp]], style_layers);
           restyled = true;

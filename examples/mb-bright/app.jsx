@@ -26,7 +26,7 @@ const store = createStore(combineReducers({
    applyMiddleware(thunkMiddleware));
 
 function main() {
-  const url = 'https://raw.githubusercontent.com/mapbox/mapbox-gl-styles/master/styles/bright-v8.json';
+  const url = `https://api.mapbox.com/styles/v1/mapbox/bright-v8?access_token=${CONFIG.access_token}`;
   store.dispatch(mapActions.setContext({ url }));
 
   // place the map on the page.
