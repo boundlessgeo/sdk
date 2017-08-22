@@ -329,9 +329,6 @@ export class Map extends React.Component {
   componentDidMount() {
     // put the map into the DOM
     this.configureMap();
-
-    // check to see if there is a sprite in the state.
-    this.configureSprite(this.props.map);
   }
 
   /** This will check nextProps and nextState to see
@@ -394,7 +391,7 @@ export class Map extends React.Component {
 
     // update the sprite, this could happen BEFORE the map
     if (this.props.map.sprite !== nextProps.map.sprite) {
-      this.configureSprite(nextProps.map);
+      this.updateSpriteLayers(nextProps.map);
     }
 
     // change the current interaction as needed
@@ -504,7 +501,7 @@ export class Map extends React.Component {
     };
 
     if (olLayer.setStyle) {
-      applyStyle(olLayer, fake_style, layers[0].source);
+      applyStyle(olLayer, fake_style, layers[0].source, this.props.baseUrl);
     }
 
     // handle toggling the layer on or off
@@ -652,10 +649,9 @@ export class Map extends React.Component {
 
         // check for style changes, the OL style
         // is defined by filter and paint elements.
-        // const current_layer = getLayerById(this.props.map.layers, group_name);
         const current_layers = [];
         for (let j = 0, jj = lyr_group.length; j < jj; j++) {
-          current_layers.push(getLayerById(lyr_group[j]));
+          current_layers.push(getLayerById(layersDef, lyr_group[j]));
         }
 
         if (!jsonEquals(lyr_group, current_layers)) {
@@ -679,36 +675,36 @@ export class Map extends React.Component {
     this.cleanupLayers(group_names);
   }
 
-  configureSprite(map) {
-    if (map.sprite === undefined) {
-      // return a resolved promise.
-      return (new Promise((resolve) => {
-        resolve();
-      }));
+  updateSpriteLayers(map) {
+    const sprite_layers = [];
+    const layers_by_id = {};
+
+    // restyle all the symbol layers.
+    for (let i = 0, ii = map.layers.length; i < ii; i++) {
+      const gl_layer = map.layers[i];
+      if (gl_layer.type === 'symbol') {
+        sprite_layers.push(gl_layer.id);
+        layers_by_id[gl_layer.id] = gl_layer;
+      }
     }
 
-    let spriteUrl;
-    if (map.sprite.indexOf(MAPBOX_PROTOCOL) === 0) {
-      spriteUrl = `${this.props.baseUrl}/sprite?access_token=${this.props.accessToken}`;
-    } else {
-      spriteUrl = `${map.sprite}.json`;
-    }
-    return fetch(spriteUrl)
-      .then(r => r.json())
-      .then((spriteJson) => {
-        // store the spite data for later styling.
-        this.spriteData = spriteJson;
-        this.spriteImageUrl = `${map.sprite}.png`;
+    const layer_groups = Object.keys(this.layers);
+    for (let grp = 0, ngrp = layer_groups.length; grp < ngrp; grp++) {
+      // unpack the layers from the group name
+      const layers = layer_groups[grp].split('-')[1].split(',');
 
-        // restyle all the symbol layers.
-        for (let i = 0, ii = map.layers.length; i < ii; i++) {
-          const gl_layer = map.layers[i];
-          if (gl_layer.type === 'symbol') {
-            // TODO: Update symbols
-            // this.layers[gl_layer.id].setStyle(this.fakeStyle(gl_layer));
+      let restyled = false;
+      for (let lyr = 0, nlyr = sprite_layers.length; !restyled && lyr < nlyr; lyr++) {
+        if (layers.indexOf(sprite_layers[lyr]) >= 0) {
+          const style_layers = [];
+          for (let i = 0, ii = layers.length; i < ii; i++) {
+            style_layers.push(layers_by_id[layers[i]]);
           }
+          this.applyStyle(this.layers[layer_groups[grp]], style_layers);
+          restyled = true;
         }
-      });
+      }
+    }
   }
 
   updatePopups() {

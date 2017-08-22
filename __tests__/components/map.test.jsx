@@ -748,10 +748,10 @@ describe('Map component', () => {
     const wrapper = mount(<ConnectedMap store={store} />);
     const map = wrapper.instance().getWrappedInstance();
 
-    spyOn(map, 'configureSprite');
+    spyOn(map, 'updateSpriteLayers');
     store.dispatch(MapActions.setSprite('./sprites'));
 
-    expect(map.configureSprite).toHaveBeenCalled();
+    expect(map.updateSpriteLayers).toHaveBeenCalled();
   });
 
   it('should call handleWMSGetFeatureInfo', () => {
@@ -797,54 +797,7 @@ describe('Map component async', () => {
     nock.cleanAll();
   });
 
-  it('should set spriteData', (done) => {
-    const store = createStore(combineReducers({
-      map: MapReducer,
-    }));
-
-    const wrapper = mount(<ConnectedMap store={store} />);
-    const map = wrapper.instance().getWrappedInstance();
-
-    // eslint-disable-next-line
-    const spritesJson = {"accommodation_camping": {"y": 0, "width": 20, "pixelRatio": 1, "x": 0, "height": 20}, "amenity_firestation": {"y": 0, "width": 50, "pixelRatio": 1, "x": 20, "height": 50}};
-
-    nock('http://example.com')
-      .get('/sprites.json')
-      .reply(200, spritesJson);
-
-    store.dispatch(MapActions.setSprite('http://example.com/sprites'));
-
-    setTimeout(() => {
-      expect(map.spriteData).toEqual(spritesJson);
-      expect(map.spriteImageUrl).toEqual('http://example.com/sprites.png');
-      done();
-    }, 300);
-  });
-
-  it('should set spriteData using mapbox://', (done) => {
-    const store = createStore(combineReducers({
-      map: MapReducer,
-    }));
-
-    const baseUrl = 'https://api.mapbox.com/styles/v1/mapbox/bright-v9';
-    const apiKey = 'foo';
-    const wrapper = mount(<ConnectedMap baseUrl={baseUrl} accessToken={apiKey} store={store} />);
-    const map = wrapper.instance().getWrappedInstance();
-
-    // eslint-disable-next-line
-    const spritesJson = {"accommodation_camping": {"y": 0, "width": 20, "pixelRatio": 1, "x": 0, "height": 20}, "amenity_firestation": {"y": 0, "width": 50, "pixelRatio": 1, "x": 20, "height": 50}};
-
-    nock(baseUrl)
-      .get(`/sprite?access_token=${apiKey}`)
-      .reply(200, spritesJson);
-
-    store.dispatch(MapActions.setSprite('mapbox://sprites/mapbox/bright-v9'));
-
-    setTimeout(() => {
-      expect(map.spriteData).toEqual(spritesJson);
-      done();
-    }, 300);
-  });
+  // removed set spriteData tests as they are now handled in ol-mapbox-style
 
   it('should handle WMS GetFeatureInfo', () => {
     const store = createStore(combineReducers({
