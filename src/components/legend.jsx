@@ -220,7 +220,7 @@ Legend.propTypes = {
 Legend.defaultProps = {
   layers: [],
   sources: {},
-  emptyLegendMessage: '',
+  emptyLegendMessage: undefined,
 };
 
 function mapStateToProps(state) {
