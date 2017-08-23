@@ -6,8 +6,9 @@
     "start": "webpack-dev-server --config webpack-dev-server.config.js",
     "test": "jest && npm run lint",
     "test:watch": "npm test -- --watch",
-    "lint": "eslint __tests__ src examples --ext .jsx,.js",
-    "cover": "node_modules/.bin/jest --coverage"
+    "lint": "eslint __tests__ src examples tasks --ext .jsx,.js",
+    "cover": "node_modules/.bin/jest --coverage",
+    "build:examples": "node tasks/build-examples.js"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
@@ -28,7 +29,11 @@
     "eslint-plugin-jsx-a11y": "^5.0.2",
     "eslint-plugin-react": "^7.1.0",
     "extract-text-webpack-plugin": "^2.1.2",
+    "handlebars": "^4.0.10",
     "jest": "^20.0.4",
+    "marked": "^0.3.6",
+    "metalsmith": "^2.3.0",
+    "metalsmith-layouts": "^1.8.1",
     "mixin": "^0.2.0",
     "nock": "^9.0.13",
     "node-sass": "^4.5.3",

@@ -1,35 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>WMS Example</title>
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
-    <link rel="stylesheet" type="text/css" href="/dist/sdk.css"/>
-    <link rel="stylesheet" type="text/css" href="../examples.css"/>
-    <link rel="stylesheet" type="text/css" href="app.css"/>
-</head>
-<body>
-
-    <div id="header">
-        WMS Example
-    </div>
-
-    <div id="map">
-    </div>
-
-    <div id="controls">
-    </div>
-
-    <div id="add-wms">
-    </div>
-
-    <div class="info">
-        <h3>Features in this demo</h3>
-        <ul class="info-list">
-            <li>Adding a WMS layer on the fly</li>
-            <li>Using WMS GetFeatureInfo to populate a popup</li>
-        </ul>
-    </div>
-
-    <script type="text/javascript" src="./wms.bundle.js"></script>
-</body>
-</html>
+---
+layout: example.html
+title: WMS Example
+shortdesc: Demonstrates adding a WMS layer and interacting with it.
+docs: >
+  <li>Adding a WMS layer on the fly</li>
+  <li>Using WMS GetFeatureInfo to populate a popup</li>
+resources:
+  - https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
+---
+<div id="map"></div>
+<div id="controls"></div>
+<div id="add-wms"></div>

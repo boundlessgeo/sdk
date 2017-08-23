@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="/dist/sdk.css"/>
+    <link rel="stylesheet" type="text/css" href="../examples.css"/>
+    {{{ extraHead.local }}}
+    {{{ css.tag }}}
+  </head>
+  <body>
+    <div id="header">
+      {{ shortdesc }}
+    </div>
+    {{{ contents }}}
+    <div class="info">
+      <h3>Features in this demo</h3>
+      <ul class="info-list">
+        {{ md docs }}
+      </ul>
+    </div>
+    {{{ js.tag }}}
+  </body>
+</html>

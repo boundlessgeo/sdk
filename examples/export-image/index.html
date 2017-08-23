@@ -1,29 +1,11 @@
-<html>
-<head>
-    <title>Export Image Example</title>
-    <link rel="stylesheet" type="text/css" href="/dist/sdk.css"/>
-    <link rel="stylesheet" type="text/css" href="../examples.css"/>
-</head>
-<body>
-
-    <div id="header">
-        Export Image Example
-    </div>
-
-    <div id="map">
-    </div>
-
-    <div id="controls">
-    </div>
-
-    <div class="info">
-        <h3>Features in this demo</h3>
-        <ul class="info-list">
-            <li>Using export image</li>
-        </ul>
-    </div>
-
-    <script src="https://unpkg.com/browser-filesaver@1.1.1"></script>
-    <script type="text/javascript" src="./export-image.bundle.js"></script>
-</body>
-</html>
+---
+layout: example.html
+title: Export Image Example
+shortdesc: Demonstrates exporting the map image to PNG.
+docs: >
+  <li>Using export image</li>
+resources:
+  - https://unpkg.com/browser-filesaver@1.1.1/FileSaver.js
+---
+<div id="map"></div>
+<div id="controls"></div>
