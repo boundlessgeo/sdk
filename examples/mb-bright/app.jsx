@@ -34,7 +34,7 @@ function main() {
     <SdkMap
       accessToken={CONFIG.access_token}
       store={store}
-      baseUrl={'https://api.mapbox.com/styles/v1/mapbox/bright-v9'}
+      baseUrl={'https://api.mapbox.com/styles/v1/mapbox/bright-v8'}
     />
   , document.getElementById('map'));
 }
