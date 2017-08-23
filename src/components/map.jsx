@@ -67,7 +67,7 @@ import { setMeasureFeature, clearMeasureFeature } from '../actions/drawing';
 
 import ClusterSource from '../source/cluster';
 
-import { parseQueryString, jsonEquals, getLayerById, degreesToRadians, radiansToDegrees } from '../util';
+import { parseQueryString, jsonClone, jsonEquals, getLayerById, degreesToRadians, radiansToDegrees } from '../util';
 
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
@@ -294,6 +294,51 @@ function getLayerGroupName(layer_group) {
   return `${layer_group[0].source}-${all_names.join(',')}`;
 }
 
+/** Populate a ref'd layer.
+ */
+function hydrateLayer(layersDef, glLayer) {
+  // Small sanity check for when this
+  // is blindly called on any layer.
+  if (glLayer === undefined || glLayer.ref === undefined) {
+    return glLayer;
+  }
+
+  const ref_layer = getLayerById(layersDef, glLayer.ref);
+
+  // default the layer definition to return to
+  // the layer itself, incase we can't find the ref layer.
+  let layer_def = glLayer;
+
+  // ensure the ref layer is SOMETHING.
+  if (ref_layer) {
+    // clone the gl layer
+    layer_def = jsonClone(glLayer);
+    // remove the reference
+    layer_def.ref = undefined;
+    // mixin the layer_def to the ref layer.
+    layer_def = Object.assign({}, layer_def, ref_layer);
+  }
+  // return the new layer.
+  return layer_def;
+}
+
+/** Hydrate a layer group
+ *  Normalizes all the ref layers in a group.
+ *
+ *  @param layersDef - All layers defined in the mapbox gl stylesheet.
+ *  @param layerGroup - Subset of layers to be rendered as a group.
+ *
+ *  @returns An array with the ref layers normalized.
+ */
+function hydrateLayerGroup(layersDef, layerGroup) {
+  const hydrated_group = [];
+  for (let i = 0, ii = layerGroup.length; i < ii; i++) {
+    // hydrateLayer checks for "ref"
+    hydrated_group.push(hydrateLayer(layersDef, layerGroup[i]));
+  }
+  return hydrated_group;
+}
+
 export class Map extends React.Component {
 
   constructor(props) {
@@ -512,9 +557,11 @@ export class Map extends React.Component {
     let layer = null;
     switch (glSource.type) {
       case 'raster':
-        return new TileLayer({
+        layer = new TileLayer({
           source,
         });
+        this.applyStyle(layer, layers);
+        return layer;
       case 'geojson':
         layer = new VectorLayer({
           source,
@@ -577,40 +624,29 @@ export class Map extends React.Component {
     // bin layers into groups based on their source.
     const layer_groups = [];
 
-    let last_layer = null;
+    let last_source = null;
     let layer_group = [];
     for (let i = 0, ii = layersDef.length; i < ii; i++) {
       let layer = layersDef[i];
-      // check to see if this layer references another.
-      if (layer.ref !== undefined) {
-        // find the source layer
-        let layer_def = null;
-        for (let j = 0, jj = layersDef.length; j < jj && layer_def === null; j++) {
-          if (layersDef[j].id === layer.ref) {
-            // layersDef[j] will contain objects which need to be
-            // copied by value and not by reference which is why
-            // Object.assign is not used.
-            const src_layer = JSON.parse(JSON.stringify(layersDef[j]));
-            // now use Object.assign to do the mixin.
-            // src_layer is a new object and the original layer
-            //  is not being mutated here.
-            layer_def = Object.assign(src_layer, layer);
-          }
-        }
 
-        // change the working definition of the layer.
-        layer = layer_def;
+      // fake the "layer" by getting the source
+      //  from the ref'd layer.
+      if (layer.ref !== undefined) {
+        layer = {
+          source: getLayerById(layersDef, layer.ref).source,
+        };
       }
 
       // if the layers differ start a new layer group
-      if (last_layer === null || last_layer.source !== layer.source) {
+      if (last_source === null || last_source !== layer.source) {
         if (layer_group.length > 0) {
           layer_groups.push(layer_group);
           layer_group = [];
         }
       }
-      layer_group.push(layer);
-      last_layer = layer;
+      last_source = layer.source;
+
+      layer_group.push(layersDef[i]);
     }
     if (layer_group.length > 0) {
       layer_groups.push(layer_group);
@@ -622,7 +658,7 @@ export class Map extends React.Component {
       const group_name = getLayerGroupName(lyr_group);
       group_names.push(group_name);
 
-      const source_name = lyr_group[0].source;
+      const source_name = hydrateLayer(layersDef, lyr_group[0]).source;
       const source = sourcesDef[source_name];
 
       // if the layer is not on the map, create it.
@@ -630,7 +666,8 @@ export class Map extends React.Component {
         if (lyr_group[0].type === 'background') {
           applyBackground(this.map, { layers: lyr_group });
         } else {
-          const new_layer = this.configureLayer(source_name, source, lyr_group);
+          const hydrated_group = hydrateLayerGroup(layersDef, lyr_group);
+          const new_layer = this.configureLayer(source_name, source, hydrated_group);
 
           // if the new layer has been defined, add it to the map.
           if (new_layer !== null) {
@@ -648,11 +685,11 @@ export class Map extends React.Component {
         // is defined by filter and paint elements.
         const current_layers = [];
         for (let j = 0, jj = lyr_group.length; j < jj; j++) {
-          current_layers.push(getLayerById(layersDef, lyr_group[j]));
+          current_layers.push(getLayerById(this.props.map.layers, lyr_group[j].id));
         }
 
         if (!jsonEquals(lyr_group, current_layers)) {
-          this.applyStyle(ol_layer, lyr_group);
+          this.applyStyle(ol_layer, hydrateLayerGroup(layersDef, lyr_group));
         }
 
         // update the min/maxzooms
@@ -679,7 +716,10 @@ export class Map extends React.Component {
 
     // restyle all the symbol layers.
     for (let i = 0, ii = map.layers.length; i < ii; i++) {
-      const gl_layer = map.layers[i];
+      let gl_layer = map.layers[i];
+      if (gl_layer.ref !== undefined) {
+        gl_layer = hydrateLayer(map.layers, gl_layer);
+      }
       if (gl_layer.type === 'symbol') {
         sprite_layers.push(gl_layer.id);
         layers_by_id[gl_layer.id] = gl_layer;

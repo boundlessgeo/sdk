@@ -85,6 +85,21 @@ function main() {
       ],
     },
   }));
+  // some purple points!
+  store.dispatch(mapActions.addLayer({
+    id: 'random-points',
+    source: 'points',
+    paint: {
+      'circle-radius': 5,
+      'circle-color': '#756bb1',
+      'circle-stroke-color': '#756bb1',
+    },
+    filter: ['==', 'isNullIsland', false],
+    metadata: {
+      'bnd:legend-type': 'image',
+      'bnd:legend-content': './purple-point.png',
+    },
+  }));
 
   // Show null island as a layer.
   store.dispatch(mapActions.addLayer({
@@ -96,33 +111,11 @@ function main() {
       'bnd:legend-content': 'Null Island is the orange circle on the map.',
     },
     paint: {
-      'circle-radius': {
-        type: 'interval',
-        default: 3,
-        property: 'point_count',
-        stops: [
-          [0, 5], [2, 10], [3, 30],
-        ],
-      },
+      'circle-radius': 3,
       'circle-color': '#feb24c',
       'circle-stroke-color': '#f03b20',
     },
-  }));
-
-  // some purple points!
-  store.dispatch(mapActions.addLayer({
-    id: 'random-points',
-    ref: 'null-island',
-    paint: {
-      'circle-radius': 5,
-      'circle-color': '#756bb1',
-      'circle-stroke-color': '#756bb1',
-    },
-    filter: ['==', 'isNullIsland', false],
-    metadata: {
-      'bnd:legend-type': 'image',
-      'bnd:legend-content': './purple-point.png',
-    },
+    filter: ['==', 'isNullIsland', true],
   }));
 
   // Test a WMS Legend
