@@ -352,11 +352,6 @@ describe('Map component', () => {
 
     // test that the style has been set to something
     expect(typeof ol_style).toEqual('function');
-
-    // This is the old test.
-    // It is not a valid test as both sides will always evaluate to a function
-    // const results = jsonEquals(style, ol_style);
-    // expect(results).toEqual(true);
   });
 
   it('handles updates to source and layer min/maxzoom values', () => {
@@ -384,10 +379,6 @@ describe('Map component', () => {
     const map = instance.map;
     const view = map.getView();
     const layer = map.getLayers().item(0);
-
-    // a number of tests have been removed from here as the
-    // GL-layer min/maxzoom are actually handled in the style
-    // functions.
 
     // min/max zoom values defined on source only
     let nextProps = {
