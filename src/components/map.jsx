@@ -294,14 +294,6 @@ function getLayerGroupName(layer_group) {
   return `${layer_group[0].source}-${all_names.join(',')}`;
 }
 
-/** Convert a zoom number to a resolution.
- */
-function getResolutionForZoom(map, zoom) {
-  const view = map.getView();
-  const max_rez = view.getMaxResolution();
-  return view.constrainResolution(max_rez, zoom - view.getMinZoom());
-}
-
 export class Map extends React.Component {
 
   constructor(props) {
@@ -500,8 +492,13 @@ export class Map extends React.Component {
       layers: render_layers,
     };
 
+    if (this.props.map.sprite && this.props.map.sprite.indexOf('mapbox://') === 0) {
+      const baseUrl = this.props.baseUrl;
+      fake_style.sprite = `${baseUrl}/sprite?access_token=${this.props.accessToken}`;
+    }
+
     if (olLayer.setStyle) {
-      applyStyle(olLayer, fake_style, layers[0].source, this.props.baseUrl);
+      applyStyle(olLayer, fake_style, layers[0].source);
     }
 
     // handle toggling the layer on or off
@@ -659,11 +656,12 @@ export class Map extends React.Component {
         }
 
         // update the min/maxzooms
+        const view = this.map.getView();
         if (source.minzoom) {
-          ol_layer.setMinResolution(getResolutionForZoom(this.map, source.minzoom));
+          ol_layer.setMinResolution(view.getResolutionForZoom(source.minzoom));
         }
         if (source.maxzoom) {
-          ol_layer.setMaxResolution(getResolutionForZoom(this.map, source.maxzoom));
+          ol_layer.setMaxResolution(view.getResolutionForZoom(source.maxzoom));
         }
 
         // update the display order.
