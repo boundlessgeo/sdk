@@ -209,12 +209,18 @@ class Legend extends React.Component {
 }
 
 Legend.propTypes = {
-  layerId: PropTypes.string,
+  layerId: PropTypes.string.isRequired,
   layers: PropTypes.arrayOf(PropTypes.object),
   sources: PropTypes.shape({
     source: PropTypes.string,
   }),
   emptyLegendMessage: PropTypes.string,
+};
+
+Legend.defaultProps = {
+  layers: [],
+  sources: {},
+  emptyLegendMessage: '',
 };
 
 function mapStateToProps(state) {
