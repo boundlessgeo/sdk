@@ -55,7 +55,7 @@ After `"scripts": {`:
    "watch-css": "npm run build-css && node-sass-chokidar src/ --include-path node_modules/ -o src/ --watch --recursive",
 ```
 
-`App.css` needs renamed to the sass extension `App.scss`:
+`App.css` needs to be renamed with the sass extension `App.scss`:
 
 ```bash
 mv src/App.css src/App.scss
