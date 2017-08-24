@@ -128,7 +128,7 @@ import * as SdkMapActions from '@boundlessgeo/sdk/actions/map';
 
 ### Create a new store with the map reducer.
 
-After the imports add a new reducer:
+After the imports add a store with the `SdkMapReducer`:
 ```javascript
 const store = createStore(combineReducers({
   'map': SdkMapReducer,
