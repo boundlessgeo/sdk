@@ -78,7 +78,7 @@ It will install the dist-version of the library.
 yarn add @boundlessgeo/sdk
 ```
 
-### From a GitHub
+### From GitHub
 
 This is the way to install SDK if the latest features are needed
 or development on SDK is planned.
@@ -165,7 +165,7 @@ componentDidMount() {
 }
 ```
 
-### Add the map component to the applcation
+### Add the map component to the application
 
 After the last `</p>` tag add the following to add an SDK map:
 
