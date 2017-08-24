@@ -24,6 +24,8 @@ http://localhost:3000/build/examples - browse to examples
 
 ## Troubleshooting
 
+If `npm install` fails to install `canvas`, your system may require some package installations. See the `node-canvas` repo for instructions based on OS: https://github.com/Automattic/node-canvas
+
 If `npm start` fails review node version, SDK targets v6.0 or greater.  On OSX node install can be error prone, seems to work best when installed by Brew http://brewformulas.org/Node
 
 ## Running tests
