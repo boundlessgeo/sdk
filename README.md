@@ -25,3 +25,10 @@ http://localhost:3000/build/examples - browse to examples
 ## Troubleshooting
 
 If `npm start` fails review node version, SDK targets v6.0 or greater.  On OSX node install can be error prone, seems to work best when installed by Brew http://brewformulas.org/Node
+
+## Running tests
+
+The test suite will skip a number of tests unless the `canvas` module has been installed.
+
+For more details on installing `canvas` and other important developer notes
+please read [DEVELOPING.md](DEVELOPING.md).
