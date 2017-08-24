@@ -23,7 +23,7 @@ npm install -g yarn
 `create-react-app` installs itself as a global dependency.
 
 ```
-yarn add -g create-react-app
+npm install -g create-react-app
 ```
 
 ## Initialize the new app
