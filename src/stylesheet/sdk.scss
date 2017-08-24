@@ -9,6 +9,20 @@ $sdk-blue: #29728d;
 $sdk-green: #bbd34a;
 $sdk-grey: #ededed;
 
+// Palette
+
+$primary-color-dark:   #455A64;
+$primary-color:        #607D8B;
+$primary-color-light:  #CFD8DC;
+$primary-color-text:   #FFFFFF;
+$accent-color:         #8BC34A;
+$primary-text-color:   #212121;
+$secondary-text-color: #757575;
+$divider-color:        #BDBDBD;
+
+
+
+
 /** SDK button. */
 button.sdk-btn {
   background-color: $sdk-orange;
@@ -30,12 +44,36 @@ button.sdk-btn {
 
 /** some OpenLayers styling tweaks */
 .ol-control {
-  border: solid 1px rgba(153, 153, 153, 0.45);
-}
-.ol-control button {
-    background-color: rgba($sdk-blue, .8);
-
-    &:hover {
-        background-color: rgba($sdk-blue, .9);
+  // background: $divider-color;
+  button {
+    background-color: #f1f1f1;
+    color: #333333;
+    // border-color: $divider-color;
+    border: solid 1px $divider-color;
+    border-radius: 10px;
+    margin: 0;
+    &:last-child {
+      // border-top: ;
     }
+    &:hover {
+      // border: none;
+      color: #f1f1f1;
+      background-color: $divider-color;
+    }
+    &.active {
+      background-color: $divider-color;
+    }
+    &:focus {
+      color: #333333;
+      background-color: #f1f1f1;
+    }
+  }
 }
+
+// .ol-control button {
+//     background-color: rgba($sdk-blue, .8);
+//
+//     &:hover {
+//         background-color: rgba($sdk-blue, .9);
+//     }
+// }
