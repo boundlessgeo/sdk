@@ -87,6 +87,7 @@ The following steps will clone SDK, install its dependencies,
 build the library, and finally add it to the app.
 
 ```bash
+cd ..
 git clone https://github.com/boundlessgeo/sdk
 cd sdk
 npm install
