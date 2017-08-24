@@ -17,7 +17,7 @@ env:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev g++
-  - npm install canvas
+  - npm install -g canvas
   - "npm prune"
 
 before_script:
