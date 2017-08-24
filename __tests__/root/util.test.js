@@ -20,6 +20,7 @@ describe('util', () => {
   it('gets layer by id', () => {
     const layers = [{ id: 'osm', source: 'osm' }];
     expect(util.getLayerById(layers, 'foo')).toEqual(null);
+    expect(util.getLayerById(layers, 'osm')).toEqual(layers[0]);
   });
 
   it('converts degrees to radians', () => {

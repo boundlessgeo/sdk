@@ -14,7 +14,7 @@ import TileJSONSource from 'ol/source/tilejson';
 import TileWMSSource from 'ol/source/tilewms';
 
 import { createStore, combineReducers } from 'redux';
-import { jsonEquals, radiansToDegrees } from '../../src/util';
+import { radiansToDegrees } from '../../src/util';
 
 import ConnectedMap, { Map } from '../../src/components/map';
 import SdkPopup from '../../src/components/map/popup';
@@ -63,6 +63,10 @@ describe('Map component', () => {
         type: 'vector',
         url: 'https://{a-d}.tiles.mapbox.com/v4/mapbox.mapbox-streets-v6/{z}/{x}/{y}.vector.pbf?access_token=test_key',
       },
+      mapbox: {
+        url: 'mapbox://mapbox.mapbox-streets-v7',
+        type: 'vector',
+      },
     };
     const layers = [
       {
@@ -84,6 +88,9 @@ describe('Map component', () => {
         id: 'mvt-layer',
         source: 'mvt',
       }, {
+        id: 'mapbox-layer',
+        source: 'mapbox',
+      }, {
         id: 'purple-points',
         ref: 'sample-points',
         paint: {
@@ -100,7 +107,11 @@ describe('Map component', () => {
 
     const center = [0, 0];
     const zoom = 2;
-    const wrapper = mount(<Map map={{ center, zoom, sources, layers, metadata }} />);
+    const apiKey = 'foo';
+    const wrapper = mount(<Map
+      accessToken={apiKey}
+      map={{ center, zoom, sources, layers, metadata }}
+    />);
     const map = wrapper.instance().map;
     expect(map).toBeDefined();
     expect(map).toBeInstanceOf(olMap);
@@ -111,7 +122,8 @@ describe('Map component', () => {
     expect(map.getLayers().item(1).getSource().getParams().REQUEST).toBe(undefined);
     expect(map.getLayers().item(2)).toBeInstanceOf(VectorLayer);
     expect(map.getLayers().item(3)).toBeInstanceOf(VectorTileLayer);
-
+    const expected = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${apiKey}`;
+    expect(map.getLayers().item(4).getSource().getUrls()[0]).toBe(expected);
     // move the map.
     wrapper.setProps({
       zoom: 4,
@@ -226,6 +238,80 @@ describe('Map component', () => {
     expect(layer.getVisible()).toBe(false);
   });
 
+  it('should handle undefined center, zoom and bearing in constructor', () => {
+    const sources = {
+      tilejson: {
+        type: 'raster',
+        url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure',
+      },
+    };
+    const layers = [{
+      id: 'tilejson-layer',
+      source: 'tilejson',
+    }];
+
+    const metadata = {
+      'bnd:source-version': 0,
+      'bnd:layer-version': 0,
+    };
+    const wrapper = mount(<Map map={{ sources, layers, metadata }} />);
+
+    const instance = wrapper.instance();
+    const map = instance.map;
+    const view = map.getView();
+    // default values should get set
+    expect(view.getRotation()).toBe(0);
+    expect(view.getCenter()).toBe(null);
+    expect(view.getZoom()).toBe(undefined);
+  });
+
+  it('should handle undefined center, zoom, bearing in shouldComponentUpdate', () => {
+    const sources = {
+      tilejson: {
+        type: 'raster',
+        url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure',
+      },
+    };
+    const layers = [{
+      id: 'tilejson-layer',
+      source: 'tilejson',
+    }];
+
+    const metadata = {
+      'bnd:source-version': 0,
+      'bnd:layer-version': 0,
+    };
+    const center = [0, 0];
+    const zoom = 2;
+    const bearing = 45;
+    const wrapper = mount(<Map map={{ bearing, center, zoom, sources, layers, metadata }} />);
+
+    const instance = wrapper.instance();
+    const map = instance.map;
+    const view = map.getView();
+    // center in EPSG:4326
+    const centerWGS84 = view.getCenter();
+
+    const nextProps = {
+      map: {
+        center: undefined,
+        zoom: undefined,
+        bearing: undefined,
+        metadata: {
+          'bnd:source-version': 0,
+          'bnd:layer-version': 0,
+        },
+        sources,
+        layers,
+      },
+    };
+    instance.shouldComponentUpdate.call(instance, nextProps);
+    // previous values should still be valid
+    expect(radiansToDegrees(view.getRotation())).toBe(45);
+    expect(view.getZoom()).toBe(2);
+    expect(view.getCenter()).toBe(centerWGS84);
+  });
+
   it('should handle layout changes', () => {
     const sources = {
       geojson: {
@@ -257,15 +343,15 @@ describe('Map component', () => {
     };
     const center = [0, 0];
     const zoom = 2;
-    const wrapper = shallow(<Map map={{ center, zoom, sources, layers, metadata }} />);
+    const wrapper = mount(<Map map={{ center, zoom, sources, layers, metadata }} />);
     const instance = wrapper.instance();
-    instance.componentDidMount();
-    const style = instance.fakeStyle(layers[0]);
+
     const map = instance.map;
     const layer = map.getLayers().item(0);
     const ol_style = layer.getStyle();
-    const results = jsonEquals(style, ol_style);
-    expect(results).toEqual(true);
+
+    // test that the style has been set to something
+    expect(typeof ol_style).toEqual('function');
   });
 
   it('handles updates to source and layer min/maxzoom values', () => {
@@ -291,41 +377,11 @@ describe('Map component', () => {
 
     const instance = wrapper.instance();
     const map = instance.map;
-    const layer = map.getLayers().item(0);
     const view = map.getView();
-    let max_rez = view.constrainResolution(
-    view.getMaxResolution(), layers[0].minzoom - view.getMinZoom());
-    expect(layer.getMaxResolution()).toEqual(max_rez);
-    let min_rez = view.constrainResolution(
-    view.getMinResolution(), layers[0].maxzoom - view.getMaxZoom());
-    expect(layer.getMinResolution()).toEqual(min_rez);
-    // min/max zoom values change on layer def
-    let nextProps = {
-      map: {
-        center,
-        zoom,
-        metadata: {
-          'bnd:source-version': 0,
-          'bnd:layer-version': 1,
-        },
-        sources,
-        layers: [{
-          id: 'tilejson-layer',
-          source: 'tilejson',
-          minzoom: 3,
-          maxzoom: 4,
-        }],
-      },
-    };
-    instance.shouldComponentUpdate.call(instance, nextProps);
-    max_rez = view.constrainResolution(
-    view.getMaxResolution(), nextProps.map.layers[0].minzoom - view.getMinZoom());
-    expect(layer.getMaxResolution()).toEqual(max_rez);
-    min_rez = view.constrainResolution(
-    view.getMinResolution(), nextProps.map.layers[0].maxzoom - view.getMaxZoom());
-    expect(layer.getMinResolution()).toEqual(min_rez);
+    const layer = map.getLayers().item(0);
+
     // min/max zoom values defined on source only
-    nextProps = {
+    let nextProps = {
       map: {
         center,
         zoom,
@@ -348,12 +404,14 @@ describe('Map component', () => {
       },
     };
     instance.shouldComponentUpdate.call(instance, nextProps);
-    max_rez = view.constrainResolution(
-    view.getMaxResolution(), nextProps.map.sources.tilejson.minzoom - view.getMinZoom());
+    let max_rez = view.constrainResolution(
+      view.getMaxResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMinZoom());
     expect(layer.getMaxResolution()).toEqual(max_rez);
-    min_rez = view.constrainResolution(
-    view.getMinResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMaxZoom());
+
+    let min_rez = view.constrainResolution(
+      view.getMaxResolution(), nextProps.map.sources.tilejson.minzoom - view.getMinZoom());
     expect(layer.getMinResolution()).toEqual(min_rez);
+
     // min.max zoom values defined on both source and layer def
     nextProps = {
       map: {
@@ -380,11 +438,12 @@ describe('Map component', () => {
       },
     };
     instance.shouldComponentUpdate.call(instance, nextProps);
+    // the layer minzoom will be handled in the style and *not* on the layer itself.
     max_rez = view.constrainResolution(
-    view.getMaxResolution(), nextProps.map.layers[0].minzoom - view.getMinZoom());
+      view.getMaxResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMinZoom());
     expect(layer.getMaxResolution()).toEqual(max_rez);
     min_rez = view.constrainResolution(
-      view.getMinResolution(), nextProps.map.sources.tilejson.maxzoom - view.getMaxZoom());
+      view.getMinResolution(), nextProps.map.sources.tilejson.minzoom - view.getMaxZoom());
     expect(layer.getMinResolution()).toEqual(min_rez);
   });
 
@@ -680,10 +739,10 @@ describe('Map component', () => {
     const wrapper = mount(<ConnectedMap store={store} />);
     const map = wrapper.instance().getWrappedInstance();
 
-    spyOn(map, 'configureSprite');
+    spyOn(map, 'updateSpriteLayers');
     store.dispatch(MapActions.setSprite('./sprites'));
 
-    expect(map.configureSprite).toHaveBeenCalled();
+    expect(map.updateSpriteLayers).toHaveBeenCalled();
   });
 
   it('should call handleWMSGetFeatureInfo', () => {
@@ -729,29 +788,8 @@ describe('Map component async', () => {
     nock.cleanAll();
   });
 
-  it('should set spriteData', (done) => {
-    const store = createStore(combineReducers({
-      map: MapReducer,
-    }));
+  // removed set spriteData tests as they are now handled in ol-mapbox-style
 
-    const wrapper = mount(<ConnectedMap store={store} />);
-    const map = wrapper.instance().getWrappedInstance();
-
-    // eslint-disable-next-line
-    const spritesJson = {"accommodation_camping": {"y": 0, "width": 20, "pixelRatio": 1, "x": 0, "height": 20}, "amenity_firestation": {"y": 0, "width": 50, "pixelRatio": 1, "x": 20, "height": 50}};
-
-    nock('http://example.com')
-      .get('/sprites.json')
-      .reply(200, spritesJson);
-
-    store.dispatch(MapActions.setSprite('http://example.com/sprites'));
-
-    setTimeout(() => {
-      expect(map.spriteData).toEqual(spritesJson);
-      expect(map.spriteImageUrl).toEqual('http://example.com/sprites.png');
-      done();
-    }, 300);
-  });
   it('should handle WMS GetFeatureInfo', () => {
     const store = createStore(combineReducers({
       map: MapReducer,

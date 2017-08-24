@@ -3,65 +3,32 @@ const path = require('path');
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
+const { lstatSync, readdirSync } = require('fs')
+const { join } = require('path')
+
+const isDirectory = source => lstatSync(source).isDirectory()
+const getDirectories = source =>
+  readdirSync(source).map(name => join(source, name)).filter(isDirectory)
+
+const subDirs = getDirectories('./examples');
+
+const entry = {};
+for (let i = 0, ii = subDirs.length; i < ii; ++i) {
+  const name = subDirs[i].split(path.sep).pop();
+  entry[name] = [
+    'webpack/hot/only-dev-server'
+  ];
+  entry[name].push(`.${path.sep}${subDirs[i]}${path.sep}app.js`);
+}
+
 const config = {
   resolve: {
-    extensions: ['.js', '.jsx'],
     alias: {
       '@boundlessgeo/sdk': path.resolve(__dirname, 'src/'),
     },
   },
   // Entry points to the project
-  entry: {
-    // each example is it's own entry point.
-    basic: [
-      'webpack/hot/only-dev-server',
-      './examples/basic/app.jsx',
-    ],
-    wms: [
-      'webpack/hot/only-dev-server',
-      './examples/wms/app.jsx',
-    ],
-    'feature-table': [
-      'webpack/hot/only-dev-server',
-      './examples/feature-table/app.jsx',
-    ],
-    popups: [
-      'webpack/hot/only-dev-server',
-      './examples/popups/app.jsx',
-    ],
-    clustering: [
-      'webpack/hot/only-dev-server',
-      './examples/clustering/app.jsx',
-    ],
-    sprites: [
-      'webpack/hot/only-dev-server',
-      './examples/sprites/app.jsx',
-    ],
-    'paint-change': [
-      'webpack/hot/only-dev-server',
-      './examples/paint-change/app.jsx',
-    ],
-    drawing: [
-      'webpack/hot/only-dev-server',
-      './examples/drawing/app.jsx',
-    ],
-    legends: [
-      'webpack/hot/only-dev-server',
-      './examples/legends/app.jsx',
-    ],
-    'export-image': [
-      'webpack/hot/only-dev-server',
-      './examples/export-image/app.jsx',
-    ],
-    'basic-wgs84': [
-      'webpack/hot/only-dev-server',
-      './examples/basic-wgs84/app.jsx',
-    ],
-    rotating: [
-      'webpack/hot/only-dev-server',
-      './examples/rotating/app.jsx',
-    ],
-  },
+  entry: entry,
   // Server Configuration options
   devServer: {
     contentBase: './', // Relative directory for base of server
@@ -75,7 +42,7 @@ const config = {
   output: {
     path: __dirname, // Path of output file
     // [name] refers to the entry point's name.
-    filename: 'examples/[name]/[name].bundle.js',
+    filename: 'build/examples/[name]/[name].bundle.js',
   },
   plugins: [
     new ExtractTextPlugin('dist/sdk.css'),

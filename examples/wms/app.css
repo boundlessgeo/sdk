@@ -1,0 +1,15 @@
+/* POP content Styling Example */
+.sdk-popup-content{
+  min-width: 13rem;
+}
+
+.sdk-popup-content ul {
+  padding: 0;
+}
+.sdk-popup-content ul li {
+  margin-bottom: .5rem;
+}
+
+.sdk-popup-content ul li .title {
+  font-weight: 700;
+}

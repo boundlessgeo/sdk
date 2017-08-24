@@ -55,7 +55,7 @@ class MarkFeaturesPopup extends SdkPopup {
     const feature_ids = this.props.features.map(f => f.properties.id);
 
     return this.renderPopup((
-      <div>
+      <div className="sdk-popup-content">
         You clicked here:<br />
         <code>
           { this.props.coordinate.hms }
@@ -66,7 +66,7 @@ class MarkFeaturesPopup extends SdkPopup {
           <code>{ feature_ids.join(', ') }</code>
           <br />
           <button className="sdk-btn" onClick={() => { this.markFeatures(); }}>
-            Mark these features
+            Mark this feature
           </button>
         </p>
       </div>

@@ -1,9 +1,10 @@
 .sdk-popup {
+  font-size: 14px;
   position: absolute;
   background-color: white;
   -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
   filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
-  padding: 15px;
+  padding: 18px 15px 15px;
   border-radius: 10px;
   border: 1px solid #cccccc;
   bottom: 12px;
@@ -28,13 +29,20 @@
     left: 48px;
     margin-left: -11px;
   }
+  #sdk-popup-container {
+    max-height: 240px;
+    overflow: auto;
+    .sdk-popup-content {
+
+    }
+  }
 }
 .sdk-popup-closer {
   text-decoration: none;
   position: absolute;
-  top: 2px;
+  top: 7px;
   right: 8px;
   &:after {
-      content: "✖";
+      // content: "✖";
   }
 }

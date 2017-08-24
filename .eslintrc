@@ -4,7 +4,7 @@
         "browser": true,
         "node": true
     },
-    "extends": "airbnb",
+    "extends": "react-app",
     "rules": {
         "import/no-extraneous-dependencies": 0,
         "no-console": ["error", {

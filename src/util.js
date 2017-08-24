@@ -153,3 +153,8 @@ export function degreesToRadians(degrees) {
 export function radiansToDegrees(radians) {
   return (radians * 180) / Math.PI;
 }
+
+// Use JSON utilities to clone an object.
+export function jsonClone(object) {
+  return JSON.parse(JSON.stringify(object));
+}

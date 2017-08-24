@@ -34,7 +34,7 @@ class Popup extends React.PureComponent {
   renderPopup(children) {
     let close_btn = false;
     if (this.props.closeable) {
-      close_btn = (<i tabIndex={0} role="link" onClick={() => { this.close(); }} className="sdk-popup-closer" />);
+      close_btn = (<i tabIndex={0} role="link" onClick={() => { this.close(); }} className="sdk-popup-closer fa fa-times" />);
     }
     if (this.state.closed) {
       return false;
@@ -43,7 +43,7 @@ class Popup extends React.PureComponent {
     return (
       <div className="sdk-popup">
         { close_btn }
-        <div id="popup-content">
+        <div id="sdk-popup-container">
           { React.Children.only(children) }
         </div>
       </div>

@@ -84,17 +84,11 @@ function main() {
     source: 'points',
     type: 'circle',
     paint: {
-      'circle-radius': {
-        type: 'interval',
-        default: 3,
-        property: 'point_count',
-        stops: [
-          [0, 5], [2, 10], [3, 30],
-        ],
-      },
+      'circle-radius': 3,
       'circle-color': '#feb24c',
       'circle-stroke-color': '#f03b20',
     },
+    filter: ['!=', 'isRandom', true],
   }));
 
   // The points source has both null island
@@ -103,7 +97,7 @@ function main() {
   // of orange.
   store.dispatch(mapActions.addLayer({
     id: 'random-points',
-    ref: 'null-island',
+    source: 'points',
     paint: {
       'circle-radius': 5,
       'circle-color': '#756bb1',

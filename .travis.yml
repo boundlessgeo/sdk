@@ -21,6 +21,7 @@ before_install:
 
 before_script:
   - "export DISPLAY=:99.0"
+  - npm install canvas
 
 script:
   - "npm run test"
@@ -32,6 +33,5 @@ after_success:
 branches:
   only:
     - master
-    - sdk-redux
-    - ultimateredux
+    - 1.x
     - /^v\d+\.\d+(\.\d+)?$/

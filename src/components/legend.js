@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { parseQueryString, encodeQueryObject } from '../util';
+import { getLayerById, parseQueryString, encodeQueryObject } from '../util';
 
 
 /** Return a div that is asynchronously populated
@@ -154,25 +154,17 @@ export function getRasterLegend(layer, layer_src) {
 
 
 class Legend extends React.Component {
-  getLayerById(id) {
-    for (let i = 0, ii = this.props.layers.length; i < ii; i++) {
-      if (this.props.layers[i].id === id) {
-        return this.props.layers[i];
-      }
-    }
-    return null;
-  }
 
   getLegendContents() {
     // get the layer definition
-    const layer = this.getLayerById(this.props.layerId);
+    const layer = getLayerById(this.props.layers, this.props.layerId);
     if (layer === null) {
       return null;
     }
 
     let source_name = layer.source;
     if (layer.ref && !layer.source) {
-      const ref_layer = this.getLayerById(layer.ref);
+      const ref_layer = getLayerById(this.props.layers, layer.ref);
       source_name = ref_layer.source;
     }
     const layer_src = this.props.sources[source_name];
@@ -209,12 +201,18 @@ class Legend extends React.Component {
 }
 
 Legend.propTypes = {
-  layerId: PropTypes.string,
+  layerId: PropTypes.string.isRequired,
   layers: PropTypes.arrayOf(PropTypes.object),
   sources: PropTypes.shape({
     source: PropTypes.string,
   }),
   emptyLegendMessage: PropTypes.string,
+};
+
+Legend.defaultProps = {
+  layers: [],
+  sources: {},
+  emptyLegendMessage: undefined,
 };
 
 function mapStateToProps(state) {
