@@ -3,3 +3,4 @@ coverage
 npm-debug.log
 conf.js
 build
+dist

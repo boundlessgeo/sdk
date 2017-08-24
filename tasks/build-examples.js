@@ -90,9 +90,14 @@ function augmentExamples(files, metalsmith, done) {
 }
 
 function main(callback) {
+  let dest = destDir;
+  if (process.argv[2]) {
+    dest = path.join(__dirname, '..', process.argv[2]);
+  }
+
   const smith = new Metalsmith('.')
       .source(srcDir)
-      .destination(destDir)
+      .destination(dest)
       .concurrency(25)
       .use(augmentExamples)
       .use(createIndex)
