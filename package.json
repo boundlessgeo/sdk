@@ -8,9 +8,11 @@
     "test:watch": "npm test -- --watch",
     "lint": "eslint __tests__ src examples tasks",
     "cover": "node_modules/.bin/jest --coverage",
-    "build:examples": "node tasks/build-examples.js"
+    "build:examples": "node tasks/build-examples.js",
+    "build:js": "babel ./src --out-dir ./lib"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-loader": "^7.0.0",
@@ -22,7 +24,7 @@
     "css-loader": "^0.28.4",
     "deep-freeze": "0.0.1",
     "enzyme": "^2.9.1",
-    "eslint": "^3.19.0",
+    "eslint": "^4.1.0",
     "eslint-config-react-app": "^2.0.0",
     "eslint-import-resolver-webpack": "^0.8.3",
     "eslint-plugin-flowtype": "^2.35.0",

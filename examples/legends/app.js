@@ -13,10 +13,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
-import SdkMap from '@boundlessgeo/sdk/components/map';
-import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
-import SdkLegend from '@boundlessgeo/sdk/components/legend';
-import * as mapActions from '@boundlessgeo/sdk/actions/map';
+import SdkMap from '@boundlessgeo/sdk/lib/components/map';
+import SdkMapReducer from '@boundlessgeo/sdk/lib/reducers/map';
+import SdkLegend from '@boundlessgeo/sdk/lib/components/legend';
+import * as mapActions from '@boundlessgeo/sdk/lib/actions/map';
 
 // This will have webpack include all of the SDK styles.
 import '@boundlessgeo/sdk/stylesheet/sdk.scss';

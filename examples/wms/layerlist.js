@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import * as mapActions from '@boundlessgeo/sdk/actions/map';
+import * as mapActions from '@boundlessgeo/sdk/lib/actions/map';
 
 /**
  * Layer list to toggle visibility and remove layers from the map.

@@ -11,10 +11,10 @@ import thunkMiddleware from 'redux-thunk';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import SdkMap from '@boundlessgeo/sdk/components/map';
-import SdkHashHistory from '@boundlessgeo/sdk/components/history';
-import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
-import * as mapActions from '@boundlessgeo/sdk/actions/map';
+import SdkMap from '@boundlessgeo/sdk/lib/components/map';
+import SdkHashHistory from '@boundlessgeo/sdk/lib/components/history';
+import SdkMapReducer from '@boundlessgeo/sdk/lib/reducers/map';
+import * as mapActions from '@boundlessgeo/sdk/lib/actions/map';
 
 // This will have webpack include all of the SDK styles.
 import '@boundlessgeo/sdk/stylesheet/sdk.scss';

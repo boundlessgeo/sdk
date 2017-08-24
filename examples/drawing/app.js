@@ -8,13 +8,13 @@ import thunkMiddleware from 'redux-thunk';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import SdkMap from '@boundlessgeo/sdk/components/map';
-import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
-import SdkDrawingReducer from '@boundlessgeo/sdk/reducers/drawing';
-import * as mapActions from '@boundlessgeo/sdk/actions/map';
-import * as drawingActions from '@boundlessgeo/sdk/actions/drawing';
+import SdkMap from '@boundlessgeo/sdk/lib/components/map';
+import SdkMapReducer from '@boundlessgeo/sdk/lib/reducers/map';
+import SdkDrawingReducer from '@boundlessgeo/sdk/lib/reducers/drawing';
+import * as mapActions from '@boundlessgeo/sdk/lib/actions/map';
+import * as drawingActions from '@boundlessgeo/sdk/lib/actions/drawing';
 
-import { INTERACTIONS } from '@boundlessgeo/sdk/constants';
+import { INTERACTIONS } from '@boundlessgeo/sdk/lib/constants';
 
 // This will have webpack include all of the SDK styles.
 import '@boundlessgeo/sdk/stylesheet/sdk.scss';

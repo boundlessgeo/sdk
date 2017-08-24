@@ -9,11 +9,11 @@ import thunkMiddleware from 'redux-thunk';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import SdkMap from '@boundlessgeo/sdk/components/map';
-import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
-import SdkPrintReducer from '@boundlessgeo/sdk/reducers/print';
-import * as mapActions from '@boundlessgeo/sdk/actions/map';
-import * as printActions from '@boundlessgeo/sdk/actions/print';
+import SdkMap from '@boundlessgeo/sdk/lib/components/map';
+import SdkMapReducer from '@boundlessgeo/sdk/lib/reducers/map';
+import SdkPrintReducer from '@boundlessgeo/sdk/lib/reducers/print';
+import * as mapActions from '@boundlessgeo/sdk/lib/actions/map';
+import * as printActions from '@boundlessgeo/sdk/lib/actions/print';
 
 // This will have webpack include all of the SDK styles.
 import '@boundlessgeo/sdk/stylesheet/sdk.scss';
@@ -24,6 +24,8 @@ const store = createStore(combineReducers({
   print: SdkPrintReducer,
 }), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
    applyMiddleware(thunkMiddleware));
+
+window.store = store;
 
 function main() {
   const url = 'https://raw.githubusercontent.com/boundlessgeo/ol-mapbox-style/master/example/data/wms.json';
@@ -37,6 +39,7 @@ function main() {
   // place the map on the page.
   ReactDOM.render(
     <SdkMap
+      ref={(m) => { window.map = m; }}
       store={store}
       onExportImage={exportMapImage}
     />

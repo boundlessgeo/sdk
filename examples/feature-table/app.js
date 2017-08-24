@@ -11,9 +11,9 @@ import thunkMiddleware from 'redux-thunk';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import SdkMap from '@boundlessgeo/sdk/components/map';
-import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
-import * as mapActions from '@boundlessgeo/sdk/actions/map';
+import SdkMap from '@boundlessgeo/sdk/lib/components/map';
+import SdkMapReducer from '@boundlessgeo/sdk/lib/reducers/map';
+import * as mapActions from '@boundlessgeo/sdk/lib/actions/map';
 
 import fetch from 'isomorphic-fetch';
 

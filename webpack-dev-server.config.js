@@ -24,7 +24,8 @@ for (let i = 0, ii = subDirs.length; i < ii; ++i) {
 const config = {
   resolve: {
     alias: {
-      '@boundlessgeo/sdk': path.resolve(__dirname, 'src/'),
+      '@boundlessgeo/sdk/lib' : path.resolve(__dirname, './src'),
+      '@boundlessgeo/sdk': path.resolve(__dirname, './'),
     },
   },
   // Entry points to the project
