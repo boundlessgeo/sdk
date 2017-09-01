@@ -11,10 +11,6 @@
  * under the License.
  */
 
-/** Provide an OpenLayers map which reflects the
- *  state of the  store.
- */
-
 import fetch from 'isomorphic-fetch';
 
 import uuid from 'uuid';
@@ -69,13 +65,21 @@ import ClusterSource from '../source/cluster';
 
 import { parseQueryString, jsonClone, jsonEquals, getLayerById, degreesToRadians, radiansToDegrees } from '../util';
 
+/** Provide an OpenLayers map which reflects the
+ *  state of the Redux store.
+ */
 
 const GEOJSON_FORMAT = new GeoJsonFormat();
 const WGS84_SPHERE = new Sphere(6378137);
 const MAPBOX_PROTOCOL = 'mapbox://';
 
-/** This variant of getVersion differs as it allows
+/** This variant of getVersion() differs as it allows
  *  for undefined values to be returned.
+ * @param {Object} obj The state.map object
+ * @param {Object} obj.metadata The state.map.metadata object
+ * @param {string} key One of 'bnd:layer-version', 'bnd:source-version', or 'bnd:data-version'.
+ *
+ * @returns {(number|undefined)} The version number of the given metadata key.
  */
 function getVersion(obj, key) {
   if (obj.metadata === undefined) {
@@ -84,6 +88,13 @@ function getVersion(obj, key) {
   return obj.metadata[key];
 }
 
+/** Configures an OpenLayers TileWMS or XyzSource object from the provided
+ * Mapbox GL style object.
+ * @param {Object} glSource The Mapbox GL map source containing a 'tiles' property.
+ * @param {Object} mapProjection The OpenLayers projection object.
+ *
+ * @returns {Object} Configured OpenLayers TileWMSSource or XyzSource.
+ */
 function configureTileSource(glSource, mapProjection) {
   const tile_url = glSource.tiles[0];
   const commonProps = {
@@ -127,6 +138,12 @@ function configureTileSource(glSource, mapProjection) {
   return source;
 }
 
+/** Configures an OpenLayers TileJSONSource object from the provided
+ * Mapbox GL style object.
+ * @param {Object} glSource The Mapbox GL map source containing a 'url' property.
+ *
+ * @returns {Object} Configured OpenLayers TileJSONSource.
+ */
 function configureTileJSONSource(glSource) {
   return new TileJSON({
     url: glSource.url,
@@ -134,6 +151,12 @@ function configureTileJSONSource(glSource) {
   });
 }
 
+/** Configures an OpenLayers ImageStaticSource object from the provided
+ * Mapbox GL style object.
+ * @param {Object} glSource The Mapbox GL map source of type 'image'.
+ *
+ * @returns {Object} Configured OpenLayers ImageStaticSource.
+ */
 function configureImageSource(glSource) {
   const coords = glSource.coordinates;
   const source = new ImageStaticSource({
@@ -144,6 +167,13 @@ function configureImageSource(glSource) {
   return source;
 }
 
+/** Configures an OpenLayers VectorTileSource object from the provided
+ * Mapbox GL style object.
+ * @param {Object} glSource The Mapbox GL map source of type 'vector'.
+ * @param {string} accessToken The user's Mapbox tiles access token .
+ *
+ * @returns {Object} Configured OpenLayers VectorTileSource.
+ */
 function configureMvtSource(glSource, accessToken) {
   const url = glSource.url;
   let urls;
@@ -170,6 +200,15 @@ function configureMvtSource(glSource, accessToken) {
   return source;
 }
 
+/** Updates an OpenLayers VectorSource object
+ *  with a promise to resolve new geojson data.
+ * @param {Object} olSource The OpenLayers VectorSource object.
+ * @param {Object} glSource The Mapbox GL geojson source.
+ * @param {Object} mapProjection The OpenLayers projection object.
+ * @param {string} baseUrl A baseUrl provided by this.props.baseUrl.
+ *
+ * @returns {Object} Configured OpenLayers VectorTileSource.
+ */
 function updateGeojsonSource(olSource, glSource, mapProjection, baseUrl) {
   // setup a feature promise to handle async loading
   // of features.
@@ -247,9 +286,9 @@ function updateGeojsonSource(olSource, glSource, mapProjection, baseUrl) {
 /** Create a vector source based on a
  *  Mapbox GL styles definition.
  *
- *  @param glSource a Mapbox GL styles defintiion of the source.
+ *  @param {Object} glSource A Mapbox GL styles defintiion of the source.
  *
- * @returns ol.source.vector instance.
+ *  @returns {Object} ol.source.vector instance.
  */
 function configureGeojsonSource(glSource, mapProjection, baseUrl) {
   const vector_src = new VectorSource({
@@ -276,6 +315,15 @@ function configureGeojsonSource(glSource, mapProjection, baseUrl) {
   return new_src;
 }
 
+/** Configures a Mapbox GL source object into appropriate
+ *  an appropriatly typed OpenLayers source object.
+ * @param {Object} olSource The OpenLayers source object.
+ * @param {Object} mapProjection The OpenLayers projection object.
+ * @param {string} accessToken A Mapbox access token.
+ * @param {string} baseUrl A baseUrl provided by this.props.baseUrl.
+ *
+ * @returns {(Object|null)} Callback to the applicable configure source method.
+ */
 function configureSource(glSource, mapProjection, accessToken, baseUrl) {
   // tiled raster layer.
   if (glSource.type === 'raster') {
@@ -295,7 +343,10 @@ function configureSource(glSource, mapProjection, accessToken, baseUrl) {
 }
 
 /** Create a unique key for a group of layers
- */
+  * @param {Object[]} layer_group An array of Mapbox GL layers.
+  *
+  * @returns {string} The layer_group source name, followed by a concatenated string of layer ids.
+  */
 function getLayerGroupName(layer_group) {
   const all_names = [];
   for (let i = 0, ii = layer_group.length; i < ii; i++) {
@@ -304,15 +355,20 @@ function getLayerGroupName(layer_group) {
   return `${layer_group[0].source}-${all_names.join(',')}`;
 }
 
-/** Get the source name from the layer group name
+/** Get the source name from the layer group name.
+ * @param {string} groupName The layer group name.
  *
+ * @returns {string} The source name for the provided layer group name.
  */
 function getSourceName(groupName) {
   const dash = groupName.indexOf('-');
   return groupName.substring(0, dash);
 }
 
-/** Get the list of layers from the layer group name
+/** Get the list of layers from the layer group name.
+ * @param {string} groupName The layer group name.
+ *
+ * @returns {string} A concatenated string of layer names inside the group.
  */
 function getLayerNames(groupName) {
   const dash = groupName.indexOf('-');
@@ -320,6 +376,10 @@ function getLayerNames(groupName) {
 }
 
 /** Populate a ref'd layer.
+ * @param {Object[]} layersDef All layers defined in the Mapbox gl stylesheet.
+ * @param {Object} glLayer Subset of layers to be rendered as a group.
+ *
+ * @returns {Object} A new glLayer object with ref'd layer properties mixed in.
  */
 function hydrateLayer(layersDef, glLayer) {
   // Small sanity check for when this
@@ -350,10 +410,10 @@ function hydrateLayer(layersDef, glLayer) {
 /** Hydrate a layer group
  *  Normalizes all the ref layers in a group.
  *
- *  @param layersDef - All layers defined in the mapbox gl stylesheet.
- *  @param layerGroup - Subset of layers to be rendered as a group.
+ *  @param {Object[]} layersDef All layers defined in the mapbox gl stylesheet.
+ *  @param {Object[]} layerGroup Subset of layers to be rendered as a group.
  *
- *  @returns An array with the ref layers normalized.
+ *  @returns {Object[]} An array with the ref layers normalized.
  */
 function hydrateLayerGroup(layersDef, layerGroup) {
   const hydrated_group = [];

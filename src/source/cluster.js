@@ -12,10 +12,19 @@
  */
 
 import ClusterSource from 'ol/source/cluster';
-
+/** ClusterSource class for Boundless SDK,
+ *  extends OpenLayers ClusterSource,
+ *  http://openlayers.org/en/latest/apidoc/ol.source.Cluster.html.
+*/
 
 class SdkClusterSource extends ClusterSource {
 
+  /** Creates the cluster.
+    *
+    * @param {Object[]} features Features to be clustered.
+    *
+    * @returns {Object} The cluster feature.
+  */
   createCluster(features) {
     // get the cluster back from the clustering algorithm.
     const cluster = super.createCluster(features);

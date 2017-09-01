@@ -11,10 +11,6 @@
  * under the License.
  */
 
-/** Provides a components which will respond to WFS
- *  updates.
- */
-
 import fetch from 'isomorphic-fetch';
 
 import { PureComponent } from 'react';
@@ -30,6 +26,8 @@ import { finishedAction } from '../actions/wfs';
 import { jsonClone } from '../util';
 import { WFS } from '../action-types';
 
+/** Provides a component which will respond to WFS updates.
+ */
 class WfsController extends PureComponent {
   constructor(props) {
     super(props);
@@ -44,6 +42,10 @@ class WfsController extends PureComponent {
     Proj.addEquivalentProjections([Proj.get('EPSG:4326'), this.wfs_proj]);
   }
 
+  /** Runs the WFS request.
+    * @param {Object} props WfsController component's props.
+    * @param {string} id The WFS action to run.
+   */
   execute(props, id) {
     // only act if the action is not already pending.
     if (this.pendingActions[id] === undefined) {
@@ -119,6 +121,9 @@ class WfsController extends PureComponent {
     }
   }
 
+  /** Loop through the WFS actions in state and run execute() for each.
+    * @param {Object} props WfsController component's props.
+   */
   executeActions(props) {
     const action_ids = Object.keys(props.actions);
     for (let i = 0, ii = action_ids.length; i < ii; i++) {

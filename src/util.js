@@ -12,24 +12,30 @@
  */
 
 import GeoJsonFormat from 'ol/format/geojson';
-/** Utility functions for SDK.
+/** Utility functions for Boundless SDK.
  *
  *  This is the grab bag of universally useful functions.
- */
+*/
 
-/** Compare two objects, uses JSON.stringify.
- */
+/** Compares two objects using JSON.stringify.
+  *
+  * @param {Object} objectA The first object to be compared.
+  * @param {Object} objectB An object to compare with objectA.
+  *
+  * @returns {boolean} True if objectA and objectB are deeply equal, false if not.
+*/
 export function jsonEquals(objectA, objectB) {
   return (JSON.stringify(objectA) === JSON.stringify(objectB));
 }
 
 
-/** Get a layer by it's id
+/** Gets a layer by it's id. https://www.mapbox.com/mapbox-gl-js/style-spec/#layer-id
  *
- *  @param layers - Array of GL layer objects.
- *  @param id     - The layer's ID.
+ * @param {Object[]} layers An array of Mapbox GL layer objects.
+ * @param {string} layers[].id - The id of a given layer.
+ * @param {string} id The id of the layer object to be returned.
  *
- *  @returns The layer or null if not found.
+ * @returns {(Object|null)} The Mapbox GL layer object, or null if not found.
  */
 export function getLayerById(layers, id) {
   for (let i = 0, ii = layers.length; i < ii; i++) {
@@ -40,11 +46,11 @@ export function getLayerById(layers, id) {
   return null;
 }
 
-/** Parse an arbitrary string as if it were a URL.
+/** Parses an arbitrary string as if it were a URL.
  *
- *  @param queryString {String} - The query string to parse.
+ * @param {string} queryString The query string to parse.
  *
- * @returns An object with the key-value-pairs.
+ * @returns {Object} An object containing the key-value-pairs of the parsed query string.
  */
 export function parseQueryString(queryString) {
   const pairs = queryString.split('&');
@@ -62,11 +68,11 @@ export function parseQueryString(queryString) {
   return results;
 }
 
-/** Convert an object into a query string.
+/** Converts an object into a query string.
  *
- *  @param query {Object} - An object representing key-value-pairs to encode.
+ * @param {Object} query An object representing key-value-pairs to encode.
  *
- * @returns A URL encoded string.
+ * @returns {string} A URL encoded string.
  */
 export function encodeQueryObject(query) {
   const keys = Object.keys(query);
@@ -78,11 +84,14 @@ export function encodeQueryObject(query) {
   return pairs.join('&');
 }
 
-/** Reproject GeoJSON to mapbox gl style spec EPSG:4326
-  * @param geoJSON - geoJSON object
-  * @param destProj - ['EPSG:4326'] string of target projection for the data
-  * @return array of geoJSON feature in destProj
- */
+/** Reprojects GeoJSON to Mapbox gl style spec EPSG:4326
+  *
+  * @param {Object} geoJSON - The geoJSON object to reproject.
+  * @param {Object[]} geoJSON.features - An array of geoJSON features.
+  * @param {string} [destProj = 'EPSG:4326'] A string of target projection for the data. The default is 'EPSG:4326'.
+  *
+  * @returns {Object[]} An array of geoJSON features in the destination projection (destProj).
+  */
 export function reprojectGeoJson(geoJSON, destProj = 'EPSG:4326') {
   const GEOJSON_FORMAT = new GeoJsonFormat();
   const crsName = GEOJSON_FORMAT.readProjectionFromObject(geoJSON).getCode();
@@ -107,27 +116,32 @@ export function reprojectGeoJson(geoJSON, destProj = 'EPSG:4326') {
   return features.features;
 }
 
-/** Convert degrees to radians.
+/** Converts degrees to radians.
  *
- *  @param degrees - number, Bearing value on gl_map.
+ * @param {number} degrees The bearing value on a Mapbox GL map object.
  *
- * @returns radians - number, rotation value on ol_map.
+ * @returns {number} The rotation value on the OpenLayers map object in radians.
  */
 export function degreesToRadians(degrees) {
   return (degrees * Math.PI) / 180;
 }
 
-/** Convert radians to degrees.
+/** Converts radians to degrees.
  *
- *  @param radians - number, rotation value on ol_map.
+ * @param {number} radians The rotation value on an OpenLayers map object.
  *
- * @returns degrees - number, bearing value on gl_map.
+ * @returns {number} The bearing value on the Mapbox GL map object in degrees.
  */
 export function radiansToDegrees(radians) {
   return (radians * 180) / Math.PI;
 }
 
-// Use JSON utilities to clone an object.
+/** Uses JSON utilities to clone an object.
+ *
+ * @param {Object} object An object to be cloned.
+ *
+ * @returns {Object} The cloned object.
+ */
 export function jsonClone(object) {
   return JSON.parse(JSON.stringify(object));
 }
