@@ -376,7 +376,7 @@ function getLayerNames(groupName) {
 }
 
 /** Populate a ref'd layer.
- * @param {Object[]} layersDef All layers defined in the Mapbox gl stylesheet.
+ * @param {Object[]} layersDef All layers defined in the Mapbox GL stylesheet.
  * @param {Object} glLayer Subset of layers to be rendered as a group.
  *
  * @returns {Object} A new glLayer object with ref'd layer properties mixed in.
@@ -410,7 +410,7 @@ function hydrateLayer(layersDef, glLayer) {
 /** Hydrate a layer group
  *  Normalizes all the ref layers in a group.
  *
- *  @param {Object[]} layersDef All layers defined in the mapbox gl stylesheet.
+ *  @param {Object[]} layersDef All layers defined in the Mapbox GL stylesheet.
  *  @param {Object[]} layerGroup Subset of layers to be rendered as a group.
  *
  *  @returns {Object[]} An array with the ref layers normalized.
@@ -549,7 +549,13 @@ export class Map extends React.Component {
 
   /** Callback for finished drawings, converts the event's feature
    *  to GeoJSON and then passes the relevant information on to
-   *  this.props.onFeatureDrawn.
+   *  this.props.onFeatureDrawn, this.props.onFeatureModified,
+   *  or this.props.onFeatureSelected.
+   *
+   *  @param {string} eventType One of 'drawn', 'modified', or 'selected'.
+   *  @param {string} sourceName Name of the geojson source.
+   *  @param {Object} feature OpenLayers feature object.
+   *
    */
   onFeatureEvent(eventType, sourceName, feature) {
     if (feature !== undefined) {
@@ -574,6 +580,8 @@ export class Map extends React.Component {
 
   /** Convert the GL source definitions into internal
    *  OpenLayers source definitions.
+   *  @param {Object} sourcesDef All sources defined in the Mapbox GL stylesheet.
+   *  @param {number} sourceVersion Counter for the source metadata updates.
    */
   configureSources(sourcesDef, sourceVersion) {
     this.sourcesVersion = sourceVersion;
