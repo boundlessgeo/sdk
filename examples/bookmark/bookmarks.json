@@ -1,0 +1,32 @@
+{
+  "version": 8,
+  "name": "bookmarks",
+  "center":[2.336734,48.885318],
+  "zoom": 18,
+  "sources": {
+    "osm": {
+      "type": "raster",
+      "attribution": "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors.",
+      "tileSize": 256,
+      "tiles": [
+        "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      ]
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "rgba(0,0,0,0)"
+      }
+    },
+    {
+      "id": "osm",
+      "source": "osm"
+    }
+  ],
+  "bearing": 0
+}

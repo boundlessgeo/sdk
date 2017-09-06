@@ -1,0 +1,90 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "St. Louis Bakeries",
+        "name": "La Patisserie Chouquette",
+        "address": "1626 Tower Grove Avenue",
+        "telephone": "(314) 932-7935",
+        "website": "https://www.simonefaure.com/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.2555367,
+          38.6197195
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "St. Louis Bakeries",
+        "name": "Whisk: a Sustainable Bakeshop",
+        "address": "2201 Cherokee Street",
+        "telephone": "(314) 932-5166",
+        "website": "http://whiskstl.com/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.2232659,
+          38.5931809
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "St. Louis Bakeries",
+        "name": "Winslow’s Home",
+        "address": "7213 Delmar Blvd",
+        "telephone": "(314) 725-7559",
+        "website": "http://winslowshome.com"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.3213879,
+          38.6577713
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "St. Louis Bakeries",
+        "name": "Pint Size Bakery",
+        "address": "3133 Watson Rd",
+        "telephone": "(314) 645-7142",
+        "website": "http://pintsizebakery.com"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.2960089,
+          38.6066791
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "St. Louis Bakeries",
+        "name": "The Sweet Divine",
+        "address": "1801 S 9th St",
+        "telephone": "(636) 942-2900",
+        "website": "http://thesweetdivine.com"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.2058737,
+          38.6099087
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+
+
+/*html,
+body {
+  height: 100%;
+}
+
+a {
+  color: inherit;
+}*/
+
+/*
+ * Styling for modal custom control
+ */
+ #container {
+   height: 480px;
+   background-color: #f1f1f1;
+ }
+#bookmark {
+  z-index: 999;
+  user-select:text;
+  position: absolute;
+  left: 40px;
+  top: 260px;
+  width: 400px;
+  box-shadow: 8px 8px 5px #888888;
+}
+#addForm {
+  z-index: 1000;
+  user-select:text;
+  position: absolute;
+  left: 470px;
+  top: 260px;
+  width: 400px;
+  box-shadow: 8px 8px 5px #888888;
+}
+.modal-window {
+  padding: 2rem;
+  background: #fff;
+  color: #444;
+}
+.modal-window header {
+  font-weight: bold;
+}
+
+.modal-window h3 {
+  margin: 0;
+  font-size: 1rem;
+  margin: 0 0 15px;
+}
+.interior {
+  display: table-cell;
+  vertical-align: middle;
+  z-index: 9999;
+  width: 400px;
+}
+.interior .buttons button.sdk-btn {
+  padding: .25rem;
+}
+.bookmarkItem {
+  margin-bottom: 10px;
+}
+.label, .value {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.label {
+  width: 80px;;
+}
+.value {
+  width: 250px;
+}
+/* form specific formatting */
+ .form-group {
+   display: flex;
+   flex-direction: row;
+ }
+
+ .form-group label {
+   flex: none;
+   display: block;
+   width: 95px;
+  }
+ .form-group label.right-inline {
+   text-align: right;
+   padding-right: 4px;
+   padding-left: 5px;
+   width: auto;
+ }
+
+ .form-group .input-control {
+   flex: 1 1 auto;
+   display: block;
+   margin-bottom: 4px;
+   margin-top: -4px;
+ }

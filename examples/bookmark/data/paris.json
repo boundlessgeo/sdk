@@ -1,0 +1,124 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Paris Bakeries",
+        "name": "Le Grenier Pain",
+        "address": "38 rue des Abbesses",
+        "telephone": "33 (0)1 46 06 41 81",
+        "website": "http://www.legrenierapain.com"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.336734,
+          48.885318
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Paris Bakeries",
+        "name": "Poilne",
+        "address": "8 rue du Cherche-Midi",
+        "telephone": "33 (0)1 45 48 42 59",
+        "website": "http://www.poilane.fr"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.328989,
+          48.851292
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Paris Bakeries",
+        "name": "Pain d'Epis",
+        "address": "63 ave Bosquet",
+        "telephone": "33 (0)1 45 51 75 01",
+        "website": "https://www.yelp.com/biz/pain-d-epis-paris"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.305084,
+          48.85616
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Paris Bakeries",
+        "name": "Le Moulin de la Vierge",
+        "address": "166 avenue de Suffren",
+        "telephone": "33 (0)1 47 83 45 55",
+        "website": "https://www.yelp.fr/biz/le-moulin-de-la-vierge-paris"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.308177,
+          48.846262
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Paris Bakeries",
+        "name": "Maison Kayser",
+        "address": "14 rue Monge",
+        "telephone": "33 (0)1 44 07 17 81",
+        "website": "http://www.maison-kayser.com/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.349671,
+          48.848918
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Paris Bakeries",
+        "name": "Au 140",
+        "address": "40 rue de Belleville",
+        "telephone": "33 (0)1 46 36 92 47",
+        "website": "http://www.davidlebovitz.com/2006/12/140/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.390033,
+          48.875237
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Paris Bakeries",
+        "name": "Le Notre",
+        "address": "10 rue Saint Antoine",
+        "telephone": "33 (0)1 53 01 91 91",
+        "website": "http://www.lenotre.fr/fr/boulanger.php"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.367084,
+          48.853757
+        ]
+      }
+    }
+  ]
+}
