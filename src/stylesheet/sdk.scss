@@ -43,19 +43,13 @@ button.sdk-btn {
 
 /** some OpenLayers styling tweaks */
 .ol-control {
-  // background: $divider-color;
   button {
     background-color: #f1f1f1;
     color: #333333;
-    // border-color: $divider-color;
     border: solid 1px $divider-color;
     border-radius: 10px;
     margin: 0;
-    &:last-child {
-      // border-top: ;
-    }
     &:hover {
-      // border: none;
       color: #f1f1f1;
       background-color: $divider-color;
     }
@@ -68,12 +62,3 @@ button.sdk-btn {
     }
   }
 }
-
-
-// .ol-control button {
-//     background-color: rgba($sdk-blue, .8);
-//
-//     &:hover {
-//         background-color: rgba($sdk-blue, .9);
-//     }
-// }

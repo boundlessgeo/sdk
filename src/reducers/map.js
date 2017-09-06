@@ -243,7 +243,7 @@ function addFeatures(state, action) {
   let new_data = null;
   let features;
   if (action.features.features) {
-    // When a full geoJson object is passed in check the projection
+    // When a full geoJson object is passed in, check the projection
     features = reprojectGeoJson(action.features);
   } else {
     // Pass along an just features
