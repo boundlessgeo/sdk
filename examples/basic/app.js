@@ -131,7 +131,7 @@ function main() {
     }
   };
 
-  // Removing features uses MapBox GL Spec filters https://www.mapbox.com/mapbox-gl-js/style-spec/#types-filter.
+  // Removing features uses Mapbox GL Spec filters https://www.mapbox.com/mapbox-gl-js/style-spec/#types-filter.
   const removeRandomPoints = () => {
     store.dispatch(mapActions.removeFeatures('points', ['==', 'isRandom', true]));
   };
