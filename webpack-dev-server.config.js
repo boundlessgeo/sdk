@@ -51,7 +51,7 @@ const config = {
     filename: 'build/examples/[name]/[name].bundle.js',
   },
   plugins: [
-    new ExtractTextPlugin('sdk.css'),
+    new ExtractTextPlugin('build/stylesheet/sdk.css'),
     // Enables Hot Modules Replacement
     new webpack.HotModuleReplacementPlugin(),
   ],
@@ -68,7 +68,12 @@ const config = {
         test: /\.s?css$/,
         use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
-          use: ['css-loader', 'sass-loader']
+          use: ['css-loader', {
+            loader: 'sass-loader',
+            options: {
+              includePaths: ['node_modules'],
+            }
+          }],
         }),
 
       }
