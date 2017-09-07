@@ -63,7 +63,7 @@ import { setMeasureFeature, clearMeasureFeature } from '../actions/drawing';
 
 import ClusterSource from '../source/cluster';
 
-import { parseQueryString, jsonClone, jsonEquals, getLayerById, degreesToRadians, radiansToDegrees } from '../util';
+import { parseQueryString, jsonClone, jsonEquals, getLayerById, degreesToRadians, radiansToDegrees, getKey } from '../util';
 
 /** Provide an OpenLayers map which reflects the
  *  state of the Redux store.
@@ -460,8 +460,11 @@ export class Map extends React.Component {
    *  what needs to be updated on the map.
    */
   shouldComponentUpdate(nextProps) {
-    if (nextProps.map.metadata && nextProps.map.metadata[TIME_KEY] !== this.props.map.metadata[TIME_KEY]) {
-      
+    const old_time = getKey(this.props.map.metadata, TIME_KEY);
+
+    const new_time = getKey(nextProps.map.metadata, TIME_KEY);
+
+    if (old_time !== new_time) {
       // find time dependent layers
       for (let i = 0, ii = nextProps.map.layers.length; i < ii; ++i) {
         if (nextProps.map.layers[i].metadata[TIME_KEY] !== undefined) {
