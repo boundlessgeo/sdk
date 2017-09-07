@@ -149,10 +149,10 @@ export function jsonClone(object) {
 /** Get a key from a dictionary with proper handling
  *  of when the dictionary is undefined.
  *
- *  @param dictionary An object or undefined
+ *  @param {(Object|undefined)} dictionary An object or undefined
  *  @param key The key to pull from the dictionary.
  *
- * @return Value.
+ * @returns Value.
  */
 export function getKey(dictionary, key) {
   if(dictionary === undefined || dictionary === null) {

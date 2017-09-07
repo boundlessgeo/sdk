@@ -63,7 +63,7 @@ import { setMeasureFeature, clearMeasureFeature } from '../actions/drawing';
 
 import ClusterSource from '../source/cluster';
 
-import { parseQueryString, jsonClone, jsonEquals, getLayerById, degreesToRadians, radiansToDegrees, getKey } from '../util';
+import { parseQueryString, jsonClone, jsonEquals, getLayerById, degreesToRadians, radiansToDegrees } from '../util';
 
 /** Provide an OpenLayers map which reflects the
  *  state of the Redux store.
@@ -460,10 +460,7 @@ export class Map extends React.Component {
    *  what needs to be updated on the map.
    */
   shouldComponentUpdate(nextProps) {
-    const old_time = getKey(this.props.map.metadata, TIME_KEY);
-    const new_time = getKey(nextProps.map.metadata, TIME_KEY);
-
-    if (old_time !== new_time) {
+    if (nextProps.map.metadata && nextProps.map.metadata[TIME_KEY] !== this.props.map.metadata[TIME_KEY]) {
       // find time dependent layers
       for (let i = 0, ii = nextProps.map.layers.length; i < ii; ++i) {
         if (nextProps.map.layers[i].metadata[TIME_KEY] !== undefined) {
@@ -633,6 +630,8 @@ export class Map extends React.Component {
 
   /** This is a small bit of trickery that fakes
    *  `getStyleFunction` into rendering only THIS layer.
+   *  @param {Object} olLayer
+   *  @param {Object[]} layers
    */
   applyStyle(olLayer, layers) {
     // filter out the layers which are not visible
