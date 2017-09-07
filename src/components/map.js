@@ -916,8 +916,8 @@ export class Map extends React.Component {
 
   /** Add a Popup to the map.
    *
-   *  @param {SdkPopup} popup - Instance of SdkPopop or a subclass.
-   *  @param {boolean}  [silent] - When true, do not call updatePopups after adding.
+   *  @param {SdkPopup} popup Instance of SdkPopop or a subclass.
+   *  @param {boolean} [silent] When true, do not call updatePopups() after adding.
    *
    */
   addPopup(popup, silent = false) {
@@ -979,6 +979,13 @@ export class Map extends React.Component {
     }
   }
 
+  /** Handles WMS GetFeatureInfo for a given map event.
+   *
+   *  @param {Object} layer Mapbox GL layer object.
+   *  @param {Promise[]} promises Features promies.
+   *  @param {Object} evt Map event whose coordinates drive the feature request.
+   *
+   */
   handleWMSGetFeatureInfo(layer, promises, evt) {
     const map_prj = this.map.getView().getProjection();
     const map_resolution = this.map.getView().getResolution();
@@ -1013,9 +1020,9 @@ export class Map extends React.Component {
 
   /** Query the map and the appropriate layers.
    *
-   *  @param evt - The click event that kicked off the query.
+   *  @param {Object} evt The click event that kicked off the query.
    *
-   *  @returns Promise.all promise.
+   *  @returns {Promise} Promise.all promise.
    */
   queryMap(evt) {
     // get the map projection
@@ -1151,6 +1158,9 @@ export class Map extends React.Component {
     }
   }
 
+  /** Updates drawing interations.
+  *   @param {Object} drawingProps props.drawing.
+  */
   updateInteraction(drawingProps) {
     // this assumes the interaction is different,
     //  so the first thing to do is clear out the old interaction
