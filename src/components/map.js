@@ -632,10 +632,9 @@ export class Map extends React.Component {
     }
   }
 
-  /** This is a small bit of trickery that fakes
-   *  `getStyleFunction` into rendering only THIS layer.
-   *  @param {Object} olLayer
-   *  @param {Object[]} layers
+  /** Configures OpenLayers layer style.
+   *  @param {Object} olLayer OpenLayers layer object.
+   *  @param {Object[]} layers Array of Mapbox GL layer objects.
    */
   applyStyle(olLayer, layers) {
     // filter out the layers which are not visible
@@ -667,7 +666,12 @@ export class Map extends React.Component {
     olLayer.setVisible(render_layers.length > 0);
   }
 
-  /** Convert a GL-defined to an OpenLayers' layer.
+  /** Convert a Mapbox GL-defined layer to an OpenLayers layer.
+   *  @param {string} sourceName Layer's source name.
+   *  @param {Object} glSource Mapbox GL source object.
+   *  @param {Object[]} layers Array of Mapbox GL layer objects.
+   *
+   *  @returns {(Object|null)} Configured OpenLayers layer object, or null.
    */
   configureLayer(sourceName, glSource, layers) {
     const source = this.sources[sourceName];
