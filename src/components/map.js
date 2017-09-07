@@ -88,7 +88,6 @@ function getVersion(obj, key) {
   return obj.metadata[key];
 }
 
-<<<<<<< HEAD
 /** Configures an OpenLayers TileWMS or XyzSource object from the provided
  * Mapbox GL style object.
  * @param {Object} glSource The Mapbox GL map source containing a 'tiles' property.
@@ -96,10 +95,7 @@ function getVersion(obj, key) {
  *
  * @returns {Object} Configured OpenLayers TileWMSSource or XyzSource.
  */
-function configureTileSource(glSource, mapProjection) {
-=======
 function configureTileSource(glSource, mapProjection, time) {
->>>>>>> 9c40bada34bcbe85955394a13e4cf0ea7bc5a6e1
   const tile_url = glSource.tiles[0];
   const commonProps = {
     attributions: glSource.attribution,
@@ -322,7 +318,6 @@ function configureGeojsonSource(glSource, mapProjection, baseUrl) {
   return new_src;
 }
 
-<<<<<<< HEAD
 /** Configures a Mapbox GL source object into appropriate
  *  an appropriatly typed OpenLayers source object.
  * @param {Object} olSource The OpenLayers source object.
@@ -332,10 +327,7 @@ function configureGeojsonSource(glSource, mapProjection, baseUrl) {
  *
  * @returns {(Object|null)} Callback to the applicable configure source method.
  */
-function configureSource(glSource, mapProjection, accessToken, baseUrl) {
-=======
 function configureSource(glSource, mapProjection, accessToken, baseUrl, time) {
->>>>>>> 9c40bada34bcbe85955394a13e4cf0ea7bc5a6e1
   // tiled raster layer.
   if (glSource.type === 'raster') {
     if ('tiles' in glSource) {
