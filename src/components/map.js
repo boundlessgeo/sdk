@@ -461,6 +461,7 @@ export class Map extends React.Component {
    */
   shouldComponentUpdate(nextProps) {
     if (nextProps.map.metadata && nextProps.map.metadata[TIME_KEY] !== this.props.map.metadata[TIME_KEY]) {
+      
       // find time dependent layers
       for (let i = 0, ii = nextProps.map.layers.length; i < ii; ++i) {
         if (nextProps.map.layers[i].metadata[TIME_KEY] !== undefined) {
