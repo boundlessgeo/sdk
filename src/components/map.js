@@ -708,6 +708,9 @@ export class Map extends React.Component {
     return null;
   }
 
+  /** Update a layer source, provided its name.
+   *  @param {string} sourceName Layer's source name.
+   */
   updateLayerSource(sourceName) {
     const layer_names = Object.keys(this.layers);
     for (let i = 0, ii = layer_names.length; i < ii; i++) {
@@ -718,6 +721,10 @@ export class Map extends React.Component {
     }
   }
 
+  /** Updates the rendered OpenLayers layers
+   *  based on the current Redux state.map.layers.
+   *  @param {string[]} layerNames An array of layer names.
+   */
   cleanupLayers(layerNames) {
     const layer_exists = {};
     for (let i = 0, ii = layerNames.length; i < ii; i++) {
@@ -729,7 +736,7 @@ export class Map extends React.Component {
     for (let i = 0, ii = layer_ids.length; i < ii; i++) {
       const layer_id = layer_ids[i];
       // if the layer_id was not set to true then
-      //  it has been removed the state and needs to be removed
+      //  it has been removed from the state and needs to be removed
       //  from the map.
       if (layer_exists[layer_id] !== true) {
         this.map.removeLayer(this.layers[layer_id]);
