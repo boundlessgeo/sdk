@@ -745,6 +745,12 @@ export class Map extends React.Component {
     }
   }
 
+  /** Configures the layers in the state
+   *  and performs updates to the rendered layers as necessary.
+   *  @param {Object[]} sourcesDef The array of sources in map.state.
+   *  @param {Object[]} layersDef The array of layers in map.state.
+   *  @param {number} layerVersion The value of state.map.metadata[LAYER_VERSION_KEY].
+   */
   configureLayers(sourcesDef, layersDef, layerVersion) {
     // update the internal version counter.
     this.layersVersion = layerVersion;
@@ -838,6 +844,9 @@ export class Map extends React.Component {
     this.cleanupLayers(group_names);
   }
 
+  /** Performs updates to layers containing sprites.
+   *  @param {Object} map The state.map object.
+   */
   updateSpriteLayers(map) {
     const sprite_layers = [];
     const layers_by_id = {};
@@ -875,6 +884,8 @@ export class Map extends React.Component {
     }
   }
 
+  /** Removes popups from the map via OpenLayers removeOverlay().
+   */
   updatePopups() {
     const overlays = this.map.getOverlays();
     const overlays_to_remove = [];
