@@ -816,11 +816,6 @@ export class Map extends React.Component {
     }
   }
 
-  removePopup(popupId) {
-    this.popups[popupId].close();
-    this.updatePopups();
-  }
-
   /** Add a Popup to the map.
    *
    *  @param {SdkPopup} popup - Instance of SdkPopop or a subclass.
