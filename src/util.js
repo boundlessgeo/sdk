@@ -44,7 +44,7 @@ export function getLayerById(layers, id) {
  *
  *  @param queryString {String} - The query string to parse.
  *
- * @returns An object with the key-value-pairs.
+ *  @returns An object with the key-value-pairs.
  */
 export function parseQueryString(queryString) {
   const pairs = queryString.split('&');
