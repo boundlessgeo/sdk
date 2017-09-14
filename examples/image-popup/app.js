@@ -30,14 +30,6 @@ const store = createStore(combineReducers({
  *  are selected.
  */
 class ImagePopup extends SdkPopup {
-  constructor(props) {
-    super(props);
-    this.handleImgLoad = this.handleImgLoad.bind(this);
-  }
-
-  handleImgLoad() {
-    this.setState({ imageStatus: 'loaded' });
-  }
 
   render() {
     const feature_ids = this.props.features.map(f => f.properties.id);
@@ -50,7 +42,7 @@ class ImagePopup extends SdkPopup {
           Breed(s) from here:<br />
         <code>{ feature_titles.join(', ') }</code>
         <br />
-        <img src={feature_imgs} alt={feature_ids} onLoad={this.handleImgLoad}/>
+        <img src={feature_imgs} alt={feature_ids} />
       </p>
     </div>
   ));
@@ -157,7 +149,11 @@ function main() {
             map.addPopup(<SdkPopup coordinate={xy} closeable><i>No dogs here.</i></SdkPopup>);
           } else {
             // Show the super advanced fun popup!
-            map.addPopup(<ImagePopup coordinate={xy} features={features} closeable />);
+            const img = new Image();
+            img.onload = () => {
+              map.addPopup(<ImagePopup coordinate={xy} features={features} closeable />);
+            };
+            img.src = features[0].properties.image;
           }
         });
       }}

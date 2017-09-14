@@ -39,7 +39,6 @@ class Popup extends React.PureComponent {
     if (this.state.closed) {
       return false;
     }
-
     return (
       <div className="sdk-popup">
         { close_btn }
