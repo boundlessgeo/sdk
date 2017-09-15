@@ -1,6 +1,6 @@
 /** Image Popup application.
  *
- *  Contains a Map and demonstrates displying a
+ *  Contains a Map and demonstrates displaying a
  *  popup containing an image on the map.
  *
  */
@@ -26,8 +26,7 @@ const store = createStore(combineReducers({
 }), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
    applyMiddleware(thunkMiddleware));
 
-/** A popup for marking features when they
- *  are selected.
+/** A popup containing an image.
  */
 class ImagePopup extends SdkPopup {
 
@@ -39,8 +38,7 @@ class ImagePopup extends SdkPopup {
     return this.renderPopup((
       <div className="sdk-popup-content">
         <p>
-          Breed(s) from here:<br />
-        <code>{ feature_titles.join(', ') }</code>
+          Breed from here: { feature_titles.join(', ') }
         <br />
         <img src={feature_imgs} alt={feature_ids} />
       </p>
@@ -56,7 +54,7 @@ function addDogs(sourceName, data) {
     const title = dog.title;
     const coordinates = dog.coordinates;
     const image = dog.image;
-    // the feature is a normal GeoJSON feature definition
+    // the feature.properties.image contains the image path
     store.dispatch(mapActions.addFeatures(sourceName, [{
       type: 'Feature',
       properties: {
@@ -100,7 +98,7 @@ function main() {
     data: {},
   }));
 
-  // add a layer for the random points
+  // add a layer for the dogs.
   store.dispatch(mapActions.addLayer({
     id: 'dog-layer',
     source: 'dogs',
