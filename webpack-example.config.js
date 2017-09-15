@@ -23,7 +23,7 @@ const config = {
     filename: 'build/hosted/examples/[name]/[name].bundle.js',
   },
   plugins: [
-    new ExtractTextPlugin('build/hosted/stylesheet/sdk.css'),
+    new ExtractTextPlugin('build/hosted/examples/sdk.css'),
     new UglifyJSPlugin()
   ],
   module: {

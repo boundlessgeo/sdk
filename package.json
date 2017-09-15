@@ -14,7 +14,7 @@
     "build:examples": "node tasks/build-examples.js",
     "build:hosted:examples": "node tasks/build-examples.js build/hosted/examples",
     "build:examples-js": "webpack --config ./webpack-example.config.js",
-    "build:css": "npm run sass -- -o ./build/hosted/stylesheet",
+    "build:css": "npm run sass -- -o ./build/hosted/examples",
     "bundle-examples": "npm run build:hosted:examples && npm run build:examples-js && npm run build:css",
     "build:js": "babel ./src --out-dir ./dist",
     "watch:js": "babel --watch ./src --out-dir ./dist",
