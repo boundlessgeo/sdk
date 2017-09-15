@@ -26,21 +26,21 @@ const store = createStore(combineReducers({
 }), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
    applyMiddleware(thunkMiddleware));
 
-/** A popup containing an image.
+/** A popup containing an image from a feature prop.
  */
 class ImagePopup extends SdkPopup {
 
   render() {
-    const feature_ids = this.props.features.map(f => f.properties.id);
-    const feature_imgs = this.props.features.map(f => f.properties.image);
-    const feature_titles = this.props.features.map(f => f.properties.title);
+    const feature_id = this.props.feature.properties.id;
+    const feature_img = this.props.feature.properties.image;
+    const feature_title = this.props.feature.properties.title;
 
     return this.renderPopup((
       <div className="sdk-popup-content">
         <p>
-          Breed from here: { feature_titles.join(', ') }
+          Breed from here: { feature_title }
         <br />
-        <img src={feature_imgs} alt={feature_ids} />
+        <img src={feature_img} alt={feature_id} />
       </p>
     </div>
   ));
@@ -126,30 +126,25 @@ function main() {
     <SdkMap
       store={store}
       includeFeaturesOnClick
-      onClick={(map, xy, featuresPromise) => {
-        featuresPromise.then((featureGroups) => {
-          // setup an array for all the features returned in the promise.
-          let features = [];
-
+      onClick={(map, xy, featurePromise) => {
+        featurePromise.then((featureGroups) => {
           // featureGroups is an array of objects. The key of each object
-          // is a layer from the map.
-          for (let g = 0, gg = featureGroups.length; g < gg; g++) {
-            // collect every feature from each layer.
-            const layers = Object.keys(featureGroups[g]);
-            for (let l = 0, ll = layers.length; l < ll; l++) {
-              const layer = layers[l];
-              features = features.concat(featureGroups[g][layer]);
-            }
-          }
+          // is a layer from the map. Here, only one layer is included.
+          const layers = Object.keys(featureGroups[0]);
+          const layer = layers[0];
+          // collect every feature from the layer.
+          // in this case, only one feature will be returned in the promise.
+          const features = featureGroups[0][layer];
 
-          if (features.length === 0) {
+          if (features === undefined) {
             // no features, :( Let the user know nothing was there.
             map.addPopup(<SdkPopup coordinate={xy} closeable><i>No dogs here.</i></SdkPopup>);
           } else {
-            // Show the super advanced fun popup!
+            // Add the image-containing-popup only after the img has loaded
+            // so that the map re-positions to include a view of the whole popup.
             const img = new Image();
             img.onload = () => {
-              map.addPopup(<ImagePopup coordinate={xy} features={features} closeable />);
+              map.addPopup(<ImagePopup coordinate={xy} feature={features[0]} closeable />);
             };
             img.src = features[0].properties.image;
           }
