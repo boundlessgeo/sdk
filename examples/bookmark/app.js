@@ -65,7 +65,7 @@ function main() {
       });
   };
 
-  // Change the souce as needed
+  // Change the source as needed
   const changeSource = (sourceName) => {
     store.dispatch(bookmarkAction.changeSource(sourceName));
   }
