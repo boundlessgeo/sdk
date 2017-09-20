@@ -5,3 +5,4 @@ conf.js
 build
 dist
 docs/out
+package-lock.json

@@ -146,4 +146,18 @@ describe('util', () => {
     // pass in 3857 and destination projection and get back 4326
     expect(util.reprojectGeoJson(geoJson3857, 'EPSG:4326')).toEqual(features4326);
   });
+
+  it('tests find a layer in a list by id', () => {
+    const layers = [{
+      id: 'A',
+    }, {
+      id: 'B',
+    }, {
+      id: 'C',
+    }];
+
+    expect(util.getLayerIndexById(layers, 'A')).toBe(0);
+
+    expect(util.getLayerIndexById(layers, 'D')).toBe(-1);
+  });
 });

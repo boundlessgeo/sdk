@@ -29,13 +29,19 @@ export const INTERACTIONS = {
   point: 'Point',
   line: 'LineString',
   polygon: 'Polygon',
+  box: 'Box',
   measure_point: 'measure:Point',
   measure_line: 'measure:LineString',
   measure_polygon: 'measure:Polygon',
 };
 
 // useful for deciding what is or is not a drawing interaction
-INTERACTIONS.drawing = [INTERACTIONS.point, INTERACTIONS.line, INTERACTIONS.polygon];
+INTERACTIONS.drawing = [
+  INTERACTIONS.point,
+  INTERACTIONS.line,
+  INTERACTIONS.polygon,
+  INTERACTIONS.box
+];
 
 // determine which is a measuring interaction
 INTERACTIONS.measuring = [

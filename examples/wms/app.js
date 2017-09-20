@@ -8,15 +8,16 @@ import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 import WMSCapabilitiesFormat from 'ol/format/wmscapabilities';
 
 import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
+import SdkLayerList from '@boundlessgeo/sdk/components/layer-list';
 
 import '@boundlessgeo/sdk/stylesheet/sdk.scss';
 import WMSPopup from './wmspopup';
-import LayerList from './layerlist';
 import AddWMSLayer from './addwmslayer';
 
 /* eslint-disable no-underscore-dangle */
@@ -126,7 +127,9 @@ function main() {
     <div>
       <h3>Try it out</h3>
       <h4>Layers</h4>
-      <LayerList store={store} />
+      <Provider store={store}>
+        <SdkLayerList />
+      </Provider>
       <button onClick={addWMS}>Add WMS Layer</button>
     </div>
   ), document.getElementById('controls'));

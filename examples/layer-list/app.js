@@ -14,12 +14,52 @@ import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
-import LayerList from './components/layerList';
+import SdkLayerList from '@boundlessgeo/sdk/components/layer-list';
+import { SdkLayerListItem } from '@boundlessgeo/sdk/components/layer-list';
+
+import { Provider } from 'react-redux';
 
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
   map: SdkMapReducer,
 }), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
+
+class LayerListItem extends SdkLayerListItem {
+  render() {
+    const layer = this.props.layer;
+    const checkbox = this.getVisibilityControl(layer);
+
+    const moveButtons = (
+      <span>
+        <button className="sdk-btn" onClick={() => { this.moveLayerUp(); }}>
+          { this.props.labels.up }
+        </button>
+        <button className="sdk-btn" onClick={() => { this.moveLayerDown(); }}>
+          { this.props.labels.down }
+        </button>
+        <button className="sdk-btn" onClick={() => { this.removeLayer(); }}>
+          { this.props.labels.remove }
+        </button>
+      </span>
+    );
+
+    return (
+      <li className="layer">
+        <span className="checkbox">{checkbox}</span>
+        <span className="name">{layer.id}</span>
+        <span className="btn-container">{moveButtons}</span>
+      </li>
+    );
+  }
+}
+
+LayerListItem.defaultProps = {
+  labels: {
+    up: 'Move up',
+    down: 'Move down',
+    remove: 'Remove layer',
+  },
+};
 
 function main() {
   // Start with a reasonable global view of hte map.
@@ -134,7 +174,11 @@ function main() {
   ReactDOM.render((
     <div>
       <h3>Try it out</h3>
-      <LayerList store={store} />
+      <div className="sdk-layerlist">
+        <Provider store={store}>
+          <SdkLayerList layerClass={LayerListItem} />
+        </Provider>
+      </div>
     </div>
   ), document.getElementById('controls'));
 }

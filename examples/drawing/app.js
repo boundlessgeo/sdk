@@ -227,6 +227,7 @@ function main() {
           <option value={INTERACTIONS.point}>Draw point</option>
           <option value={INTERACTIONS.line}>Draw line</option>
           <option value={INTERACTIONS.polygon}>Draw polygon</option>
+          <option value={INTERACTIONS.box}>Draw box</option>
           <option value={INTERACTIONS.modify}>Modify feature</option>
           <option value={INTERACTIONS.select}>Select feature</option>
         </select>

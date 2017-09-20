@@ -129,6 +129,38 @@ if (HAS_CANVAS) {
       store.dispatch(MapActions.setView([-45, -45], 11));
     });
 
+    it('turns on a drawing tool for box', () => {
+      const sdk_map = wrapper.instance().getWrappedInstance();
+      const ol_map = sdk_map.map;
+      const n_interactions = ol_map.getInteractions().getLength();
+
+      store.dispatch(MapActions.addSource('testPoly', {
+        type: 'geojson',
+        data: {},
+      }));
+
+      store.dispatch(MapActions.addLayer({
+        id: 'testPoly',
+        source: 'testPoly',
+        type: 'fill',
+        paint: {
+          'fill-opacity': 0.7,
+          'fill-color': '#feb24c',
+          'fill-outline-color': '#f03b20',
+        },
+      }));
+
+      store.dispatch({
+        type: DRAWING.START,
+        interaction: INTERACTIONS.box,
+        sourceName: 'testPoly',
+      });
+
+      // if the drawing control has been added to the map then
+      //  there should be 1 additional interaction.
+      expect(ol_map.getInteractions().getLength()).toBe(n_interactions + 1);
+    });
+
     it('turns off a drawing tool', () => {
       store.dispatch({
         type: DRAWING.START,

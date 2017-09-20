@@ -26,6 +26,10 @@ and run the following commands:
 
 The last command should open your browser to a page of examples: http://localhost:3000/build/examples
 
+## Using the SDK source to develop a local project
+
+Please read [DEVELOPING.md](DEVELOPING.md) on how to create the SDK package and link to it locally.
+
 ## Troubleshooting
 
 If `npm start` fails review node version, SDK targets v6.0 or greater.  On OSX node install can be error prone, seems to work best when installed by Brew http://brewformulas.org/Node

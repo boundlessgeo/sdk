@@ -161,3 +161,33 @@ export function getKey(dictionary, key) {
   }
   return dictionary[key];
 }
+
+/** Check the visibility of a layer.
+ *
+ *  @param layer The layer to check.
+ *
+ * @returns Boolean, true when visible, false when not.
+ */
+export function isLayerVisible(layer) {
+  if (layer !== undefined && layer.layout !== undefined) {
+    return layer.layout.visibility !== 'none';
+  }
+  return true;
+}
+
+
+/** Get the z-index of a layer.
+ *
+ *  @param layers The list of layers.
+ *  @param id     The id of the layer to find.
+ *
+ * @returns integer index of the layer, or -1 if not found.
+ */
+export function getLayerIndexById(layers, id) {
+  for (let i = layers.length - 1, ii = 0; i >= ii; i--) {
+    if (layers[i].id === id) {
+      return i;
+    }
+  }
+  return -1;
+}
