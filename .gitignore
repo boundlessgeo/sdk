@@ -5,4 +5,5 @@ conf.js
 build
 dist
 docs/out
+docs/sdk.css
 package-lock.json

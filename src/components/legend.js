@@ -20,6 +20,21 @@ import { getLayerById, parseQueryString, encodeQueryObject } from '../util';
 
 /** @module components/legend
  * @desc React Component to render the legend data.
+ * Create legend objects using the metadata prefixes
+ *  "bnd:legend-type" and "bnd:legend-contents".
+ *  Neither the Mapbox GL Spec nor the specific underlying
+ *  services for vector layers have a standardized way of
+ *  providing legends.  This is using the metadata provided
+ *  by the layer to do so.
+ *  "bnd:legend-type" can be one of "image", "html", "href"
+ *  where "bnd:legend-content" would then provide the appropriate
+ *  additional information.
+ *  "bnd:legend-type" : "image", "bnd:legend-content" would provide
+ *   the src attribute for an <img>
+ *  "bnd:legend-type" : "html", "bnd:legend-content" would provide
+ *   the html content for a <div>
+ *  "bnd:legend-type" : "href", "bnd:legend-content" would provide
+ *   the URL for html content.
  */
 
 /** Return a div that is asynchronously populated
@@ -45,23 +60,7 @@ function getRemoteLegend(href) {
   return div;
 }
 
-/** Create legend objects using the metadata prefixes
- *  "bnd:legend-type" and "bnd:legend-contents".
- *
- *  Neither the Mapbox GL Spec nor the specific underlying
- *  services for vector layers have a standardized way of
- *  providing legends.  This is using the metadata provided
- *  by the layer to do so.
- *
- *  "bnd:legend-type" can be one of "image", "html", "href"
- *  where "bnd:legend-content" would then provide the appropriate
- *  additional information.
- *  "bnd:legend-type" : "image", "bnd:legend-content" would provide
- *   the src attribute for an <img>
- *  "bnd:legend-type" : "html", "bnd:legend-content" would provide
- *   the html content for a <div>
- *  "bnd:legend-type" : "href", "bnd:legend-content" would provide
- *   the URL for html content.
+/** 
  *   @param {Object} layer Mapbox GL layer.
  *
  *   @returns {(Object|null)} A <div> or <img> element, or null.

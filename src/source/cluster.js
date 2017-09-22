@@ -15,7 +15,7 @@ import ClusterSource from 'ol/source/cluster';
 /** @module source/cluster
  * @desc ClusterSource class for Boundless SDK,
  *  extends OpenLayers ClusterSource,
- *  http://openlayers.org/en/latest/apidoc/ol.source.Cluster.html.
+ *  {@link http://openlayers.org/en/latest/apidoc/ol.source.Cluster.html}
  */
 
 class SdkClusterSource extends ClusterSource {

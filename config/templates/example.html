@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+    {{> icons }}
+    <link rel="stylesheet" type="text/css" href="../sdk.css"/>
+    <link rel="stylesheet" type="text/css" href="../examples.css"/>
+    {{{ extraHead.local }}}
+    {{{ css.tag }}}
+  </head>
+  <body>
+    {{> header }}
+    <div class="contentContainer">
+      <h1>{{ shortdesc }}</h1>
+      <div id="map"></div>
+      <div class="description">
+        {{{ contents }}}
+        <div class="info">
+          <h3>Features in this demo</h3>
+          <ul class="info-list">
+            {{ md docs }}
+          </ul>
+        </div>
+      </div>
+    </div>
+    {{{ js.tag }}}
+  </body>
+</html>

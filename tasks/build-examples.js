@@ -1,39 +1,28 @@
 const path = require('path');
 
 const Metalsmith = require('metalsmith');
+const rootPath = require('metalsmith-rootpath');
 const handlebars = require('handlebars');
 const templates = require('metalsmith-layouts');
 const marked = require('marked');
 const config = require('./config');
 const srcDir = path.join(__dirname, '..', 'examples');
 const destDir = path.join(__dirname, '..', 'build', 'examples');
-const templatesDir = path.join(__dirname, '..', 'config', 'examples');
+const templatesDir = path.join(__dirname, '..', 'config', 'templates');
+const partialsDir = path.join(__dirname, '..', 'config', 'templates', 'partials');
 
 const isJsRegEx = /\.js$/;
 const isCssRegEx = /\.css$/;
 
 function createIndex(files, metalsmith, done) {
   setImmediate(done); // all remaining code is synchronous
-  let index = '<!DOCTYPE html>';
-  index += '<html>';
-  index += '<head>';
-  index += '<title>Boundless SDK Examples</title>';
-  index += '<link rel="stylesheet" type="text/css" href="examples.css"/>';
-  index += '</head>';
-  index += '<body>';
-  index += '<div id="header">';
-  index += '<img src="boundless_sdk_horiz.svg" width="90">';
-  index += '<span class="desc">';
-  index += 'Boundless SDK Examples';
-  index += '</span>';
-  index += '</div>';
-  index += '<ul class="examples">';
+  let index = '<ul class="examples">';
   const keys = Object.keys(files);
   for (let i = 0, ii = keys.length; i < ii; ++i) {
     const filename = keys[i];
     const example = files[filename];
     const skipExample = process.argv[2] ? config.skip.indexOf(filename.split(path.sep)[0]) !== -1 : false;
-    if (filename.indexOf('index.html') !== -1 && filename.indexOf('.swp') === -1 && !skipExample) {
+    if (filename.indexOf('index.html') !== -1 && filename.indexOf('.swp') === -1 && !skipExample && example.layout === 'example.html') {
       index += `<li onClick="location.href = '${filename}'">`;
       index += `<a href="${filename}">${example.title}</a><br>`;
       index += `${example.shortdesc}`;
@@ -41,10 +30,11 @@ function createIndex(files, metalsmith, done) {
     }
   }
   index += '</ul>';
-  index += '</body>';
-  index += '</html>';
   // eslint-disable-next-line no-param-reassign
-  files['index.html'] = {
+  files['examples.html'] = {
+    layout: 'index.html',
+    title: 'Boundless SDK Examples',
+    pageTitle: 'Boundless SDK in action',
     contents: new Buffer(index),
     mode: '0644',
   };
@@ -106,11 +96,13 @@ function main(callback) {
       .source(srcDir)
       .destination(dest)
       .concurrency(25)
+      .use(rootPath())
       .use(augmentExamples)
       .use(createIndex)
       .use(templates({
         engine: 'handlebars',
         directory: templatesDir,
+        partials: partialsDir,
         helpers: {
           md(str) {
             return new handlebars.SafeString(marked(str));

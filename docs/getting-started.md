@@ -1,15 +1,15 @@
-# Getting started with SDK
+## Getting started with SDK
 
 This guide walks through the steps necessary to create a new React-Redux
 project that will feature maps through SDK.
 
-## Please use nvm
+### Please use nvm
 
 The [Node Version Manager](https://github.com/creationix/nvm)
 provides a clean and easy way to keep
 different versions of NodeJS installed simultaneously.
 
-## Install yarn
+### Install yarn
 
 Yarn is yet another node package manager. However, it offers a number
 of performance features over npm.
@@ -18,7 +18,7 @@ of performance features over npm.
 npm install -g yarn
 ```
 
-## Install the React dependencies
+### Install the React dependencies
 
 `create-react-app` installs itself as a global dependency.
 
@@ -26,7 +26,7 @@ npm install -g yarn
 npm install -g create-react-app
 ```
 
-## Initialize the new app
+### Initialize the new app
 
 ```
 create-react-app ./sdk-starter
@@ -45,7 +45,7 @@ yarn add node-sass-chokidar redux
 ### Add sass-building scripts to package.json
 
 This is a modification of the recommendations by the create-react-app authors,
-it be reviewed in more depth [here](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md#adding-a-css-preprocessor-sass-less-etc).
+it can be reviewed in more depth [here](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md#adding-a-css-preprocessor-sass-less-etc).
 
 
 After `"scripts": {`:
@@ -61,12 +61,12 @@ After `"scripts": {`:
 mv src/App.css src/App.scss
 ```
 
-## Installing SDK
+### Installing SDK
 
-Only *one* of the following techniques are needed for installing 
-the SDK. 
+Only *one* of the following techniques are needed for installing
+the SDK.
 
-### From npm
+#### From npm
 
 This is the standard way of installing SDK.
 It is appropriate for those looking to develop a quick SDK app
@@ -78,7 +78,7 @@ It will install the dist-version of the library.
 yarn add @boundlessgeo/sdk
 ```
 
-### From GitHub
+#### From GitHub
 
 This is the way to install SDK if the latest features are needed
 or development on SDK is planned.
@@ -96,7 +96,7 @@ cd ../sdk-starter
 yarn add file:../sdk/dist
 ```
 
-## Add a basic map.
+## Add a basic map:
 
 ### Add SDK Sass to the project
 
@@ -171,7 +171,7 @@ After the last `</p>` tag add the following to add an SDK map:
 
 ```javascript
 <SdkMap store={store} />
-``` 
+```
 
 ### Fire up the browser
 
@@ -180,6 +180,6 @@ The create-react-app creates a built-in hot-compiler and server.
 yarn start
 ```
 
-## Fin
+## Fin!
 
-Congratulations! You should have a fully operational SDK React app!
+Congratulations! You should have a fully operational Boundless SDK React app!

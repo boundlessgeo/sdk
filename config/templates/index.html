@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+    {{> icons }}
+    <link rel="stylesheet" type="text/css" href="sdk.css"/>
+    <link rel="stylesheet" type="text/css" href="examples.css"/>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    {{{ extraHead.local }}}
+    {{{ css.tag }}}
+  </head>
+  <body>
+    {{> header }}
+    <div class="contentContainer">
+      <h1>{{ pageTitle }}</h1>
+      <div class="content">
+        {{{ contents }}}
+      </div>
+    </div>
+  </body>
+</html>

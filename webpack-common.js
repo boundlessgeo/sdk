@@ -13,7 +13,7 @@ module.exports = {
     const entry = {};
     for (let i = 0, ii = subDirs.length; i < ii; ++i) {
       const name = subDirs[i].split(path.sep).pop();
-      if (dev || conf.skip.indexOf(name) === -1) {
+      if (name !== 'resources' && (dev || conf.skip.indexOf(name) === -1)) {
         entry[name] = dev ? [
           'webpack/hot/only-dev-server'
         ] : [];

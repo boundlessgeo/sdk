@@ -8,27 +8,82 @@
 
 /* Begin Examples CSS */
 body {
-  font-family: sans-serif;
+  font-family: Lato,sans-serif;
   box-sizing: border-box;
-  margin: .5rem;
+  background-color: #f0f0f0;
+  color: #333;
 }
 
 #header {
-  margin-bottom: 10px;
-  height: 57px;
-  background-color: #ededed;
+  height: 90px;
+  background-color: #ffffff;
   border-bottom: solid 2px #f58d50;
   padding: 11px 5px;
-  padding-left: 12px;
-
+  margin-bottom: 40px;
+}
+#header .headerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#header .desc {
-  font-size: 20px;
-  vertical-align: top;
-  margin-top: .5rem;
+.headerContainer, .contentContainer  {
+  margin-left: 100px;
+  margin-right: 100px;
+}
+#header img {
+  line-height: 90px;
+}
+#header span {
   display: inline-block;
-  padding-left: .5rem;
+  margin-top: .75rem;
+}
+
+#header .logo {
+  flex: 1;
+}
+#header .desc {
+  flex: 5;
+  /*font-size: 20px;*/
+  /*vertical-align: top;*/
+  display: inline-block;
+  text-align: right;
+
+}
+#header .desc ul {}
+#header .desc ul li {
+  padding-left: 50px;
+  display: inline-block;
+}
+#header .desc ul li a {
+  font-size: 16px;
+  color: #4f5156;
+  text-decoration: none;
+  border-bottom: 5px solid transparent
+}
+#header .desc ul li a:hover {
+  border-bottom: 5px solid #b2d235;
+}
+
+.global-nav__top-level a span {
+    border-bottom: 5px solid transparent
+}
+
+#header .desc ul li a.selected {
+    border-bottom: 5px solid #00a78d
+}
+
+#header .icon {
+  font-size: 18px;
+}
+.contentContainer {
+  background-color: #ffffff;
+  padding: 2.25rem;
+}
+
+.contentContainer h1 {
+  font-size: 22px;
+  margin-bottom: 24px;
 }
 
 #map .sdk-map {
@@ -40,7 +95,7 @@ body {
   margin: 5px;
   font-size: .85rem;
 }
-#controls p {
+#controls p, .landingContent p {
   margin-bottom: 10px;
 }
 #controls .input {
@@ -108,4 +163,124 @@ body {
   margin-bottom: .45rem;
   margin-left: 1rem;
   list-style: square;
+}
+
+.landingContent ul {
+  margin-bottom: 2rem;
+}
+.landingContent h2 {
+  font-size: 18px;
+  color: grey;
+  margin-bottom: 1rem;
+}
+.landingContent ul li {
+  margin-left: 20px;
+  margin-bottom: .5rem;
+}
+
+.landingContent .contentBlock {
+  display: flex;
+  padding: 16px;
+}
+.landingContent .contentBlock .image {
+  padding-right: 70px;
+}
+
+.landingContent .contentBlock .image img {
+  width: 226px;
+}
+
+/* jsdoc overrides */
+.contentContainer section article p {
+  margin-bottom: 24px;
+}
+
+.contentContainer section article pre {
+  margin-bottom: 24px;
+}
+
+.contentContainer section article h1 {
+  font-weight: 700;
+}
+
+.contentContainer section article h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.contentContainer section article h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 0px;
+}
+
+.contentContainer section article h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 0px;
+}
+
+.getStarted .btn {
+  text-align: center;
+  width: 200px;
+  text-decoration: none;
+  position: relative;
+
+  display: block;
+  margin: 30px auto;
+  padding: 0;
+
+  overflow: hidden;
+
+  border-width: 0;
+  outline: none;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+
+  background-color: #2ecc71;
+  color: #ecf0f1;
+
+  transition: background-color .3s;
+}
+
+.getStarted .btn:hover, .getStarted .btn:focus {
+  background-color: #27ae60;
+}
+
+.getStarted .btn > * {
+  position: relative;
+}
+
+.getStarted .btn span {
+  display: block;
+  padding: 12px 24px;
+}
+
+.getStarted .btn:before {
+  content: "";
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  display: block;
+  width: 0;
+  padding-top: 0;
+
+  border-radius: 100%;
+
+  background-color: rgba(236, 240, 241, .3);
+
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.getStarted .btn:active:before {
+  width: 120%;
+  padding-top: 120%;
+  transition: width .2s ease-out, padding-top .2s ease-out;
 }

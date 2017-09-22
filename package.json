@@ -20,7 +20,9 @@
     "watch:js": "babel --watch ./src --out-dir ./dist",
     "dist:copy": "node tasks/dist-copy.js && node tasks/create-package-json.js",
     "dist": "npm run build:js && npm run dist:copy",
-    "jsdoc": "jsdoc -r ./src -c docs/conf.json -R docs/getting-started.md -d docs/out"
+    "build:doc-css": "npm run sass -- -o ./docs",
+    "build:jsdoc": "jsdoc -r ./src -R docs/getting-started.md -d docs/out -c docs/conf.json",
+    "jsdoc": "npm run build:doc-css && npm run build:jsdoc"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -48,6 +50,7 @@
     "marked": "^0.3.6",
     "metalsmith": "^2.3.0",
     "metalsmith-layouts": "^1.8.1",
+    "metalsmith-rootpath": "^1.0.4",
     "mixin": "^0.2.0",
     "nock": "^9.0.13",
     "node-sass": "^4.5.3",
