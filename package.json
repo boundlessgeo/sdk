@@ -1,6 +1,6 @@
 {
   "name": "@boundlessgeo/sdk",
-  "version": "2.0.0-beta2",
+  "version": "2.0.0",
   "description": "Boundless Web SDK",
   "scripts": {
     "start": "webpack-dev-server --config webpack-dev-server.config.js --open --open-page 'build/examples'",
