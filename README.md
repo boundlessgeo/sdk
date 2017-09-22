@@ -20,7 +20,7 @@ and run the following commands:
 
 `npm install` - install libraries
 
-`npm run build:examples` - build examples from templates
+`npm run bundle-examples` - build examples from templates
 
 `npm start` - start webpack-dev-server
 
