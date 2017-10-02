@@ -16,6 +16,7 @@ import TileJSONSource from 'ol/source/tilejson';
 import TileWMSSource from 'ol/source/tilewms';
 import ImageTile from 'ol/imagetile';
 import TileState from 'ol/tilestate';
+import ZoomSlider from 'ol/control/zoomslider';
 
 import { createStore, combineReducers } from 'redux';
 import { radiansToDegrees } from '../../src/util';
@@ -725,11 +726,11 @@ describe('Map component', () => {
     }));
     mount(<ConnectedMap store={store} />);
   });
-  it('should add the zoomSlider using showZoomSlider prop', () => {
+  it('should add the zoomSlider using controls prop', () => {
     const store = createStore(combineReducers({
       map: MapReducer,
     }));
-    const wrapper = mount(<ConnectedMap store={store} showZoomSlider />);
+    const wrapper = mount(<ConnectedMap store={store} controls={[new ZoomSlider()]} />);
     expect(wrapper.html().indexOf('ol-zoomslider')).toBeGreaterThan(0);
   });
 
@@ -737,7 +738,7 @@ describe('Map component', () => {
     const store = createStore(combineReducers({
       map: MapReducer,
     }));
-    const wrapper = mount(<ConnectedMap store={store} showZoomSlider={false} />);
+    const wrapper = mount(<ConnectedMap store={store} />);
     expect(wrapper.html().indexOf('ol-zoomslider')).toBe(-1);
   });
 
