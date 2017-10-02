@@ -37,7 +37,6 @@ import XyzSource from 'ol/source/xyz';
 import TileWMSSource from 'ol/source/tilewms';
 import TileJSON from 'ol/source/tilejson';
 import TileGrid from 'ol/tilegrid';
-import ZoomControl from 'ol/control/zoomslider';
 
 import VectorTileLayer from 'ol/layer/vectortile';
 import VectorTileSource from 'ol/source/vectortile';
@@ -1090,9 +1089,12 @@ export class Map extends React.Component {
       }),
     });
 
-    if (this.props.showZoomSlider) {
-      this.map.addControl(new ZoomControl());
+    if (this.props.controls) {
+      for (let i = 0, ii = this.props.controls.length; i < ii; ++i) {
+        this.map.addControl(this.props.controls[i]);
+      }
     }
+
     // when the map moves update the location in the state
     this.map.on('moveend', () => {
       this.props.setView(this.map.getView());
@@ -1284,7 +1286,7 @@ Map.propTypes = {
     interaction: PropTypes.string,
     sourceName: PropTypes.string,
   }),
-  showZoomSlider: PropTypes.bool,
+  controls: PropTypes.array,
   initialPopups: PropTypes.arrayOf(PropTypes.object),
   setView: PropTypes.func,
   includeFeaturesOnClick: PropTypes.bool,
@@ -1317,7 +1319,6 @@ Map.defaultProps = {
     interaction: null,
     source: null,
   },
-  showZoomSlider: false,
   initialPopups: [],
   setView: () => {
     // swallow event.

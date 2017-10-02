@@ -12,6 +12,8 @@ import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
+import ZoomSlider from 'ol/control/zoomslider';
+
 import FilterComponent from './filter';
 
 // This will have webpack include all of the SDK styles.
@@ -70,7 +72,7 @@ function main() {
   };
   loadJson();
   // place the map on the page.
-  ReactDOM.render(<SdkMap store={store} showZoomSlider />, document.getElementById('map'));
+  ReactDOM.render(<SdkMap store={store} controls={[new ZoomSlider()]} />, document.getElementById('map'));
 
   // add some buttons to demo some actions.
   ReactDOM.render((
