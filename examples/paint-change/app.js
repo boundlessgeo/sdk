@@ -12,6 +12,7 @@ import { Provider } from 'react-redux';
 
 import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkZoomControl from '@boundlessgeo/sdk/components/map/zoom-control';
+import SdkLegend from '@boundlessgeo/sdk/components/legend';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
@@ -206,6 +207,9 @@ function main() {
   ReactDOM.render((
     <div>
       <h3>Try it out</h3>
+      <h4>Legend</h4>
+      <div className="legend-label">Random points</div>
+      <SdkLegend store={store} layerId='random-points' />
       <div>
         <b>Choose a color for the points on the map:</b> <br />
         <div>{color_controls}</div>
