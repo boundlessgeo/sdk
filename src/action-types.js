@@ -58,9 +58,15 @@ export const WFS = {
   FINISHED: 'WFS_FINISHED',
 };
 
+export const MAPBOX = {
+  SET_ACCESS_TOKEN: 'MAPBOX_SET_ACCESS_TOKEN',
+  SET_BASE_URL: 'MAPBOX_SET_BASE_URL',
+};
+
 export default {
   MAP,
   DRAWING,
   PRINT,
   WFS,
+  MAPBOX,
 };

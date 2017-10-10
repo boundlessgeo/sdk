@@ -116,7 +116,6 @@ const canvasCache = {};
 const olLayer = new VectorLayer();
 
 export function getVectorLegend(layer, sprite) {
-  let vectorContext;
   return (<canvas ref={(c) => {
     if (c !== null) {
       let vectorContext;
@@ -268,7 +267,11 @@ class Legend extends React.Component {
       //  is deemed appropriate.
       case 'vector':
       case 'geojson':
-        return getVectorLegend(layer, this.props.sprite);
+        if (!layer.metadata || !layer.metadata['bnd:legend-type']) {
+          return getVectorLegend(layer, this.props.sprite);
+        } else {
+          return getLegend(layer, layer_src);
+        }
       case 'image':
       case 'video':
       case 'canvas':

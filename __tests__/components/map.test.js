@@ -128,7 +128,7 @@ describe('Map component', () => {
     const zoom = 2;
     const apiKey = 'foo';
     const wrapper = mount(<Map
-      accessToken={apiKey}
+      mapbox={{accessToken: apiKey}}
       map={{ center, zoom, sources, layers, metadata }}
     />);
     const map = wrapper.instance().map;

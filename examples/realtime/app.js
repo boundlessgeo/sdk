@@ -12,7 +12,9 @@ import { Provider } from 'react-redux';
 import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkZoomControl from '@boundlessgeo/sdk/components/map/zoom-control';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
+import SdkMapboxReducer from '@boundlessgeo/sdk/reducers/mapbox';
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
+import * as mapboxActions from '@boundlessgeo/sdk/actions/mapbox';
 
 import CONFIG from './conf'; // eslint-disable-line
 
@@ -22,10 +24,14 @@ import '@boundlessgeo/sdk/stylesheet/sdk.scss';
 /* eslint-disable no-underscore-dangle */
 const store = createStore(combineReducers({
   map: SdkMapReducer,
+  mapbox: SdkMapboxReducer,
 }), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
    applyMiddleware(thunkMiddleware));
 
 function main() {
+  store.dispatch(mapboxActions.setBaseUrl('https://api.mapbox.com/styles/v1/mapbox/bright-v8'));
+  store.dispatch(mapboxActions.setAccessToken(CONFIG.access_token));
+
   // Start with a reasonable global view of the map.
   store.dispatch(mapActions.setView([-93, 45], 2));
 
@@ -71,7 +77,7 @@ function main() {
 
   // place the map on the page.
   ReactDOM.render(<Provider store={store}>
-    <SdkMap accessToken={CONFIG.access_token} baseUrl={'https://api.mapbox.com/styles/v1/mapbox/bright-v8'}>
+    <SdkMap>
       <SdkZoomControl />
     </SdkMap>
   </Provider>, document.getElementById('map'));

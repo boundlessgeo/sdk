@@ -12,7 +12,9 @@ import  Adapter from 'enzyme-adapter-react-16';
 
 import SdkMap from '../../src/components/map';
 import MapReducer from '../../src/reducers/map';
+import MapboxReducer from '../../src/reducers/mapbox';
 import * as MapActions from '../../src/actions/map';
+import * as MapboxActions from '../../src/actions/mapbox';
 
 configure({ adapter: new Adapter() });
 
@@ -24,10 +26,12 @@ describe('tests for the geojson-type map sources', () => {
   beforeEach(() => {
     store = createStore(combineReducers({
       map: MapReducer,
+      mapbox: MapboxReducer,
     }));
 
     baseUrl = 'http://example.com/base';
-    const wrapper = mount(<SdkMap store={store} baseUrl={baseUrl} />);
+    store.dispatch(MapboxActions.setBaseUrl(baseUrl));
+    const wrapper = mount(<SdkMap store={store} />);
     map = wrapper.instance().getWrappedInstance();
   });
 
