@@ -29,8 +29,8 @@ const store = createStore(combineReducers({
    applyMiddleware(thunkMiddleware));
 
 function main() {
-  store.dispatch(mapboxActions.setBaseUrl('https://api.mapbox.com/styles/v1/mapbox/bright-v8'));
-  store.dispatch(mapboxActions.setAccessToken(CONFIG.access_token));
+  const baseUrl = 'https://api.mapbox.com/styles/v1/mapbox/bright-v8';
+  store.dispatch(mapboxActions.configure({baseUrl, accessToken: CONFIG.access_token}));
 
   // Start with a reasonable global view of the map.
   store.dispatch(mapActions.setView([-93, 45], 2));

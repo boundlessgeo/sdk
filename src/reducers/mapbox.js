@@ -21,8 +21,8 @@
 import { MAPBOX } from '../action-types';
 
 const defaultState = {
-  accessToken: '',
-  baseUrl: '',
+  baseUrl: undefined,
+  accessToken: undefined,
 };
 
 /** Mapbox reducer.
@@ -33,10 +33,8 @@ const defaultState = {
  */
 export default function MapboxReducer(state = defaultState, action) {
   switch (action.type) {
-    case MAPBOX.SET_BASE_URL:
-      return Object.assign({}, state, {baseUrl: action.baseUrl});
-    case MAPBOX.SET_ACCESS_TOKEN:
-      return Object.assign({}, state, {accessToken: action.accessToken});
+    case MAPBOX.CONFIGURE:
+      return Object.assign({}, state, {baseUrl: action.baseUrl, accessToken: action.accessToken});
     default:
       return state;
   }

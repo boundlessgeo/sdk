@@ -17,22 +17,13 @@
 
 import { MAPBOX } from '../action-types';
 
-/** Action to set the access token.
+/** Action to configure the baseUrl and accessToken.
  *  @returns {Object} Action object to pass to reducer.
  */
-export function setAccessToken(accessToken) {
+export function configure(config) {
   return {
-    type: MAPBOX.SET_ACCESS_TOKEN,
-    accessToken,
-  };
-}
-
-/** Action to set the base url.
- *  @returns {Object} Action object to pass to reducer.
- */
-export function setBaseUrl(baseUrl) {
-  return {
-    type: MAPBOX.SET_BASE_URL,
-    baseUrl,
+    type: MAPBOX.CONFIGURE,
+    baseUrl: config.baseUrl,
+    accessToken: config.accessToken,
   };
 }

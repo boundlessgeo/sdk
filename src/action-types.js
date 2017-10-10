@@ -59,8 +59,7 @@ export const WFS = {
 };
 
 export const MAPBOX = {
-  SET_ACCESS_TOKEN: 'MAPBOX_SET_ACCESS_TOKEN',
-  SET_BASE_URL: 'MAPBOX_SET_BASE_URL',
+  CONFIGURE: 'MAPBOX_CONFIGURE',
 };
 
 export default {

@@ -30,7 +30,7 @@ describe('tests for the geojson-type map sources', () => {
     }));
 
     baseUrl = 'http://example.com/base';
-    store.dispatch(MapboxActions.setBaseUrl(baseUrl));
+    store.dispatch(MapboxActions.configure({baseUrl}));
     const wrapper = mount(<SdkMap store={store} />);
     map = wrapper.instance().getWrappedInstance();
   });
