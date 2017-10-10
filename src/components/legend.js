@@ -91,70 +91,94 @@ export function getLegend(layer) {
   }
 }
 
-const SIZE = [50, 50];
-const CENTER = [SIZE[0] / 2, SIZE[1] / 2];
-const POINT = new Point(CENTER);
-const LINE = new LineString([
-  [-8 + CENTER[0], -3 + CENTER[1]],
-  [-3 + CENTER[0] , 3 + CENTER[1]],
-  [3 + CENTER[0], -3 + CENTER[1]],
-  [8 + CENTER[0], 3 + CENTER[1]]
-]);
-const POLY = new Polygon([[
-  [-8 + CENTER[0], -4 + CENTER[1]],
-  [-6 + CENTER[0], -6 + CENTER[1]],
-  [6 + CENTER[0], -6 + CENTER[1]],
-  [8 + CENTER[0], -4 + CENTER[1]],
-  [8 + CENTER[0], 4 + CENTER[1]],
-  [6 + CENTER[0], 6 + CENTER[1]],
-  [-6 + CENTER[0], 6 + CENTER[1]],
-  [-8 + CENTER[0], 4 + CENTER[1]]
-]]);
-
 const vectorCache = {};
 const canvasCache = {};
 const olLayer = new VectorLayer();
 
-export function getVectorLegend(layer, sprite) {
-  return (<canvas ref={(c) => {
-    if (c !== null) {
-      let vectorContext;
-      if (!vectorCache[layer.id]) {
-        canvasCache[layer.id] = c;
-        vectorContext = OlRender.toContext(c.getContext('2d'), {size: SIZE});
-        vectorCache[layer.id] = vectorContext;
-      } else {
-        vectorContext = vectorCache[layer.id];
-        const canvas = canvasCache[layer.id];
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-      }
-      const fake_style = {
-        version: 8,
-        sprite: sprite,
-        layers: [layer],
-      };
+const pointGeomCache = {};
+export function getPointGeometry(size) {
+  if (!pointGeomCache[size]) {
+    pointGeomCache[size] = new Point([size[0] / 2, size[1] / 2]);
+  }
+  return pointGeomCache[size];
+}
 
-      applyStyle(olLayer, fake_style, layer.source).then(function() {
-        const styleFn = olLayer.getStyle();
-        let geom;
-        if (layer.type === 'symbol' || layer.type === 'circle') {
-          geom = POINT;
-        } else if (layer.type === 'line') {
-          geom = LINE;
-        } else if (layer.type === 'fill') {
-          geom = POLY;
+const lineGeomCache = {};
+export function getLineGeometry(size) {
+  if (!lineGeomCache[size]) {
+    const center = [size[0] / 2, size[1] / 2];
+    lineGeomCache[size] = new LineString([
+      [-8 + center[0], -3 + center[1]],
+      [-3 + center[0] , 3 + center[1]],
+      [3 + center[0], -3 + center[1]],
+      [8 + center[0], 3 + center[1]]
+    ]);
+  }
+  return lineGeomCache[size];
+}
+
+const polygonGeomCache = {};
+export function getPolygonGeometry(size) {
+  if (!polygonGeomCache[size]) {
+    const center = [size[0] / 2, size[1] / 2];
+    polygonGeomCache[size] = new Polygon([[
+      [-8 + center[0], -4 + center[1]],
+      [-6 + center[0], -6 + center[1]],
+      [6 + center[0], -6 + center[1]],
+      [8 + center[0], -4 + center[1]],
+      [8 + center[0], 4 + center[1]],
+      [6 + center[0], 6 + center[1]],
+      [-6 + center[0], 6 + center[1]],
+      [-8 + center[0], 4 + center[1]]
+    ]]);
+  }
+  return polygonGeomCache[size];
+}
+
+export function getVectorLegend(layer, layer_src, sprite, size) {
+  if (!layer.metadata || !layer.metadata['bnd:legend-type']) {
+    return (<canvas ref={(c) => {
+      if (c !== null) {
+        let vectorContext;
+        if (!vectorCache[layer.id]) {
+          canvasCache[layer.id] = c;
+          vectorContext = OlRender.toContext(c.getContext('2d'), {size: size});
+          vectorCache[layer.id] = vectorContext;
+        } else {
+          vectorContext = vectorCache[layer.id];
+          const canvas = canvasCache[layer.id];
+          canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
         }
-        if (geom) {
-          const feature = new Feature(geom);
-          const styles = styleFn(feature);
-          if (styles && styles.length > 0) {
-            vectorContext.setStyle(styles[0]);
-            vectorContext.drawGeometry(geom);
+        const fake_style = {
+          version: 8,
+          sprite: sprite,
+          layers: [layer],
+        };
+
+        applyStyle(olLayer, fake_style, layer.source).then(function() {
+          const styleFn = olLayer.getStyle();
+          let geom;
+          if (layer.type === 'symbol' || layer.type === 'circle') {
+            geom = getPointGeometry(size);
+          } else if (layer.type === 'line') {
+            geom = getLineGeometry(size);
+          } else if (layer.type === 'fill') {
+            geom = getPolygonGeometry(size);
           }
-        }
-      });
-    }
-  }} />);
+          if (geom) {
+            const feature = new Feature(geom);
+            const styles = styleFn(feature);
+            if (styles && styles.length > 0) {
+              vectorContext.setStyle(styles[0]);
+              vectorContext.drawGeometry(geom);
+            }
+          }
+        });
+      }
+    }} />);
+  } else {
+    return getLegend(layer, layer_src);
+  }
 }
 
 /** Get the legend for a raster-type layer.
@@ -267,11 +291,7 @@ class Legend extends React.Component {
       //  is deemed appropriate.
       case 'vector':
       case 'geojson':
-        if (!layer.metadata || !layer.metadata['bnd:legend-type']) {
-          return getVectorLegend(layer, this.props.sprite);
-        } else {
-          return getLegend(layer, layer_src);
-        }
+        return getVectorLegend(layer, layer_src, this.props.sprite, this.props.size);
       case 'image':
       case 'video':
       case 'canvas':
@@ -306,11 +326,13 @@ Legend.propTypes = {
   }),
   sprite: PropTypes.string,
   emptyLegendMessage: PropTypes.string,
+  size: PropTypes.arrayOf(PropTypes.number),
   style: PropTypes.object,
   className: PropTypes.string,
 };
 
 Legend.defaultProps = {
+  size: [50, 50],
   layers: [],
   sources: {},
   emptyLegendMessage: undefined,
@@ -324,4 +346,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(Legend);
+export default connect(mapStateToProps, undefined, undefined, {withRef: true})(Legend);

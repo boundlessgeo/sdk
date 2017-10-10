@@ -9,6 +9,7 @@ import { createStore, combineReducers } from 'redux';
 import MapReducer from '../../src/reducers/map';
 
 import SdkLegend from '../../src/components/legend';
+import {getLegend, getPointGeometry, getLineGeometry, getPolygonGeometry} from '../../src/components/legend';
 
 configure({ adapter: new Adapter() });
 
@@ -92,6 +93,42 @@ describe('test the Legend component', () => {
             metadata: {
               'bnd:legend-type': 'bad-type',
             },
+          }, {
+            id: 'vector-point-test',
+            source: 'other',
+            type: 'circle',
+            paint: {
+              'circle-radius': 5,
+              'circle-color': '#756bb1',
+              'circle-stroke-color': '#756bb1',
+            },
+          }, {
+            id: 'vector-symbol-test',
+            source: 'other',
+            type: 'symbol',
+            layout: {
+              'icon-image': 'duck',
+            },
+          }, {
+            id: 'vector-line-test',
+            source: 'other',
+            type: 'line',
+            layout: {
+              'line-join': 'round',
+              'line-cap': 'round'
+            },
+            'paint': {
+              'line-color': '#888',
+              'line-width': 8
+            }
+          }, {
+            id: 'vector-polygon-test',
+            source: 'other',
+            type: 'fill',
+            paint: {
+              'fill-color': '#088',
+              'fill-opacity': 0.8
+            },
           },
         ],
       },
@@ -167,4 +204,75 @@ describe('test the Legend component', () => {
     const wrapper = mount(<SdkLegend layerId="bad-type-test" className='foo' store={store} />);
     expect(wrapper.html()).toMatchSnapshot();
   });
+
+  it('should allow for vector (point) legend', () => {
+    const wrapper = mount(<SdkLegend layerId="vector-point-test" store={store} />);
+    expect(wrapper.html()).toMatchSnapshot();
+  });
+
+  it('should allow for vector (symbol) legend', () => {
+    const wrapper = mount(<SdkLegend layerId="vector-symbol-test" store={store} />);
+    expect(wrapper.html()).toMatchSnapshot();
+  });
+
+  it('should allow for vector (line) legend', () => {
+    const wrapper = mount(<SdkLegend layerId="vector-line-test" store={store} />);
+    expect(wrapper.html()).toMatchSnapshot();
+  });
+
+  it('should allow for vector (polygon) legend', () => {
+    const wrapper = mount(<SdkLegend layerId="vector-polygon-test" store={store} />);
+    expect(wrapper.html()).toMatchSnapshot();
+  });
+
+  it('should allow for custom size', () => {
+    const wrapper = mount(<SdkLegend size={[100, 100]} layerId="vector-polygon-test" store={store} />);
+    expect(wrapper.html()).toMatchSnapshot();
+  });
+
+  it('should create the correct polygon geometry', () => {
+    const poly = getPolygonGeometry([50, 50]);
+    expect(poly.getCoordinates()).toEqual([[[17, 21], [19, 19], [31, 19], [33, 21], [33, 29], [31, 31], [19, 31], [17, 29]]]);
+    const poly2 = getPolygonGeometry([50, 50]);
+    expect(poly).toBe(poly2); // taken from cache
+  });
+
+  it('should create the correct point geometry', () => {
+    const point = getPointGeometry([50, 50]);
+    expect(point.getCoordinates()).toEqual([25, 25]);
+    const point2 = getPointGeometry([50, 50]);
+    expect(point).toBe(point2); // taken from cache
+  });
+
+  it('should create the correct line geometry', () => {
+    const line = getLineGeometry([50, 50]);
+    expect(line.getCoordinates()).toEqual([[17, 22], [22, 28], [28, 22], [33, 28]]);
+    const line2 = getLineGeometry([50, 50]);
+    expect(line).toBe(line2); // taken from cache
+  });
+
+  it('getLegend should return null if no metadata', () => {
+    const layer = {};
+    let legend = getLegend(layer);
+    expect(legend).toEqual(null);
+  });
+
+  it('componentShouldReceiveProps should work correctly', () => {
+    const wrapper = mount(<SdkLegend layerId="vector-point-test" store={store} />);
+    let layer;
+    const layers = store.getState().map.layers;
+    for (let i = 0, ii = layers.length; i < ii; ++i) {
+      if (layers[i].id === 'vector-point-test') {
+        layer = layers[i];
+        break;
+      }
+    }
+    const legend = wrapper.instance().getWrappedInstance();
+    let result = legend.componentWillReceiveProps({layers: [layer]});
+    expect(result).toBe(false); // no need to update
+    const newLayer = {id: 'vector-point-test'};
+    result = legend.componentWillReceiveProps({layers: [newLayer]});
+    expect(result).toBe(true); // layer changed so update
+  });
+
 });
