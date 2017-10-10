@@ -423,6 +423,18 @@ function hydrateLayerGroup(layersDef, layerGroup) {
   return hydrated_group;
 }
 
+export function getFakeStyle(sprite, layers, baseUrl, accessToken) {
+  const fake_style = {
+    version: 8,
+    sprite: sprite,
+    layers: layers,
+  };
+  if (sprite && sprite.indexOf(MAPBOX_PROTOCOL) === 0) {
+    fake_style.sprite = `${baseUrl}/sprite?access_token=${accessToken}`;
+  }
+  return fake_style;
+}
+
 export class Map extends React.Component {
 
   constructor(props) {
@@ -650,16 +662,12 @@ export class Map extends React.Component {
       }
     }
 
-    const fake_style = {
-      version: 8,
-      sprite: this.props.map.sprite,
-      layers: render_layers,
-    };
-
-    if (this.props.map.sprite && this.props.map.sprite.indexOf(MAPBOX_PROTOCOL) === 0) {
-      const baseUrl = this.props.mapbox.baseUrl;
-      fake_style.sprite = `${baseUrl}/sprite?access_token=${this.props.mapbox.accessToken}`;
-    }
+    const fake_style = getFakeStyle(
+      this.props.map.sprite,
+      render_layers,
+      this.props.mapbox.baseUrl,
+      this.props.mapbox.accessToken
+    );
 
     if (olLayer.setStyle) {
       applyStyle(olLayer, fake_style, layers[0].source);
@@ -1285,6 +1293,10 @@ Map.propTypes = {
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node
   ]),
+  mapbox: PropTypes.shape({
+    baseUrl: PropTypes.string,
+    accessToken: PropTypes.string,
+  }),
   style: PropTypes.object,
   className: PropTypes.string,
   drawing: PropTypes.shape({

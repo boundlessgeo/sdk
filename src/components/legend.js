@@ -23,6 +23,7 @@ import Feature from 'ol/feature';
 import VectorLayer from 'ol/layer/vector';
 import { applyStyle } from 'ol-mapbox-style';
 import { getLayerById, parseQueryString, encodeQueryObject } from '../util';
+import { getFakeStyle } from './map';
 
 /** @module components/legend
  * @desc React Component to render the legend data.
@@ -135,8 +136,9 @@ export function getPolygonGeometry(size) {
   return polygonGeomCache[size];
 }
 
-export function getVectorLegend(layer, layer_src, sprite, size) {
+export function getVectorLegend(layer, layer_src, props) {
   if (!layer.metadata || !layer.metadata['bnd:legend-type']) {
+    const size = props.size;
     return (<canvas ref={(c) => {
       if (c !== null) {
         let vectorContext;
@@ -149,11 +151,12 @@ export function getVectorLegend(layer, layer_src, sprite, size) {
           const canvas = canvasCache[layer.id];
           canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
         }
-        const fake_style = {
-          version: 8,
-          sprite: sprite,
-          layers: [layer],
-        };
+        const fake_style = getFakeStyle(
+          props.sprite,
+          [layer],
+          props.mapbox.baseUrl,
+          props.mapbox.accessToken
+        );
 
         applyStyle(olLayer, fake_style, layer.source).then(function() {
           const styleFn = olLayer.getStyle();
@@ -291,7 +294,7 @@ class Legend extends React.Component {
       //  is deemed appropriate.
       case 'vector':
       case 'geojson':
-        return getVectorLegend(layer, layer_src, this.props.sprite, this.props.size);
+        return getVectorLegend(layer, layer_src, this.props);
       case 'image':
       case 'video':
       case 'canvas':
@@ -324,6 +327,10 @@ Legend.propTypes = {
   sources: PropTypes.shape({
     source: PropTypes.string,
   }),
+  mapbox: PropTypes.shape({
+    baseUrl: PropTypes.string,
+    accessToken: PropTypes.string,
+  }),
   sprite: PropTypes.string,
   emptyLegendMessage: PropTypes.string,
   size: PropTypes.arrayOf(PropTypes.number),
@@ -333,6 +340,10 @@ Legend.propTypes = {
 
 Legend.defaultProps = {
   size: [50, 50],
+  mapbox: {
+    baseUrl: '',
+    accessToken: '',
+  },
   layers: [],
   sources: {},
   emptyLegendMessage: undefined,
@@ -343,6 +354,7 @@ function mapStateToProps(state) {
     sprite: state.map.sprite,
     layers: state.map.layers,
     sources: state.map.sources,
+    mapbox: state.mapbox,
   };
 }
 
