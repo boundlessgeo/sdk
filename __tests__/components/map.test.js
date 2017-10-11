@@ -21,6 +21,7 @@ import { createStore, combineReducers } from 'redux';
 import { radiansToDegrees } from '../../src/util';
 
 import ConnectedMap, { Map } from '../../src/components/map';
+import { hydrateLayer } from '../../src/components/map';
 import SdkPopup from '../../src/components/map/popup';
 import MapReducer from '../../src/reducers/map';
 import PrintReducer from '../../src/reducers/print';
@@ -917,6 +918,29 @@ describe('Map component', () => {
     store.dispatch(MapActions.setSprite('./sprites'));
 
     expect(map.updateSpriteLayers).toHaveBeenCalled();
+  });
+
+  it('should handle hydrateLayer', () => {
+    const layer1 = {
+      id: 'layer1',
+      type: 'fill',
+      source: 'foo',
+      paint: {
+        'fill-color': '#FF0000'
+      }
+    };
+    const layer2 = {
+      id: 'layer2',
+      paint: {
+        'fill-color': '#0000FF'
+      },
+      ref: 'layer1'
+    };
+    const layer = hydrateLayer([layer1, layer2], layer2);
+    expect(layer.id).toBe('layer2');
+    expect(layer.ref).toBe(undefined);
+    expect(layer.paint['fill-color']).toBe('#0000FF');
+    expect(layer.source).toBe('foo');
   });
 
   it('should call handleWMSGetFeatureInfo', () => {

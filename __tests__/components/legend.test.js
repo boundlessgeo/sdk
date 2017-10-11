@@ -45,6 +45,9 @@ describe('test the Legend component', () => {
             type: 'geojson',
             data: { },
           },
+          unknown: {
+            type: 'unknown',
+          },
         },
         layers: [
           {
@@ -123,11 +126,20 @@ describe('test the Legend component', () => {
             }
           }, {
             id: 'vector-polygon-test',
+            filter: ['==', 'class', 'motorway_link'],
+            'source-layer': 'foobar',
             source: 'other',
             type: 'fill',
             paint: {
               'fill-color': '#088',
               'fill-opacity': 0.8
+            },
+          }, {
+            id: 'unknown-layer',
+            source: 'unknown',
+            metadata: {
+              'bnd:legend-type': 'image',
+              'bnd:legend-content': TEST_IMAGE,
             },
           },
         ],
@@ -163,6 +175,11 @@ describe('test the Legend component', () => {
 
   it('should render an image legend', () => {
     const wrapper = mount(<SdkLegend layerId="image-test" store={store} />);
+    expect(wrapper.html().indexOf(TEST_IMAGE)).toBeGreaterThan(-1);
+  });
+
+  it('should render an image legend if unknown source type', () => {
+    const wrapper = mount(<SdkLegend layerId="unknown-layer" store={store} />);
     expect(wrapper.html().indexOf(TEST_IMAGE)).toBeGreaterThan(-1);
   });
 

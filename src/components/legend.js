@@ -22,8 +22,8 @@ import Point from 'ol/geom/point';
 import Feature from 'ol/feature';
 import VectorLayer from 'ol/layer/vector';
 import { applyStyle } from 'ol-mapbox-style';
-import { getLayerById, parseQueryString, encodeQueryObject } from '../util';
-import { getFakeStyle } from './map';
+import { jsonClone, getLayerById, parseQueryString, encodeQueryObject } from '../util';
+import { getFakeStyle, hydrateLayer } from './map';
 
 /** @module components/legend
  * @desc React Component to render the legend data.
@@ -151,9 +151,16 @@ export function getVectorLegend(layer, layer_src, props) {
           const canvas = canvasCache[layer.id];
           canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
         }
+        let newLayer;
+        if (layer.filter) {
+          newLayer = jsonClone(layer);
+          delete newLayer.filter;
+        } else {
+          newLayer = layer;
+        }
         const fake_style = getFakeStyle(
           props.sprite,
-          [layer],
+          [newLayer],
           props.mapbox.baseUrl,
           props.mapbox.accessToken
         );
@@ -169,7 +176,12 @@ export function getVectorLegend(layer, layer_src, props) {
             geom = getPolygonGeometry(size);
           }
           if (geom) {
-            const feature = new Feature(geom);
+            const properties = {};
+            if (layer['source-layer']) {
+              properties.layer = layer['source-layer'];
+            }
+            const feature = new Feature(properties);
+            feature.setGeometry(geom);
             const styles = styleFn(feature);
             if (styles && styles.length > 0) {
               vectorContext.setStyle(styles[0]);
@@ -294,7 +306,13 @@ class Legend extends React.Component {
       //  is deemed appropriate.
       case 'vector':
       case 'geojson':
-        return getVectorLegend(layer, layer_src, this.props);
+        let legendLayer;
+        if (layer.ref) {
+          legendLayer = hydrateLayer(this.props.layers, layer);
+        } else {
+          legendLayer = layer;
+        }
+        return getVectorLegend(legendLayer, layer_src, this.props);
       case 'image':
       case 'video':
       case 'canvas':

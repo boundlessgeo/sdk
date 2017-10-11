@@ -380,7 +380,7 @@ function getLayerNames(groupName) {
  *
  * @returns {Object} A new glLayer object with ref'd layer properties mixed in.
  */
-function hydrateLayer(layersDef, glLayer) {
+export function hydrateLayer(layersDef, glLayer) {
   // Small sanity check for when this
   // is blindly called on any layer.
   if (glLayer === undefined || glLayer.ref === undefined) {
@@ -400,7 +400,7 @@ function hydrateLayer(layersDef, glLayer) {
     // remove the reference
     layer_def.ref = undefined;
     // mixin the layer_def to the ref layer.
-    layer_def = Object.assign({}, layer_def, ref_layer);
+    layer_def = Object.assign({}, ref_layer, layer_def);
   }
   // return the new layer.
   return layer_def;
