@@ -1,5 +1,5 @@
 // examples that should be skipped for hosted version
-const skip = ['mb-bright', 'wfst', 'realtime'];
+const skip = ['mb-bright', 'realtime'];
 
 const config = {
   skip,

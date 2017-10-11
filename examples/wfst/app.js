@@ -58,7 +58,7 @@ function main() {
     ],
   }));
 
-  const tracts_url = '/geoserver/wfs?SRSNAME=EPSG:3857&REQUEST=GetFeature&TYPENAME=sdk:minnesota_tracts&VERSION=1.1.0&OUTPUTFORMAT=JSON';
+  const tracts_url = 'https://demo.boundlessgeo.com/geoserver/wfs?SRSNAME=EPSG:3857&REQUEST=GetFeature&TYPENAME=opengeo:tracts&VERSION=1.1.0&OUTPUTFORMAT=JSON';
 
   store.dispatch(SdkMapActions.addSource('tracts', {
     type: 'geojson',
@@ -67,11 +67,11 @@ function main() {
 
   // this will configure the source for WFS editing.
   store.dispatch(SdkWfsActions.addSource('tracts', {
-    onlineResource: '/geoserver/wfs',
-    featureNS: 'sdk',
-    featurePrefix: 'sdk',
-    typeName: 'minnesota_tracts',
-    geometryName: 'wkb_geometry',
+    onlineResource: 'https://demo.boundlessgeo.com/geoserver/wfs',
+    featureNS: 'http://www.opengeo.org',
+    featurePrefix: 'opengeo',
+    typeName: 'opengeo:tracts',
+    geometryName: 'geom',
   }));
 
   // Background layers change the background color of
