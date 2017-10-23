@@ -2,3 +2,54 @@
 .sdk-table th, .sdk-table td{
   border: solid 1px #333333;
 }
+.feature-table {
+  margin: 0 1.5rem 1.5rem;
+  .table-header {
+    @include flex-grid--half;
+    .col {
+      padding: 1rem 0;
+    }
+    .table-list {
+      margin-right: 10px;
+      width: 20%;
+      .mui-select {
+        padding-top: 2px;
+        margin-bottom: 0;
+         & > select {
+          font-size: 14px;
+        }
+      }
+    }
+    .table-filter {
+      @include flex-grid;
+
+      justify-content: flex-end;
+      .mui-textfield {
+        padding-top: 0;
+        & > input {
+          font-size: 14px;
+        }
+
+      }
+      .mui-textfield--float-label > label {
+        transform: translate( 0px, 0px );
+        font-size: 14px;
+      }
+      .mui-btn {
+        padding: 0 12px;
+      }
+    }
+  }
+  .table-content {
+    overflow: auto;
+    max-height: 300px;
+
+    .mui-table {}
+  }
+  .actionButton {
+    padding-right: 10px;
+    &.red {
+      color: $mui-danger-color;
+    }
+  }
+}
