@@ -293,10 +293,17 @@ function addFeatures(state, action) {
       features: [data].concat(features),
     };
   } else if (data.type === 'FeatureCollection') {
-    new_data = Object.assign({},
-      data,
-      { features: data.features.concat(features) },
-    );
+    let featureCollection = data.features.concat(features);
+
+    if(action.position > -1){
+      // featureCollection = data.features.splice(action.position, 0, ...features);
+      featureCollection = [
+        ...data.features.slice(0, action.position),
+        ...features,
+        ...data.features.slice(action.position)
+      ]
+    }
+    new_data = Object.assign({}, data,{ features : featureCollection }, );
   }
 
   if (new_data !== null) {

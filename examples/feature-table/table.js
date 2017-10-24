@@ -74,9 +74,11 @@ updateRow(rowNumber){
   // Remove the old feature
   this.props.removeFeature(this.state.selectedSource, filter);
 
-  // Add a new feature
-  this.props.addFeature(this.state.selectedSource, newFeature);
+  // Add a new feature, function take an array of features
+  this.props.addFeature(this.state.selectedSource, [newFeature], rowNumber);
 
+  // Reset local state
+  this.setState({editRow:-1, editRecord: {}})
 }
 
 updateFeature(value, key){
@@ -180,8 +182,8 @@ function mapDispatchToProps(dispatch) {
 		removeFeature: (sourceName, filter) => {
 			dispatch(mapActions.removeFeatures(sourceName, filter));
 		},
-    addFeature: (sourceName, filter) => {
-			dispatch(mapActions.addFeatures(sourceName, filter));
+    addFeature: (sourceName, filter, position) => {
+			dispatch(mapActions.addFeatures(sourceName, filter, position));
 		}
 	};
 }
