@@ -50,6 +50,22 @@ buildTableHeader (properties) {
   return (<thead><tr>{th}</tr></thead>);
 };
 
+updateRow(rowNumber){
+  const features = this.props.map.sources[this.state.selectedSource].data.features;
+
+  console.log(rowNumber);
+  console.log(features[rowNumber].properties);
+  console.log(this.state.editRecord);
+  console.log(Object.assign({}, features[rowNumber].properties, this.state.editRecord) );
+}
+
+updateFeature(value, key){
+  if(value !== ''){
+    this.setState({editRecord:
+      Object.assign({}, this.state.editRecord, {[key]:value}) });
+  }
+  // console.log('updatz', evt.target.value, key)
+}
 // Build the body of the table based on list of properties and source store in redux store
 buildTableBody (properties, sourceName) {
   const body = [];
@@ -69,13 +85,13 @@ buildTableBody (properties, sourceName) {
       row.push(
         <td key={j}>
           {this.state.editRow === i || featureValue}
-          {this.state.editRow !== i || <input type="text" value={value} placeholder={featureValue} onChange={(value) => this.setState({editRecord : value})}/>}
+          {this.state.editRow !== i || <input type="text" placeholder={featureValue} onBlur={(evt) => this.updateFeature(evt.target.value, properties[j])}/>}
         </td>);
     }
     const editControls = (
        <div>
           <a className='actionButton'>
-            <i className="fa fa-check" onClick={() => this.setState({editRow:i})}></i>
+            <i className="fa fa-check" onClick={() => this.updateRow(i)}></i>
           </a>
           <a className='actionButton red'>
             <i className="fa fa-times" onClick={() => this.setState({editRow:-1})}></i>
