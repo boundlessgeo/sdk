@@ -2,6 +2,7 @@ import React from 'react';
 // import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 
+import * as mapActions from '@boundlessgeo/sdk/actions/map';
 import { getLayerById } from '@boundlessgeo/sdk/util';
 
 class Table extends React.Component {
@@ -51,12 +52,31 @@ buildTableHeader (properties) {
 };
 
 updateRow(rowNumber){
-  const features = this.props.map.sources[this.state.selectedSource].data.features;
+  // Get feature from State using rowNumber
+  const feature = this.props.map.sources[this.state.selectedSource].data.features[rowNumber];
 
-  console.log(rowNumber);
-  console.log(features[rowNumber].properties);
-  console.log(this.state.editRecord);
-  console.log(Object.assign({}, features[rowNumber].properties, this.state.editRecord) );
+  // Get properties of the features and editted properties from local state
+  const properties = Object.assign({}, feature.properties, this.state.editRecord);
+
+  // Build a new feature using the properties
+  const newFeature = Object.assign({}, feature, {properties});
+
+  // Get the keys from properties
+  var keys = Object.keys(feature.properties);
+
+  // Build a filter for feature to remove
+  var filter = keys.map((key) => ['==' , key, feature.properties[key]]);
+
+  // Add all to begining of filter to test all CONDITIONS
+  // See https://www.mapbox.com/mapbox-gl-js/style-spec/#types-filter.
+  filter.unshift('all');
+
+  // Remove the old feature
+  this.props.removeFeature(this.state.selectedSource, filter);
+
+  // Add a new feature
+  this.props.addFeature(this.state.selectedSource, newFeature);
+
 }
 
 updateFeature(value, key){
@@ -64,7 +84,6 @@ updateFeature(value, key){
     this.setState({editRecord:
       Object.assign({}, this.state.editRecord, {[key]:value}) });
   }
-  // console.log('updatz', evt.target.value, key)
 }
 // Build the body of the table based on list of properties and source store in redux store
 buildTableBody (properties, sourceName) {
@@ -156,4 +175,14 @@ function mapStateToProps(state) {
     map: state.map,
   };
 }
-export default connect(mapStateToProps, null)(Table);
+function mapDispatchToProps(dispatch) {
+	return {
+		removeFeature: (sourceName, filter) => {
+			dispatch(mapActions.removeFeatures(sourceName, filter));
+		},
+    addFeature: (sourceName, filter) => {
+			dispatch(mapActions.addFeatures(sourceName, filter));
+		}
+	};
+}
+export default connect(mapStateToProps, mapDispatchToProps)(Table);

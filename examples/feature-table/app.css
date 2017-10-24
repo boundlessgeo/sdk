@@ -1,7 +1,4 @@
 
-.sdk-table th, .sdk-table td{
-  border: solid 1px #333333;
-}
 .feature-table {
   margin: 0 1.5rem 1.5rem;
   .table-header {
@@ -49,7 +46,7 @@
   .actionButton {
     padding-right: 10px;
     &.red {
-      color: $mui-danger-color;
+      color: red;
     }
   }
 }
