@@ -36,7 +36,14 @@ function main() {
 
   // build the new README
   // this is more appropriate for an NPM readme...
-  fs.writeFile(path.join(distDir, 'README.md'), README_HEADER + QUICKSTART);
+  fs.writeFile(path.join(distDir, 'README.md'), README_HEADER + QUICKSTART, function(err) {
+    if(err) {
+      // eslint-disable-next-line no-console
+      return console.log(err);
+    }
+    // eslint-disable-next-line no-console
+    console.log("README.md written correctly.");
+  });
 }
 
 if (require.main === module) {
