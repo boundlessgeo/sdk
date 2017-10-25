@@ -161,12 +161,37 @@ describe('actions', () => {
         },
       },
     ];
+    const position = -1;
     const expectedAction = {
       type: MAP.ADD_FEATURES,
       sourceName,
       features,
+      position
     };
     expect(actions.addFeatures(sourceName, features)).toEqual(expectedAction);
+  });
+  it('should create an action to add features at select position', () => {
+    const sourceName = 'tegola';
+    const features = [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [102.0, 0.5],
+        },
+        properties: {
+          prop0: 'value0',
+        },
+      },
+    ];
+    const position = 4;
+    const expectedAction = {
+      type: MAP.ADD_FEATURES,
+      sourceName,
+      features,
+      position
+    };
+    expect(actions.addFeatures(sourceName, features, position)).toEqual(expectedAction);
   });
 
   it('should create an action to set layer visibility', () => {

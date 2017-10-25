@@ -3,7 +3,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
-import { getLayerById } from '@boundlessgeo/sdk/util';
 
 class Table extends React.Component {
   constructor(props) {
@@ -102,7 +101,6 @@ buildTableBody (properties, sourceName) {
     for (let j = 0, jj = properties.length; j < jj; j++) {
       // Build list of properties for each feature
       const featureValue = features[i].properties[properties[j]];
-      let value = '';
       row.push(
         <td key={j}>
           {this.state.editRow === i || featureValue}
@@ -136,8 +134,6 @@ render(){
 
   // Get full list of properties
   const propertyList = this.getTableHeaders(this.state.selectedSource);
-  // This would be a good point to filter out any
-  // unwanted properties such as GUID from the propertyList
 
   // // Build table header
   const tableHeader = this.buildTableHeader(propertyList);
@@ -151,13 +147,14 @@ render(){
     if(source && source.type === 'geojson'){
       return ( <option key={key} value={ value.source }>{ value.id }</option> );
     }
+    return null;
   });
 
   let key = '';
   return (
     <div className="feature-table">
       <div className='table-header'>
-  			<select className="input-control" name='key' value={key} onChange={(key) => this.setState({selectedSource : key.target.value})}>
+  			<select className="input-control" name='key' value={this.state.selectedSource} onChange={(key) => this.setState({selectedSource : key.target.value})}>
   				<option value="">Select Source</option>
   				{layerIds}
         </select>

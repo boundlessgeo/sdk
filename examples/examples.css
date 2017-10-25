@@ -138,11 +138,16 @@ body {
 }
 .description {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .description #controls, .description .info {
   margin: 1rem;
 
+}
+.description #table {
+  width: 100%;
+  order: 3;
 }
 .description #controls {
   flex: 1;
@@ -283,4 +288,15 @@ body {
   width: 120%;
   padding-top: 120%;
   transition: width .2s ease-out, padding-top .2s ease-out;
+}
+table {
+  border-collapse: collapse;
+}
+tr {
+  border-bottom: 1px solid #ccc;
+}
+th, td {
+  text-align: left;
+  padding: 4px;
+  min-width: 100px;
 }
