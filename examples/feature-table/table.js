@@ -1,19 +1,30 @@
 import React from 'react';
-// import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 
 import * as mapActions from '@boundlessgeo/sdk/actions/map';
 
+export class EditField extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render(){
+    // If row is edited return input
+    if(this.props.editRow){
+      return (<input type="text" placeholder={this.props.value} onBlur={this.props.onBlur}/>)
+    } else {
+      return (<span>{this.props.value}</span>);
+    }
+  }
+}
+
 class Table extends React.Component {
   constructor(props) {
     super(props);
-    // this.features = [];
     this.state = {
       selectedSource: '',
       editRow: -1,
       editRecord: {}
     };
-    //this.getFeatures(this.props.sources.airports_src.data);
   }
 
 // Next few functions are all about building the feature Table
@@ -92,7 +103,7 @@ buildTableBody (properties, sourceName) {
   let row = [];
   // Get all the features from the Redux store
   if(sourceName === ''){
-    return;
+    return false;
   }
   const features = this.props.map.sources[sourceName].data.features;
   // Loop over features
@@ -103,8 +114,7 @@ buildTableBody (properties, sourceName) {
       const featureValue = features[i].properties[properties[j]];
       row.push(
         <td key={j}>
-          {this.state.editRow === i || featureValue}
-          {this.state.editRow !== i || <input type="text" placeholder={featureValue} onBlur={(evt) => this.updateFeature(evt.target.value, properties[j])}/>}
+          <EditField editRow={this.state.editRow === i} value={featureValue} onBlur={(evt) => this.updateFeature(evt.target.value, properties[j])}/>
         </td>);
     }
     const editControls = (
