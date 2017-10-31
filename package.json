@@ -1,6 +1,6 @@
 {
   "name": "@boundlessgeo/sdk",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Boundless Web SDK",
   "scripts": {
     "start": "webpack-dev-server --config webpack-dev-server.config.js --open --open-page 'build/examples'",
@@ -57,7 +57,7 @@
     "mixin": "^0.2.0",
     "nock": "^9.0.13",
     "node-sass": "^4.5.3",
-    "ol": "^4.3.1",
+    "ol": "^4.4.2",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-redux": "^5.0.5",

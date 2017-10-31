@@ -115,13 +115,21 @@ function main() {
   let edit_panel = null;
 
   const updateFeature = (feature, color) => {
-    // change the color
-    feature.properties.color = color;
-    // clear the selected feature from the panel
-    edit_panel.setState({feature: null});
-    // trigger a WFS update.
-    store.dispatch(SdkWfsActions.updateFeature('tracts', feature));
+    if (feature) {
+      // change the color
+      feature.properties.color = color;
+      // clear the selected feature from the panel
+      edit_panel.setState({feature: null});
+      // trigger a WFS update.
+      store.dispatch(SdkWfsActions.updateFeature('tracts', feature));
+    }
   }
+
+  const onError = (error, action, id) => {
+    store.dispatch(SdkDrawingActions.endSelect());
+    store.dispatch(SdkDrawingActions.startSelect('tracts'));
+    alert(error.message);
+  };
 
   const onFinish = (response, action) => {
     store.dispatch(SdkMapActions.updateSource(action.sourceName, {
@@ -151,7 +159,7 @@ function main() {
 
       <EditPanel onChange={ updateFeature } colors={colors} ref={ (pnl) => { edit_panel = pnl; }} />
 
-      <WfsController store={store} onFinishTransaction={ onFinish }/>
+      <WfsController store={store} onRequestError={ onError } onFinishTransaction={ onFinish }/>
     </div>
   ), document.getElementById('controls'));
 }

@@ -132,59 +132,6 @@ export function getPolygonGeometry(size) {
   return polygonGeomCache[size];
 }
 
-export function getVectorLegend(layer, layer_src, props) {
-  if (!layer.metadata || !layer.metadata['bnd:legend-type']) {
-    const size = props.size;
-    return (<canvas ref={(c) => {
-      if (c !== null) {
-        let vectorContext = OlRender.toContext(c.getContext('2d'), {size: size});
-        let newLayer;
-        if (layer.filter) {
-          newLayer = jsonClone(layer);
-          delete newLayer.filter;
-        } else {
-          newLayer = layer;
-        }
-        const fake_style = getFakeStyle(
-          props.sprite,
-          [newLayer],
-          props.mapbox.baseUrl,
-          props.mapbox.accessToken
-        );
-        const olLayer = new VectorLayer();
-        applyStyle(olLayer, fake_style, layer.source).then(function() {
-          const styleFn = olLayer.getStyle();
-          let geom;
-          if (layer.type === 'symbol' || layer.type === 'circle') {
-            geom = getPointGeometry(size);
-          } else if (layer.type === 'line') {
-            geom = getLineGeometry(size);
-          } else if (layer.type === 'fill') {
-            geom = getPolygonGeometry(size);
-          }
-          if (geom) {
-            const properties = {};
-            if (layer['source-layer']) {
-              properties.layer = layer['source-layer'];
-            }
-            const feature = new Feature(properties);
-            feature.setGeometry(geom);
-            const styles = styleFn(feature);
-            if (styles) {
-              for (let i = 0, ii = styles.length; i < ii; ++i) {
-                vectorContext.setStyle(styles[i]);
-                vectorContext.drawGeometry(geom);
-              }
-            }
-          }
-        });
-      }
-    }} />);
-  } else {
-    return getLegend(layer, layer_src);
-  }
-}
-
 /** Get the legend for a raster-type layer.
  *  Attempts to detect a WMS-type source and use GetLegendGraphic,
  *  otherwise, uses SDK specified legend metadata.
@@ -263,10 +210,74 @@ export function getRasterLegend(layer, layer_src) {
 
 class Legend extends React.Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      empty: false
+    };
+  }
+
   componentWillReceiveProps(nextProps) {
     const nextLayer = getLayerById(nextProps.layers, this.props.layerId);
     const layer = getLayerById(this.props.layers, this.props.layerId);
     return (layer !== nextLayer);
+  }
+
+  getVectorLegend(layer, layer_src) {
+    const props = this.props;
+    if (!layer.metadata || !layer.metadata['bnd:legend-type']) {
+      const size = props.size;
+      return (<canvas ref={(c) => {
+        if (c !== null) {
+          let vectorContext = OlRender.toContext(c.getContext('2d'), {size: size});
+          let newLayer;
+          if (layer.filter) {
+            newLayer = jsonClone(layer);
+            delete newLayer.filter;
+          } else {
+            newLayer = layer;
+          }
+          const fake_style = getFakeStyle(
+            props.sprite,
+            [newLayer],
+            props.mapbox.baseUrl,
+            props.mapbox.accessToken
+          );
+          const olLayer = new VectorLayer();
+          const me = this;  
+          applyStyle(olLayer, fake_style, layer.source).then(function() {
+            const styleFn = olLayer.getStyle();
+            let geom;
+            if (layer.type === 'symbol' || layer.type === 'circle') {
+              geom = getPointGeometry(size);
+            } else if (layer.type === 'line') {
+              geom = getLineGeometry(size);
+            } else if (layer.type === 'fill') {
+              geom = getPolygonGeometry(size);
+            }
+            if (geom) {
+              const properties = {};
+              if (layer['source-layer']) {
+                properties.layer = layer['source-layer'];
+              }
+              const feature = new Feature(properties);
+              feature.setGeometry(geom);
+              const styles = styleFn(feature);
+              if (styles) {
+                for (let i = 0, ii = styles.length; i < ii; ++i) {
+                  vectorContext.setStyle(styles[i]);
+                  vectorContext.drawGeometry(geom);
+                }
+              } else {
+                me.setState({empty: true});
+              }
+            }
+          });
+        }
+      }} />);
+    } else {
+      return getLegend(layer, layer_src);
+    }
   }
 
   /** Handles how to get the legend data based on the layer source type.
@@ -301,7 +312,7 @@ class Legend extends React.Component {
         } else {
           legendLayer = layer;
         }
-        return getVectorLegend(legendLayer, layer_src, this.props);
+        return this.getVectorLegend(legendLayer, layer_src);
       case 'image':
       case 'video':
       case 'canvas':
@@ -311,9 +322,14 @@ class Legend extends React.Component {
   }
 
   render() {
-    let legend_contents = this.getLegendContents();
-    if (legend_contents === null) {
+    let legend_contents;
+    if (this.state.empty) {
       legend_contents = this.props.emptyLegendMessage;
+    } else {
+      legend_contents = this.getLegendContents();
+      if (legend_contents === null) {
+        legend_contents = this.props.emptyLegendMessage;
+      }
     }
     let className = 'sdk-legend';
     if (this.props.className) {

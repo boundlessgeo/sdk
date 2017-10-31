@@ -462,9 +462,15 @@ function updateSource(state, action) {
   new_source[action.sourceName] = Object.assign({}, old_source, action.sourceDef);
   const new_sources = Object.assign({}, state.sources, new_source);
 
+  let metadata;
+  if (action.sourceDef.type === 'geojson') {
+    metadata = incrementVersion(state.metadata, dataVersionKey(action.sourceName));
+  } else {
+    metadata = incrementVersion(state.metadata, SOURCE_VERSION_KEY);
+  }
   return Object.assign({}, state, {
     sources: Object.assign({}, state.sources, new_sources),
-  }, incrementVersion(state.metadata, dataVersionKey(action.sourceName)));
+  }, metadata);
 }
 
 function setZoom(state, action) {

@@ -1,44 +1,131 @@
-input[type="range"].sdk-zoom-slider {
-  cursor: pointer;
-  width: 100px !important;
-  -webkit-appearance: none; 
-  z-index: 1; 
-  width:50px; 
-  border: 1px solid #e6e6e6; 
-  background-color: #e6e6e6; 
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#e6e6e6), to(#d2d2d2)); 
-  background-image: -webkit-linear-gradient(right, #e6e6e6, #d2d2d2); 
-  background-image: -moz-linear-gradient(right, #e6e6e6, #d2d2d2); 
-  background-image: -ms-linear-gradient(right, #e6e6e6, #d2d2d2); 
-  background-image: -o-linear-gradient(right, #e6e6e6, #d2d2d2); 
-  -webkit-border-radius: 20px;
-  -moz-border-radius: 20px;
-  border-radius: 20px;
-  -webkit-transform:rotate(270deg);
-  -moz-transform:rotate(270deg);
-  -o-transform:rotate(270deg);
-  -ms-transform:rotate(270deg);
-  transform:rotate(270deg);
+// Inspired by https://github.com/darlanrod/input-range-sass
 
-  position: absolute;
-  top: 120px;
-  left: -30px;
+$track-color: $sdk-grey !default;
+$thumb-color: $sdk-blue !default;
+
+$thumb-radius: 4px !default;
+$thumb-height: 22px !default;
+$thumb-width: 14px !default;
+$thumb-shadow-size: 0px !default;
+$thumb-shadow-blur: 0px !default;
+$thumb-shadow-color: rgba(0, 0, 0, .2) !default;
+$thumb-border-width: 1px !default;
+$thumb-border-color: #ffffff !default;
+
+$track-width: 201px !default;
+$track-height: 24px !default;
+$track-shadow-size: 0px !default;
+$track-shadow-blur: 0px !default;
+$track-shadow-color: rgba(0, 0, 0, 0) !default;
+$track-border-width: 1px !default;
+$track-border-color: #b4b4b4 !default;
+
+$track-radius: 4px !default;
+$contrast: 5% !default;
+
+// Position
+$slider-top: 160px;
+$slider-left: -75px;
+
+@mixin shadow($shadow-size, $shadow-blur, $shadow-color) {
+  box-shadow: $shadow-size $shadow-size $shadow-blur $shadow-color, 0 0 $shadow-size lighten($shadow-color, 5%);
 }
-input[type="range"].sdk-zoom-slider:focus {
-  border: 0 !important; 
-  outline: none !important; 
+
+@mixin track {
+  cursor: pointer;
+  height: $track-height;
+  transition: all .2s ease;
+  width: $track-width;
 }
-input[type="range"].sdk-zoom-slider::-webkit-slider-thumb {
-  -webkit-appearance: none; 
-  width: 10px; 
-  height: 10px; 
-  background-color: #555; 
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#4DDBFF), to(#00CCFF)); 
-  background-image: -webkit-linear-gradient(right, #4DDBFF, #00CCFF); 
-  background-image: -moz-linear-gradient(right, #4DDBFF, #00CCFF); 
-  background-image: -ms-linear-gradient(right, #4DDBFF, #00CCFF); 
-  background-image: -o-linear-gradient(right, #4DDBFF, #00CCFF); 
-  -webkit-border-radius: 5px; 
-  -moz-border-radius: 5px; 
-  -o-border-radius: 5px; 
+
+@mixin thumb {
+  // @include shadow($thumb-shadow-size, $thumb-shadow-blur, $thumb-shadow-color);
+  background: $thumb-color;
+  border: $thumb-border-width solid $thumb-border-color;
+  border-radius: $thumb-radius;
+  cursor: pointer;
+  height: $thumb-height;
+  width: $thumb-width;
+}
+
+
+.controls {
+  .sdk-slider-control {
+    z-index: 1;
+    position: absolute;
+    top: $slider-top;
+    left: $slider-left;
+    -webkit-transform:rotate(-90deg);
+    -moz-transform:rotate(-90deg);
+    -ms-transform:rotate(-90deg);
+    transform:rotate(-90deg);
+
+    input[type=range] {
+      background-color: transparent;
+      -webkit-appearance: none;
+      width: $track-width;
+      &:focus {
+        outline: 0;
+      }
+
+      &::-webkit-slider-runnable-track {
+        @include track;
+        background: $track-color;
+        border: $track-border-width solid $track-border-color;
+        border-radius: $track-radius;
+      }
+
+      &::-webkit-slider-thumb {
+        @include thumb;
+        -webkit-appearance: none;
+      }
+
+      &::-moz-range-track {
+        @include track;
+
+        background: $track-color;
+        border: $track-border-width solid $track-border-color;
+        border-radius: $track-radius;
+      }
+
+      &::-moz-range-thumb {
+        @include thumb;
+      }
+
+      &::-ms-track {
+        @include track;
+        background: transparent;
+        border-color: transparent;
+        border-width: ($thumb-height / 2) 0;
+        color: transparent;
+      }
+
+      &::-ms-fill-lower {
+
+        background: darken($track-color, $contrast);
+        border: $track-border-width solid $track-border-color;
+        border-radius: $track-radius * 2;
+      }
+
+      &::-ms-fill-upper {
+
+        background: $track-color;
+        border: $track-border-width solid $track-border-color;
+        border-radius: $track-radius * 2;
+      }
+
+      &::-ms-thumb {
+        @include thumb;
+        margin-top: 0;
+      }
+    }
+  }
+}
+
+@-moz-document url-prefix() {
+    .controls {
+        .sdk-slider-control {
+          top: calc(#{$slider-top} + 4px);
+        }
+    }
 }

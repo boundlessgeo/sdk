@@ -2,9 +2,6 @@
  * Include the SDK stylesheet
  */
 @import 'ol/ol';
-@import 'popup';
-@import 'zoomslider';
-@import 'zoomcontrol';
 
 $sdk-orange: #f58d50;
 $sdk-blue: #29728d;
@@ -21,6 +18,12 @@ $accent-color:         #8BC34A;
 $primary-text-color:   #212121;
 $secondary-text-color: #757575;
 $divider-color:        #BDBDBD;
+
+@import 'popup';
+@import 'zoomslider';
+@import 'zoomcontrol';
+
+
 
 
 
@@ -41,28 +44,6 @@ button.sdk-btn {
   padding: .5rem 1rem;
   font-size: 1rem;
   border-radius: .25rem;
-}
-
-/** some OpenLayers styling tweaks */
-.ol-control {
-  button {
-    background-color: #f1f1f1;
-    color: #333333;
-    border: solid 1px $divider-color;
-    border-radius: 10px;
-    margin: 0;
-    &:hover {
-      color: #f1f1f1;
-      background-color: $divider-color;
-    }
-    &.active {
-      background-color: $divider-color;
-    }
-    &:focus {
-      color: #333333;
-      background-color: #f1f1f1;
-    }
-  }
 }
 
 li.sdk-layer {

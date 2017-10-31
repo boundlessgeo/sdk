@@ -100,24 +100,36 @@ class WfsController extends Component {
       }).then((response) => {
         if (response.ok) {
           return response.text();
+        } else {
+          throw Error(response.statusText);
         }
-      }).catch((error) => {
-        // let the caller know the request has errored.
-        this.props.onRequestError(error, action, id);
-      }).then((text) => {
+      }).then(text => (new window.DOMParser()).parseFromString(text, 'text/xml'))
+        .then(data  => {
         // A 200 does not necessarily mean the
-        //  request was successful.  This attempst to
+        //  request was successful.  This attempts to
         //  parse the transaction response and then passes
         //  it to onFinishTransaction. Handling is left to the
         //  user.
-        const wfs_response = this.wfs_format.readTransactionResponse(text);
+        if (data.documentElement.localName === 'ExceptionReport') {
+          const exceptionNode = data.getElementsByTagNameNS('http://www.opengis.net/ows', 'ExceptionText');
+          throw Error(exceptionNode.item(0).textContent);
+        } else {
+          const wfs_response = this.wfs_format.readTransactionResponse(data);
 
+          // ensure the action is removed from the state
+          this.props.dispatch(finishedAction(id));
+          // remove it from the pending actions
+          delete this.pendingActions[id];
+
+          this.props.onFinishTransaction(wfs_response, action);
+        }
+      }).catch((error) => {
         // ensure the action is removed from the state
         this.props.dispatch(finishedAction(id));
         // remove it from the pending actions
         delete this.pendingActions[id];
-
-        this.props.onFinishTransaction(wfs_response, action);
+        // let the caller know the request has errored.
+        this.props.onRequestError(error, action, id);
       });
     }
   }

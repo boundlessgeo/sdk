@@ -24,7 +24,9 @@ class ZoomSlider extends React.Component {
       className += ' ' + this.props.className;
     }
     return (
-      <input style={this.props.style} className={className} min={this.props.minZoom} max={this.props.maxZoom} value={this.props.zoom} onChange={(evt) => { this.props.onChange(evt.target.value); }} type='range' />
+      <div className="sdk-slider-control">
+        <input style={this.props.style} className={className} min={this.props.minZoom} max={this.props.maxZoom} value={this.props.zoom} onChange={(evt) => { this.props.onChange(evt.target.value); }} type='range' />
+      </div>
     );
   }
 }

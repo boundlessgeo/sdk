@@ -5,7 +5,7 @@ import { shallow, mount, configure } from 'enzyme';
 import nock from 'nock';
 import  Adapter from 'enzyme-adapter-react-16';
 
-import olMap from 'ol/map';
+import olMap from 'ol/pluggablemap';
 import TileLayer from 'ol/layer/tile';
 import VectorLayer from 'ol/layer/vector';
 import ImageLayer from 'ol/layer/image';
@@ -743,6 +743,35 @@ describe('Map component', () => {
     });
 
     expect(store.getState().map.center).toEqual([0, 0]);
+  });
+
+  it('should update the source url', () => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+    }));
+    const getMapUrl = 'https://demo.boundlessgeo.com/geoserver/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&SRS=EPSG:900913&LAYERS=foo&STYLES=&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}';
+    store.dispatch(MapActions.addSource('foo', {
+      type: 'raster',
+      tileSize: 256,
+      tiles: [getMapUrl],
+    }));
+    store.dispatch(MapActions.addLayer({
+      id: 'foo',
+      source: 'foo',
+    }));
+
+    const wrapper = mount(<ConnectedMap store={store} />);
+    const sdk_map = wrapper.instance().getWrappedInstance();
+
+    let source = sdk_map.sources['foo'];
+    expect(source.getParams()['SALT']).toBeUndefined();
+    store.dispatch(MapActions.updateSource('foo', {
+      type: 'raster',
+      tileSize: 256,
+      tiles: [getMapUrl + '&SALT=0.556643'],
+    }));
+    source = sdk_map.sources['foo'];
+    expect(source.getParams()['SALT']).toEqual('0.556643');
   });
 
   it('should trigger the setRotation callback', () => {

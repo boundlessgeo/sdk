@@ -1,17 +1,33 @@
 .sdk-zoom-control {
   z-index: 1;
   border-radius: 4px;
-  padding: 2px;
-
   position: absolute;
   top: 20px;
-  left: 10px;
-}
-.sdk-zoom-control > button {
-  font-size: 1.14em;
-  font-weight: bold;
-  border-radius: 2px 2px 0 0;
-  display: block;
-  width: 1.375em;
-  height: 1.375em;
+  left: 12px;
+  background-color: #e0e0e0;
+
+  button {
+    border-radius: 4px 4px 0 0;
+    background-color: #f1f1f1;
+    font-size: 1.14em;
+    font-weight: bold;
+    display: block;
+    width: 1.55em;
+    height: 1.55em;
+    border: 1px solid #b4b4b4;
+
+    &:focus {
+      outline: 0;
+    }
+    &:hover {
+      background-color:rgba(0, 0, 0, 0.05);
+    }
+  }
+  button.sdk-zoom-in {
+    border-bottom: none;
+  }
+  button.sdk-zoom-out {
+    border-radius: 0 0 4px 4px;
+    border-top: 1px solid #b4b4b4;
+  }
 }

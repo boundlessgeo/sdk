@@ -1,3 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Zoom slider tests should allow for custom className 1`] = `"<input type=\\"range\\" min=\\"0\\" max=\\"28\\" class=\\"sdk-zoom-slider foo\\" value=\\"3\\">"`;
+exports[`Zoom slider tests should allow for custom className 1`] = `"<div class=\\"sdk-slider-control\\"><input type=\\"range\\" min=\\"0\\" max=\\"28\\" class=\\"sdk-zoom-slider foo\\" value=\\"3\\"></div>"`;
