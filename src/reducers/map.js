@@ -293,7 +293,7 @@ function addFeatures(state, action) {
       features: [data].concat(features),
     };
   } else if (data.type === 'FeatureCollection') {
-    let featureCollection = data.features.concat(features);
+    let featureCollection = [];
 
     if(action.position > -1){
       featureCollection = [
@@ -301,6 +301,8 @@ function addFeatures(state, action) {
         ...features,
         ...data.features.slice(action.position),
       ]
+    } else {
+      featureCollection = data.features.concat(features);
     }
     new_data = Object.assign({}, data,{ features : featureCollection }, );
   }
