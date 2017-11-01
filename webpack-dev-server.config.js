@@ -27,7 +27,7 @@ const config = {
       }
     },
   },
-  devtool: 'eval',
+  devtool: 'cheap-module-source-map',
   node: {fs: "empty"},
   output: {
     path: __dirname, // Path of output file
