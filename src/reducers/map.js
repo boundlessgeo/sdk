@@ -296,11 +296,15 @@ function addFeatures(state, action) {
     let featureCollection = [];
 
     if(action.position > -1){
-      featureCollection = [
-        ...data.features.slice(0, action.position),
-        ...features,
-        ...data.features.slice(action.position),
-      ]
+      var output = [];
+      for(var i = 0, ii = data.features.length; i < ii; i++) {
+        if(i === action.position) {
+          for(var x = 0, xx = features.length; x < xx; x++) {
+            featureCollection.push(features[x]);
+          }
+        }
+        featureCollection.push(data.features[i]);
+      }
     } else {
       featureCollection = data.features.concat(features);
     }
