@@ -113,30 +113,28 @@ class SdkLayerList extends React.Component {
     if (this.props.className) {
       className = `${className} ${this.props.className}`;
     }
-    let i;
     const layers = [];
     const groups = this.props.metadata ? this.props.metadata[GROUPS_KEY] : undefined;
-    const layersHash = {};
-    if (groups) {
-      for (var key in groups) {
-        const children = [];
-        for (i = this.props.layers.length - 1; i >= 0; i--) {
-          const item = this.props.layers[i];
-          if (item.metadata && item.metadata[LAYERLIST_HIDE_KEY] !== true && item.metadata[GROUP_KEY] === key) {
-            layersHash[item.id] = true;
-            children.push(<this.layerClass exclusive={groups[key].exclusive} groupId={key} key={i} layers={this.props.layers} layer={item} />);
+    let groupName, children;
+    for (let i = 0, ii = this.props.layers.length; i < ii; i++) {
+      const layer = this.props.layers[i];
+      if (layer.metadata && layer.metadata[GROUP_KEY]) {
+        if (groupName !== layer.metadata[GROUP_KEY]) {
+          if (children && children.length > 0) {
+            layers.unshift(<li key={groupName}>{groups[groupName].name}<ul>{children}</ul></li>);
           }
+          children = [];
         }
-        if (children.length > 0) {
-          layers.push(<li key={key}>{groups[key].name}<ul>{children}</ul></li>);
+        groupName = layer.metadata[GROUP_KEY];
+        if (layer.metadata[LAYERLIST_HIDE_KEY] !== true) {
+          children.unshift(<this.layerClass exclusive={groups[groupName].exclusive} groupId={groupName} key={i} layers={this.props.layers} layer={layer} />);
         }
+      } else if (!layer.metadata || layer.metadata[LAYERLIST_HIDE_KEY] !== true) {
+        layers.unshift(<this.layerClass key={i} layers={this.props.layers} layer={layer} />);
       }
     }
-    for (i = this.props.layers.length - 1; i >= 0; i--) {
-      const layer = this.props.layers[i];
-      if (!layersHash[layer.id] && (!layer.metadata || layer.metadata[LAYERLIST_HIDE_KEY] !== true)) {
-        layers.push(<this.layerClass key={i} layers={this.props.layers} layer={layer} />);
-      }
+    if (children && children.length) {
+      layers.unshift(<li key={groupName}>{groups[groupName].name}<ul>{children}</ul></li>);
     }
     return (
       <ul style={this.props.style} className={className}>
