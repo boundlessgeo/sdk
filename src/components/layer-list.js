@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import { getLayerIndexById, isLayerVisible, getLayerTitle } from '../util';
 
 import * as mapActions from '../actions/map';
-import {GROUP_KEY, GROUPS_KEY} from '../constants';
+import {LAYERLIST_HIDE_KEY, GROUP_KEY, GROUPS_KEY} from '../constants';
 
 export class SdkLayerListItem extends React.Component {
 
@@ -122,7 +122,7 @@ class SdkLayerList extends React.Component {
         const children = [];
         for (i = this.props.layers.length - 1; i >= 0; i--) {
           const item = this.props.layers[i];
-          if (item.metadata && item.metadata[GROUP_KEY] === key) {
+          if (item.metadata && item.metadata[LAYERLIST_HIDE_KEY] !== true && item.metadata[GROUP_KEY] === key) {
             layersHash[item.id] = true;
             children.push(<this.layerClass exclusive={groups[key].exclusive} groupId={key} key={i} layers={this.props.layers} layer={item} />);
           }
@@ -134,7 +134,7 @@ class SdkLayerList extends React.Component {
     }
     for (i = this.props.layers.length - 1; i >= 0; i--) {
       const layer = this.props.layers[i];
-      if (!layersHash[layer.id]) {
+      if (!layersHash[layer.id] && (!layer.metadata || layer.metadata[LAYERLIST_HIDE_KEY] !== true)) {
         layers.push(<this.layerClass key={i} layers={this.props.layers} layer={layer} />);
       }
     }

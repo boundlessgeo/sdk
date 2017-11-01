@@ -203,6 +203,47 @@ describe('test the LayerList component', () => {
     const wrapper = mount(<Provider store={store}><SdkLayerList /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
   });
+
+  it('should handle hiding layers', () => {
+    store.dispatch(MapActions.updateLayer('osm', {
+      metadata: {
+        'bnd:hide-layerlist': true
+      }
+    }));
+    const wrapper = mount(<Provider store={store}><SdkLayerList /></Provider>);
+    expect(wrapper.html()).toMatchSnapshot();
+  });
+
+  it('should handle hiding layers in a group', () => {
+    store.dispatch(MapActions.updateMetadata({
+      'mapbox:groups': {
+        'background': {
+          name: 'Base Maps',
+        },
+        'overlays': {
+          name: 'Overlays',
+        },
+      }
+    }));
+    store.dispatch(MapActions.updateLayer('osm', {
+      metadata: {
+        'mapbox:group': 'background'
+      }
+    }));
+    store.dispatch(MapActions.updateLayer('wms-test', {
+      metadata: {
+        'mapbox:group': 'overlays',
+        'bnd:hide-layerlist': true
+      }
+    }));
+    store.dispatch(MapActions.updateLayer('image-test', {
+      metadata: {
+        'mapbox:group': 'overlays'
+      }
+    }));
+    const wrapper = mount(<Provider store={store}><SdkLayerList /></Provider>);
+    expect(wrapper.html()).toMatchSnapshot();
+  });
 });
 
 describe('test the exclusive grouping of the LayerList component', () => {
