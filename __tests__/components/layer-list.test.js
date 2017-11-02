@@ -40,9 +40,15 @@ class TestList extends React.Component {
 
 class TestListGroup extends React.Component {
   render() {
+    let text;
+    if (this.props.collapsed) {
+      text = this.props.label;
+    } else {
+      text = (<b>{this.props.label}</b>);
+    }
     return (
       <li>
-        <b>{this.props.label}</b>
+        {text}
         <ol>
           {this.props.children}
         </ol>
@@ -244,6 +250,33 @@ describe('test the LayerList component', () => {
   });
 
   it('should handle a custom list and listgroup class', () => {
+    store.dispatch(MapActions.updateMetadata({
+      'mapbox:groups': {
+        'background': {
+          name: 'Base Maps',
+          collapsed: true
+        },
+        'overlays': {
+          name: 'Overlays',
+          collapsed: false
+        },
+      }
+    }));
+    store.dispatch(MapActions.updateLayer('osm', {
+      metadata: {
+        'mapbox:group': 'background'
+      }
+    }));
+    store.dispatch(MapActions.updateLayer('wms-test', {
+      metadata: {
+        'mapbox:group': 'overlays'
+      }
+    }));
+    store.dispatch(MapActions.updateLayer('image-test', {
+      metadata: {
+        'mapbox:group': 'overlays'
+      }
+    }));
     const wrapper = mount(<Provider store={store}><SdkLayerList groupClass={TestListGroup} listClass={TestList} /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
   });
