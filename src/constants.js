@@ -24,6 +24,7 @@ export const TIME_ATTRIBUTE_KEY = 'bnd:timeattribute';
 export const DATA_VERSION_KEY = 'bnd:data-version';
 export const GROUPS_KEY = 'mapbox:groups';
 export const GROUP_KEY = 'mapbox:group';
+export const LAYERLIST_HIDE_KEY = 'bnd:hide-layerlist';
 
 export const DEFAULT_ZOOM = {
   MIN: 0,
