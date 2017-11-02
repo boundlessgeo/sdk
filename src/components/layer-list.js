@@ -134,6 +134,7 @@ class SdkListGroup extends React.Component {
 }
 
 SdkListGroup.PropTypes = {
+  collapsed: PropTypes.bool,
   label: PropTypes.string,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
@@ -161,7 +162,7 @@ class SdkLayerList extends React.Component {
       if (layer.metadata && layer.metadata[GROUP_KEY]) {
         if (groupName !== layer.metadata[GROUP_KEY]) {
           if (children && children.length > 0) {
-            layers.unshift(<this.props.groupClass key={groupName} label={groups[groupName].name}>{children}</this.props.groupClass>);
+            layers.unshift(<this.props.groupClass collapsed={groups[groupName].collapsed} key={groupName} label={groups[groupName].name}>{children}</this.props.groupClass>);
           }
           children = [];
         }
@@ -174,7 +175,7 @@ class SdkLayerList extends React.Component {
       }
     }
     if (children && children.length) {
-      layers.unshift(<this.props.groupClass key={groupName} label={groups[groupName].name}>{children}</this.props.groupClass>);
+      layers.unshift(<this.props.groupClass collapsed={groups[groupName].collapsed} key={groupName} label={groups[groupName].name}>{children}</this.props.groupClass>);
     }
     return (
       <this.props.listClass style={this.props.style} className={className}>
