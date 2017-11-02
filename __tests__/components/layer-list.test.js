@@ -27,6 +27,30 @@ class TestLayerListItem extends SdkLayerListItem {
   }
 }
 
+// uses ol instead of ul
+class TestList extends React.Component {
+  render() {
+    return (
+      <ol>
+        {this.props.children}
+      </ol>
+    );
+  }
+}
+
+class TestListGroup extends React.Component {
+  render() {
+    return (
+      <li>
+        <b>{this.props.label}</b>
+        <ol>
+          {this.props.children}
+        </ol>
+      </li>
+    );
+  }
+}
+
 describe('test the LayerList component', () => {
   let store = null;
 
@@ -211,6 +235,16 @@ describe('test the LayerList component', () => {
       }
     }));
     const wrapper = mount(<Provider store={store}><SdkLayerList /></Provider>);
+    expect(wrapper.html()).toMatchSnapshot();
+  });
+
+  it('should handle a custom list class', () => {
+    const wrapper = mount(<Provider store={store}><SdkLayerList listClass={TestList} /></Provider>);
+    expect(wrapper.html()).toMatchSnapshot();
+  });
+
+  it('should handle a custom list and listgroup class', () => {
+    const wrapper = mount(<Provider store={store}><SdkLayerList groupClass={TestListGroup} listClass={TestList} /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
   });
 

@@ -101,6 +101,46 @@ SdkLayerListItem.PropTypes = {
   }).isRequired,
 };
 
+class SdkList extends React.Component {
+  render() {
+    return (
+      <ul style={this.props.style} className={this.props.className}>
+        {this.props.children}
+      </ul>
+    );
+  }
+}
+
+SdkList.PropTypes = {
+  style: PropTypes.object,
+  className: PropTypes.string,
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node
+  ])
+};
+
+class SdkListGroup extends React.Component {
+  render() {
+    return (
+      <li>
+        {this.props.label}
+        <ul>
+          {this.props.children}
+        </ul>
+      </li>
+    );
+  }
+}
+
+SdkListGroup.PropTypes = {
+  label: PropTypes.string,
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node
+  ])
+};
+
 class SdkLayerList extends React.Component {
   constructor(props) {
     super(props);
@@ -121,7 +161,7 @@ class SdkLayerList extends React.Component {
       if (layer.metadata && layer.metadata[GROUP_KEY]) {
         if (groupName !== layer.metadata[GROUP_KEY]) {
           if (children && children.length > 0) {
-            layers.unshift(<li key={groupName}>{groups[groupName].name}<ul>{children}</ul></li>);
+            layers.unshift(<this.props.groupClass key={groupName} label={groups[groupName].name}>{children}</this.props.groupClass>);
           }
           children = [];
         }
@@ -134,18 +174,20 @@ class SdkLayerList extends React.Component {
       }
     }
     if (children && children.length) {
-      layers.unshift(<li key={groupName}>{groups[groupName].name}<ul>{children}</ul></li>);
+      layers.unshift(<this.props.groupClass key={groupName} label={groups[groupName].name}>{children}</this.props.groupClass>);
     }
     return (
-      <ul style={this.props.style} className={className}>
+      <this.props.listClass style={this.props.style} className={className}>
         { layers }
-      </ul>
+      </this.props.listClass>
     );
   }
 }
 
 SdkLayerList.propTypes = {
+  listClass: PropTypes.func,
   layerClass: PropTypes.func,
+  groupClass: PropTypes.func,
   layers: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string,
   })).isRequired,
@@ -154,6 +196,8 @@ SdkLayerList.propTypes = {
 };
 
 SdkLayerList.defaultProps = {
+  listClass: SdkList,
+  groupClass: SdkListGroup,
   layerClass: SdkLayerListItem,
 };
 
