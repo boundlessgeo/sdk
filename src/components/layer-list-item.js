@@ -13,15 +13,53 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import {DragSource, DropTarget} from 'react-dnd';
 import {getLayerIndexById, isLayerVisible, getLayerTitle} from '../util';
 import * as mapActions from '../actions/map';
+
+export const layerListItemSource = {
+  beginDrag(props) {
+    return {
+      index: props.index,
+      layer: props.layer,
+    };
+  }
+};
+
+export const layerListItemTarget = {
+  drop(props, monitor, component) {
+    var sourceItem = monitor.getItem();
+    const dragIndex = sourceItem.index;
+    const hoverIndex = props.index;
+    // Don't replace items with themselves
+    if (dragIndex === hoverIndex) {
+      return;
+    }
+    // Time to actually perform the action
+    const target = props.layers[hoverIndex];
+    if (target && sourceItem.layer && sourceItem.layer.id !== target.id) {
+      props.dispatch(mapActions.orderLayer(sourceItem.layer.id, target.id));
+    }
+  }
+};
+
+export function collect(connect, monitor) {
+  return {
+    connectDragSource: connect.dragSource(),
+  };
+}
+
+export function collectDrop(connect, monitor) {
+  return {
+    connectDropTarget: connect.dropTarget()
+  };
+}
 
 /** @module components/layer-list-item
  *
  * @desc Provides a layer list item, with a radio button or checkbox for visibility control.
  */
-class SdkLayerListItem extends React.Component {
+export default class SdkLayerListItem extends React.Component {
   moveLayer(layerId, targetId) {
     this.props.dispatch(mapActions.orderLayer(layerId, targetId));
   }
@@ -79,16 +117,25 @@ class SdkLayerListItem extends React.Component {
   render() {
     const layer = this.props.layer;
     const checkbox = this.getVisibilityControl();
-    return (
+    const markup = (
       <li className="sdk-layer" key={layer.id}>
         <span className="sdk-checkbox">{checkbox}</span>
         <span className="sdk-name">{getLayerTitle(this.props.layer)}</span>
       </li>
     );
+    if (this.props.enableDD) {
+      return this.props.connectDragSource(this.props.connectDropTarget(markup));
+    } else {
+      return markup;
+    }
   }
 }
 
 SdkLayerListItem.propTypes = {
+  /**
+   * Should we enable drag and drop?
+   */
+  enableDD: PropTypes.bool,
   /**
    * Set of layers which belong to the same group
    */
@@ -120,4 +167,5 @@ SdkLayerListItem.propTypes = {
   }).isRequired,
 };
 
-export default SdkLayerListItem;
+export const types = 'layerlistitem';
+export const SdkLayerListItemDD = DropTarget(types, layerListItemTarget, collectDrop)(DragSource(types, layerListItemSource, collect)(SdkLayerListItem));

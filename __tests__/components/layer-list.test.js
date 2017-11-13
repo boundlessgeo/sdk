@@ -1,4 +1,4 @@
-/* global it, describe, expect, beforeEach */
+/* global it, describe, expect, beforeEach, spyOn */
 
 import React from 'react';
 import {mount, configure} from 'enzyme';
@@ -13,6 +13,7 @@ import {isLayerVisible} from '../../src/util';
 
 import SdkLayerList from '../../src/components/layer-list';
 import SdkLayerListItem from  '../../src/components/layer-list-item';
+import {layerListItemTarget} from '../../src/components/layer-list-item';
 
 configure({adapter: new Adapter()});
 
@@ -145,12 +146,12 @@ describe('test the LayerList component', () => {
   });
 
   it('should allow for custom className', () => {
-    const wrapper = mount(<Provider store={store}><SdkLayerList className='foo' /></Provider>);
+    const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} className='foo' /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
   });
 
   function getCustomLayerList() {
-    return mount(<Provider store={store}><SdkLayerList layerClass={TestLayerListItem} /></Provider>);
+    return mount(<Provider store={store}><SdkLayerList enableDD={false} layerClass={TestLayerListItem} /></Provider>);
   }
 
   it('should render with a custom layer list class', () => {
@@ -244,7 +245,7 @@ describe('test the LayerList component', () => {
         'mapbox:group': 'overlays'
       }
     }));
-    const wrapper = mount(<Provider store={store}><SdkLayerList /></Provider>);
+    const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
   });
 
@@ -254,12 +255,12 @@ describe('test the LayerList component', () => {
         'bnd:hide-layerlist': true
       }
     }));
-    const wrapper = mount(<Provider store={store}><SdkLayerList /></Provider>);
+    const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
   });
 
   it('should handle a custom list class', () => {
-    const wrapper = mount(<Provider store={store}><SdkLayerList listClass={TestList} /></Provider>);
+    const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} listClass={TestList} /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
   });
 
@@ -291,7 +292,7 @@ describe('test the LayerList component', () => {
         'mapbox:group': 'overlays'
       }
     }));
-    const wrapper = mount(<Provider store={store}><SdkLayerList groupClass={TestListGroup} listClass={TestList} /></Provider>);
+    const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} groupClass={TestListGroup} listClass={TestList} /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
   });
 
@@ -322,8 +323,59 @@ describe('test the LayerList component', () => {
         'mapbox:group': 'overlays'
       }
     }));
-    const wrapper = mount(<Provider store={store}><SdkLayerList /></Provider>);
+    const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
+  });
+});
+
+describe('test drag and drop', () => {
+  let drop, layers, props, monitor, item;
+  beforeEach(() => {
+    drop = layerListItemTarget.drop;
+    layers = [{
+      id: 'foo',
+      index: 0,
+    }, {
+      id: 'bar',
+      index: 1,
+    }, {
+      id: 'baz',
+      index: 2,
+    }];
+    const dispatch = function() {};
+    props = {index: 2, layers, dispatch};
+    item = {
+      index: 1,
+      layer: layers[1],
+    };
+    monitor = {
+      getItem() {
+        return item;
+      }
+    };
+  });
+  it('should dispatch on drop', () => {
+    spyOn(props, 'dispatch');
+    drop(props, monitor);
+    expect(props.dispatch).toHaveBeenCalledWith({'layerId': 'bar', 'targetId': 'baz', 'type': 'MAP_ORDER_LAYER'});
+  });
+  it('should not dispatch if source and target are the same', () => {
+    props.index = 1;
+    spyOn(props, 'dispatch');
+    drop(props, monitor);
+    expect(props.dispatch).not.toHaveBeenCalled();
+  });
+  it('should not dispatch if no source item layer', () => {
+    delete item.layer;
+    spyOn(props, 'dispatch');
+    drop(props, monitor);
+    expect(props.dispatch).not.toHaveBeenCalled();
+  });
+  it('should not dispatch if hover index out of bounds', () => {
+    props.index = 10;
+    spyOn(props, 'dispatch');
+    drop(props, monitor);
+    expect(props.dispatch).not.toHaveBeenCalled();
   });
 });
 
@@ -377,7 +429,7 @@ describe('test the exclusive grouping of the LayerList component', () => {
   });
 
   it('should handle exclusive groups', () => {
-    const wrapper = mount(<Provider store={store}><SdkLayerList /></Provider>);
+    const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
   });
 

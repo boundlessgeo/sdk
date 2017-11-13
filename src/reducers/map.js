@@ -121,21 +121,20 @@ function changeTarget(state, action) {
   let i, ii;
   if (layerIdx < targetIdx) {
     // move up
-    for (i = targetIdx, ii = state.layers.length; i < ii; i++) {
-      if (i === ii  - 1) {
-        return state.layers[i].id;
-      }
+    for (i = targetIdx + 1, ii = state.layers.length; i < ii; i++) {
       if (getGroup(state.layers[i]) === layerGroup) {
         return state.layers[i - 1].id;
       }
     }
+    return state.layers[ii - 1].id;
   } else {
     // move down
-    for (i = layerIdx - 2; i >= 0; i--) {
-      if (getGroup(state.layers[i]) !== layerGroup) {
-        return state.layers[i].id;
+    for (i = targetIdx - 1; i >= 0; i--) {
+      if (getGroup(state.layers[i]) === layerGroup) {
+        return state.layers[i + 1].id;
       }
     }
+    return state.layers[0].id;
   }
 }
 

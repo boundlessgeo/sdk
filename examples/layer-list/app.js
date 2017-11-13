@@ -9,7 +9,8 @@ import {createStore, combineReducers} from 'redux';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-
+import {DragSource, DropTarget} from 'react-dnd';
+import {types, layerListItemSource, layerListItemTarget, collect, collectDrop} from '@boundlessgeo/sdk/components/layer-list-item';
 import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkZoomControl from '@boundlessgeo/sdk/components/map/zoom-control';
 import SdkMapReducer from '@boundlessgeo/sdk/reducers/map';
@@ -50,13 +51,13 @@ class LayerListItem extends SdkLayerListItem {
       </span>
     );
 
-    return (
+    return  this.props.connectDragSource(this.props.connectDropTarget((
       <li className="layer">
         <span className="checkbox">{checkbox}</span>
         <span className="name">{layer.id}</span>
         <span className="btn-container">{moveButtons}</span>
       </li>
-    );
+    )));
   }
 }
 
@@ -67,6 +68,8 @@ LayerListItem.defaultProps = {
     remove: 'Remove layer',
   },
 };
+
+LayerListItem = DropTarget(types, layerListItemTarget, collectDrop)(DragSource(types, layerListItemSource, collect)(LayerListItem));
 
 function main() {
   // Start with a reasonable global view of hte map.

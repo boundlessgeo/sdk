@@ -14,9 +14,11 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
-
+import HTML5Backend from 'react-dnd-html5-backend';
+import {DragDropContext} from 'react-dnd';
 import {LAYERLIST_HIDE_KEY, GROUP_KEY, GROUPS_KEY} from '../constants';
-import SdkLayerListItem from './layer-list-item';
+import {getLayerIndexById} from '../util';
+import {SdkLayerListItemDD} from './layer-list-item';
 
 export class SdkList extends React.Component {
   render() {
@@ -44,8 +46,10 @@ export class SdkLayerListGroup extends React.Component {
     for (let i = 0, ii = this.props.childLayers.length; i < ii; i++) {
       children.push(
         <this.props.layerClass
+          enableDD={this.props.enableDD}
           exclusive={this.props.group.exclusive}
           key={i}
+          index={getLayerIndexById(this.props.layers, this.props.childLayers[i].id)}
           groupLayers={this.props.childLayers}
           layers={this.props.layers}
           layer={this.props.childLayers[i]}
@@ -59,6 +63,7 @@ export class SdkLayerListGroup extends React.Component {
 }
 
 SdkLayerListGroup.PropTypes = {
+  enableDD: PropTypes.bool,
   groupId: PropTypes.string.isRequired,
   group: PropTypes.shape({
     name: PropTypes.string,
@@ -88,6 +93,7 @@ class SdkLayerList extends React.Component {
   addGroup(layers, groupName, groups, group_layers) {
     layers.unshift(
       <this.groupClass
+        enableDD={this.props.enableDD}
         key={groupName}
         groupId={groupName}
         group={groups[groupName]}
@@ -130,7 +136,7 @@ class SdkLayerList extends React.Component {
         }
       } else if (!item.metadata || item.metadata[LAYERLIST_HIDE_KEY] !== true) {
         group_layers = this.handlePendingGroup(layers, group_layers, groupName, groups);
-        layers.unshift(<this.layerClass key={i} layers={this.props.layers} layer={item} />);
+        layers.unshift(<this.layerClass enableDD={this.props.enableDD} index={i} key={i} layers={this.props.layers} layer={item} />);
       }
     }
     group_layers = this.handlePendingGroup(layers, group_layers, groupName, groups);
@@ -143,6 +149,10 @@ class SdkLayerList extends React.Component {
 }
 
 SdkLayerList.propTypes = {
+  /**
+   * Should we enable drag and drop for reordering?
+   */
+  enableDD: PropTypes.bool,
   /**
    * React.Component to use for rendering layer groups.
    */
@@ -172,7 +182,8 @@ SdkLayerList.propTypes = {
 };
 
 SdkLayerList.defaultProps = {
-  layerClass: SdkLayerListItem,
+  enableDD: true,
+  layerClass: SdkLayerListItemDD,
   groupClass: SdkLayerListGroup,
   listClass: SdkList,
 };
@@ -184,4 +195,5 @@ function mapStateToProps(state) {
   };
 }
 
+SdkLayerList = DragDropContext(HTML5Backend)(SdkLayerList);
 export default connect(mapStateToProps)(SdkLayerList);
