@@ -541,4 +541,20 @@ describe('async actions', () => {
       sourceDef,
     });
   });
+
+  it('should generate the correct TMS source', () => {
+    const sourceName = 'my-source';
+    const url = 'http://localhost/geoserver';
+    const layerName = 'topp:states';
+    const options = {accessToken: 'my-token'};
+    const sourceDef = {
+      type: 'vector',
+      url: 'http://localhost/geoserver/gwc/service/tms/1.0.0/topp:states@EPSG%3A3857@pbf/{z}/{x}/{-y}.pbf?access_token=my-token',
+    };
+    expect(actions.addTmsSource(sourceName, url, layerName, options)).toEqual({
+      type: MAP.ADD_SOURCE,
+      sourceName,
+      sourceDef,
+    });
+  });
 });
