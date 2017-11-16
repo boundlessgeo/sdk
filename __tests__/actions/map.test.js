@@ -469,4 +469,60 @@ describe('async actions', () => {
       group: 'xyz',
     });
   });
+
+  it('should generate a WMS source when no options specified', () => {
+    const sourceName = 'my-source';
+    const sourceDef = {
+      type: 'vector',
+      url: 'http://localhost/geoserver/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=application%2Fx-protobuf%3Btype%3Dmapbox-vector&TRANSPARENT=TRUE&LAYERS=my-layer&WIDTH=256&HEIGHT=256&CRS=EPSG%3A3857&BBOX={bbox-epsg-3857}',
+    };
+    expect(actions.addWmsSource(sourceName, 'http://localhost/geoserver/wms', 'my-layer')).toEqual({
+      type: MAP.ADD_SOURCE,
+      sourceName,
+      sourceDef,
+    });
+  });
+
+  it('should generate a WMS source with tileSize, accessToken and projection specified', () => {
+    const sourceName = 'my-source';
+    const sourceDef = {
+      type: 'vector',
+      url: 'http://localhost/geoserver/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=application%2Fx-protobuf%3Btype%3Dmapbox-vector&TRANSPARENT=TRUE&LAYERS=my-layer&WIDTH=512&HEIGHT=512&CRS=EPSG%3A4326&ACCESS_TOKEN=my-token&BBOX={bbox-epsg-3857}',
+    };
+    const options = {accessToken: 'my-token', projection: 'EPSG:4326', tileSize: 512};
+    expect(actions.addWmsSource(sourceName, 'http://localhost/geoserver/wms', 'my-layer', options)).toEqual({
+      type: MAP.ADD_SOURCE,
+      sourceName,
+      sourceDef,
+    });
+  });
+
+  it('should generate the correct WMS source when asVector false', () => {
+    const sourceName = 'my-source';
+    const sourceDef = {
+      type: 'raster',
+      tileSize: 256,
+      tiles: ['http://localhost/geoserver/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=TRUE&LAYERS=my-layer&WIDTH=256&HEIGHT=256&CRS=EPSG%3A3857&BBOX={bbox-epsg-3857}'],
+    };
+    expect(actions.addWmsSource(sourceName, 'http://localhost/geoserver/wms', 'my-layer', {asVector: false})).toEqual({
+      type: MAP.ADD_SOURCE,
+      sourceName,
+      sourceDef,
+    });
+  });
+
+  it('should generate the correct WMS source when asVector false and tileSize, accessToken and projection specified', () => {
+    const sourceName = 'my-source';
+    const sourceDef = {
+      type: 'raster',
+      tileSize: 512,
+      tiles: ['http://localhost/geoserver/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=TRUE&LAYERS=my-layer&WIDTH=512&HEIGHT=512&CRS=EPSG%3A4326&ACCESS_TOKEN=my-token&BBOX={bbox-epsg-3857}'],
+    };
+    const options = {asVector: false, accessToken: 'my-token', projection: 'EPSG:4326', tileSize: 512};
+    expect(actions.addWmsSource(sourceName, 'http://localhost/geoserver/wms', 'my-layer', options)).toEqual({
+      type: MAP.ADD_SOURCE,
+      sourceName,
+      sourceDef,
+    });
+  });
 });
