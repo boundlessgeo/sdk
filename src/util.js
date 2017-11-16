@@ -218,3 +218,22 @@ export function getLayerTitle(layer) {
   }
   return layer.id;
 }
+
+/** Get the source of a layer.
+ *
+ *  @param {Object} layer The layer.
+ *  @param {Object} sources The map sources.
+ *
+ * @returns {Object} The source object of the layer.
+ */
+export function getLayerSource(layer, sources) {
+  const sourceKeys = Object.keys(sources);
+
+  for (let i = 0; i < sourceKeys.length; i++) {
+    if (sourceKeys[i] === layer.source) {
+      return sources[sourceKeys[i]];
+    } else {
+      return null;
+    }
+  }
+}
