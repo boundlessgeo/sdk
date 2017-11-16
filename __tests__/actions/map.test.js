@@ -525,4 +525,20 @@ describe('async actions', () => {
       sourceDef,
     });
   });
+
+  it('should generate the correct WFS source', () => {
+    const sourceName = 'my-source';
+    const url = 'http://localhost/geoserver/wfs';
+    const featureType = 'topp:states';
+    const options = {accessToken: 'my-token'};
+    const sourceDef = {
+      type: 'geojson',
+      data: 'http://localhost/geoserver/wfs?SERVICE=WFS&VERSION=1.1.0&SRSNAME=EPSG%3A4326&REQUEST=GetFeature&TYPENAME=topp%3Astates&OUTPUTFORMAT=JSON&ACCESS_TOKEN=my-token',
+    };
+    expect(actions.addWfsSource(sourceName, url, featureType, options)).toEqual({
+      type: MAP.ADD_SOURCE,
+      sourceName,
+      sourceDef,
+    });
+  });
 });
