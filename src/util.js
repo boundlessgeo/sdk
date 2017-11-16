@@ -229,11 +229,11 @@ export function getLayerTitle(layer) {
 export function getLayerSource(layer, sources) {
   const sourceKeys = Object.keys(sources);
 
-  for(let i=0; i<sourceKeys.length;i++) {
-    if(sourceKeys[i] === layer.source){
+  for (let i = 0; i < sourceKeys.length; i++) {
+    if (sourceKeys[i] === layer.source) {
       return sources[sourceKeys[i]];
     } else {
       return null;
     }
   }
-};
+}
