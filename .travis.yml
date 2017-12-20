@@ -23,6 +23,7 @@ before_script:
   - "export DISPLAY=:99.0"
 
 script:
+  - "npm view https"
   - "npm run test"
 
 after_success:
