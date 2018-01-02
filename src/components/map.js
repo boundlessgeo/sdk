@@ -281,7 +281,8 @@ function getLoaderFunction(glSource, mapProjection, baseUrl) {
       if (url.indexOf(BBOX_STRING) >= 0) {
         url = url.replace(BBOX_STRING, bbox.toString());
       }
-      features_promise = fetch(url).then(response => response.json());
+      features_promise = fetch(url, {headers: glSource.requestHeaders || {}})
+        .then(response => response.json());
     } else if (typeof glSource.data === 'object'
       && (glSource.data.type === 'Feature' || glSource.data.type === 'FeatureCollection')) {
       features_promise = new Promise((resolve) => {
