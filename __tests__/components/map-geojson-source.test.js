@@ -58,7 +58,7 @@ describe('tests for the geojson-type map sources', () => {
       const src = map.sources[src_name];
       expect(src.getFeatures().length).toBe(nFeatures);
       done();
-    }, 100);
+    }, 200);
   }
 
   it('handles undefined data', (done) => {
@@ -118,7 +118,7 @@ describe('tests for the geojson-type map sources', () => {
     testGeojsonData(done, 'http://example.com/test.geojson', 2);
   });
 
-  xit('adds a geojson feature collection from a relative url', (done) => {
+  it('adds a geojson feature collection from a relative url', (done) => {
     // mock up the url to call
     nock('http://example.com')
       .get('/base/test.geojson')
@@ -165,7 +165,7 @@ describe('tests for the geojson-type map sources', () => {
     testGeojsonData(next_fetch, '/bbox.geojson?BBOX={bbox-epsg-3857}', 2);
   });
 
-  xit('fetches from a https location', (done) => {
+  it('fetches from a https location', (done) => {
     nock('https://foo.com')
       .get('/my.geojson')
       .reply(200, JSON.stringify(feature_collection));

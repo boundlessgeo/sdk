@@ -23,6 +23,7 @@ const defaultState = {
     lngLat: null,
     coordinate: null,
   },
+  extent: null,
 };
 
 /** Map info reducer.
@@ -33,6 +34,8 @@ const defaultState = {
  */
 export default function mapInfoReducer(state = defaultState, action) {
   switch (action.type) {
+    case MAPINFO.SET_EXTENT:
+      return Object.assign({}, state, {extent: action.extent});
     case MAPINFO.SET_SIZE:
       return Object.assign({}, state, {size: action.size});
     case MAPINFO.SET_MOUSE_POSITION:

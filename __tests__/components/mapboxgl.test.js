@@ -6,8 +6,9 @@ import  Adapter from 'enzyme-adapter-react-16';
 import {createStore, combineReducers} from 'redux';
 
 import MapReducer from '../../src/reducers/map';
+import MapInfoReducer from '../../src/reducers/mapinfo';
 import DrawingReducer from '../../src/reducers/drawing';
-import ConnectedMap, {MapboxGL} from '../../src/components/mapboxgl';
+import ConnectedMap, {MapboxGL, getMapExtent} from '../../src/components/mapboxgl';
 import SdkPopup from '../../src/components/map/popup';
 
 configure({adapter: new Adapter()});
@@ -514,6 +515,56 @@ describe('MapboxGL component', () => {
     expect(map.map.addControl).toHaveBeenCalled();
   });
 
+  it('should call setView', () => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+      mapinfo: MapInfoReducer,
+    }));
+
+    const props = {
+      store,
+    };
+
+    const wrapper = mount(<ConnectedMap {...props} />);
+    const map = wrapper.instance().getWrappedInstance();
+    // mock up our GL map
+    map.map = createMapMock();
+    map.map.getCenter = () => {
+      return {
+        toArray: () => {
+          return [50, 45];
+        }
+      };
+    };
+    map.map.getZoom = () => {
+      return 3;
+    };
+    map.map.getBearing = () => {
+      return 0;
+    };
+    map.map.getBounds = () => {
+      return {
+        getSouthWest: () => {
+          return {
+            lng: -45,
+            lat: -50,
+          };
+        },
+        getNorthEast: () => {
+          return {
+            lng: -25,
+            lat: -20,
+          };
+        }
+      };
+    };
+    map.onMapMoveEnd();
+    expect(store.getState().mapinfo.extent).toEqual([-45, -50, -25, -20]);
+    expect(store.getState().map.center).toEqual([50, 45]);
+    expect(store.getState().map.bearing).toEqual(0);
+    expect(store.getState().map.zoom).toEqual(3);
+  });
+
   it('should create an overlay for the initialPopups', () => {
     const store = createStore(combineReducers({
       map: MapReducer,
@@ -740,6 +791,28 @@ describe('MapboxGL component', () => {
       map: MapReducer,
     }));
     mount(<ConnectedMap store={store} />);
+  });
+
+  it('getMapExtent should work correctly', () => {
+    const map = createMapMock();
+    map.getBounds = () => {
+      return {
+        getSouthWest: () => {
+          return {
+            lng: -45,
+            lat: -50,
+          };
+        },
+        getNorthEast: () => {
+          return {
+            lng: -25,
+            lat: -20,
+          };
+        }
+      };
+    };
+    const extent = getMapExtent(map);
+    expect(extent).toEqual([-45, -50, -25, -20]);
   });
 
 });

@@ -14,6 +14,21 @@ describe('mapinfo reducer', () => {
         lngLat: null,
         coordinate: null,
       },
+      extent: null,
+    });
+  });
+
+  it('should set the map extent', () => {
+    let state = {};
+    deepFreeze(state);
+    const extent = [-90, -45, 90, 45];
+    const action = {
+      type: MAPINFO.SET_EXTENT,
+      extent,
+    };
+    deepFreeze(action);
+    expect(reducer(state, action)).toEqual({
+      extent: [-90, -45, 90, 45],
     });
   });
 

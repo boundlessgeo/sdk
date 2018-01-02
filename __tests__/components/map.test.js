@@ -6,6 +6,7 @@ import nock from 'nock';
 import  Adapter from 'enzyme-adapter-react-16';
 
 import olMap from 'ol/pluggablemap';
+import olView from 'ol/view';
 import TileLayer from 'ol/layer/tile';
 import VectorLayer from 'ol/layer/vector';
 import ImageLayer from 'ol/layer/image';
@@ -22,7 +23,7 @@ import {createStore, combineReducers} from 'redux';
 import {radiansToDegrees} from '../../src/util';
 
 import ConnectedMap, {Map} from '../../src/components/map';
-import {hydrateLayer, getFakeStyle} from '../../src/components/map';
+import {hydrateLayer, getFakeStyle, getMapExtent} from '../../src/components/map';
 import SdkPopup from '../../src/components/map/popup';
 import MapReducer from '../../src/reducers/map';
 import MapInfoReducer from '../../src/reducers/mapinfo';
@@ -1002,6 +1003,12 @@ describe('Map component', () => {
     const layers = [{id: 'foo'}];
     const style = getFakeStyle(sprite, layers, baseUrl, accessToken);
     expect(style.sprite).toEqual(`${baseUrl}/sprite?access_token=${accessToken}`);
+  });
+
+  it('getMapExtent should work correctly', () => {
+    const view = new olView({center: [0, 0], resolution: 1000});
+    const extent = getMapExtent(view, [500, 250]);
+    expect(extent).toEqual([-2.2457882102988034, -1.1228222300941866, 2.2457882102988034, 1.1228222300942008]);
   });
 
   it('should handle hydrateLayer', () => {

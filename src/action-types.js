@@ -73,6 +73,7 @@ export const ESRI = {
 export const MAPINFO = {
   SET_SIZE: 'MAPINFO.SET_SIZE',
   SET_MOUSE_POSITION: 'MAPINFO.SET_MOUSE_POSITION',
+  SET_EXTENT: 'MAPINFO.SET_EXTENT',
 };
 
 export default {

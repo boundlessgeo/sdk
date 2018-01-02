@@ -42,3 +42,15 @@ export function setMousePosition(lngLat, coordinate) {
     coordinate,
   };
 }
+
+/** Action to set the map extent.
+ *  @param {number[]} extent Map extent in EPSG:4326.
+ *
+ *  @returns {Object} Action object to pass to reducer.
+ */
+export function setMapExtent(extent) {
+  return {
+    type: MAPINFO.SET_EXTENT,
+    extent,
+  };
+}

@@ -13,6 +13,14 @@ describe('test that mapinfo actions are properly created', () => {
     });
   });
 
+  it('should issue an action to set the map extent', () => {
+    const extent = [-90, -45, 90, 45];
+    expect(actions.setMapExtent(extent)).toEqual({
+      type: MAPINFO.SET_EXTENT,
+      extent,
+    });
+  });
+
   it('should issue an action to change the mouse position', () => {
     const lngLat = {lng: 50, lat: 45};
     const coordinate = [100000, 80000];

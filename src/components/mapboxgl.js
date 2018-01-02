@@ -17,7 +17,7 @@ import ReactDOM from 'react-dom';
 import uuid from 'uuid';
 import {connect} from 'react-redux';
 import {setView, setBearing} from '../actions/map';
-import {setMapSize, setMousePosition} from '../actions/mapinfo';
+import {setMapSize, setMousePosition, setMapExtent} from '../actions/mapinfo';
 
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import {dataVersionKey} from '../reducers/map';
@@ -197,10 +197,10 @@ export class MapboxGL extends React.Component {
     this.layersVersion = getVersion(this.props.map, LAYER_VERSION_KEY);
     // when the map moves update the location in the state
     if (this.map) {
-      this.props.setSize([this.mapdiv.offsetWidth, this.mapdiv.offsetHeight]);
+      this.props.setSize([this.mapdiv.offsetWidth, this.mapdiv.offsetHeight], this.map);
 
       this.map.on('resize', () => {
-        this.props.setSize([this.mapdiv.offsetWidth, this.mapdiv.offsetHeight]);
+        this.props.setSize([this.mapdiv.offsetWidth, this.mapdiv.offsetHeight], this.map);
       });
 
       if (this.props.hover) {
@@ -514,6 +514,13 @@ function mapStateToProps(state) {
   };
 }
 
+export function getMapExtent(map) {
+  const bounds = map.getBounds();
+  const sw = bounds.getSouthWest();
+  const ne = bounds.getNorthEast();
+  return [sw.lng, sw.lat, ne.lng, ne.lat];
+}
+
 function mapDispatchToProps(dispatch) {
   return {
     updateLayer: (layerId, layerConfig) => {
@@ -523,9 +530,11 @@ function mapDispatchToProps(dispatch) {
       const bearing = map.getBearing();
       dispatch(setView(center, map.getZoom()));
       dispatch(setBearing(bearing));
+      dispatch(setMapExtent(getMapExtent(map)));
     },
-    setSize: (size) => {
+    setSize: (size, map) => {
       dispatch(setMapSize(size));
+      dispatch(setMapExtent(getMapExtent(map)));
     },
     setMeasureGeometry: (geom) => {
       const segments = [];
