@@ -518,7 +518,7 @@ export function addWmsSource(sourceId, serverUrl, layerName, options = {}) {
  * @returns {Object} Action to create a new source.
  */
 export function addWfsSource(sourceId, serverUrl, featureType, options = {}) {
-  const params = Object.assign({
+  const params = {
     'SERVICE': 'WFS',
     'VERSION': '1.1.0',
     // projection is always fixed for WFS sources as they
@@ -527,7 +527,7 @@ export function addWfsSource(sourceId, serverUrl, featureType, options = {}) {
     'REQUEST': 'GetFeature',
     'TYPENAME': featureType,
     'OUTPUTFORMAT': 'JSON',
-  }, options.params || {});
+  };
 
   if (options.accessToken) {
     params['ACCESS_TOKEN'] = options.accessToken;
