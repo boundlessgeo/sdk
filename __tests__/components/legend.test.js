@@ -8,7 +8,7 @@ import  Adapter from 'enzyme-adapter-react-16';
 import {createStore, combineReducers} from 'redux';
 import MapReducer from '../../src/reducers/map';
 
-import SdkLegend from '../../src/components/legend';
+import SdkLegend, {Legend} from '../../src/components/legend';
 import {getLegend, getPointGeometry, getLineGeometry, getPolygonGeometry} from '../../src/components/legend';
 
 configure({adapter: new Adapter()});
@@ -155,6 +155,12 @@ describe('test the Legend component', () => {
     mount(<SdkLegend layerId="wms-test" store={store} />);
   });
 
+  it('should render empty text', () => {
+    const wrapper = mount(<Legend emptyLegendMessage='Empty Layer' layerId="wms-test" store={store} />);
+    wrapper.instance().setState({empty: true});
+    expect(wrapper.html()).toMatchSnapshot();
+  });
+
   it('should render a wms legend', () => {
     const wrapper = mount(<SdkLegend layerId="wms-test" store={store} />);
 
@@ -275,7 +281,8 @@ describe('test the Legend component', () => {
   });
 
   it('componentShouldReceiveProps should work correctly', () => {
-    const wrapper = mount(<SdkLegend layerId="vector-point-test" store={store} />);
+    const state = store.getState().map;
+    const wrapper = mount(<Legend layerId="vector-point-test" layers={state.layers} sources={state.sources} />);
     let layer;
     const layers = store.getState().map.layers;
     for (let i = 0, ii = layers.length; i < ii; ++i) {
@@ -284,7 +291,7 @@ describe('test the Legend component', () => {
         break;
       }
     }
-    const legend = wrapper.instance().getWrappedInstance();
+    const legend = wrapper.instance();
     let result = legend.componentWillReceiveProps({layers: [layer]});
     expect(result).toBe(false); // no need to update
     const newLayer = {id: 'vector-point-test'};

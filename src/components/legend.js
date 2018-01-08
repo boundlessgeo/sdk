@@ -247,7 +247,8 @@ export class Legend extends React.Component {
           );
           const olLayer = new VectorLayer();
           const me = this;
-          applyStyle(olLayer, fake_style, layer.source).then(function() {
+
+          const onApplyStyle = () => {
             const styleFn = olLayer.getStyle();
             let geom;
             if (layer.type === 'symbol' || layer.type === 'circle') {
@@ -273,6 +274,16 @@ export class Legend extends React.Component {
               } else {
                 me.setState({empty: true});
               }
+            }
+          };
+
+          applyStyle(olLayer, fake_style, layer.source).then(function() {
+            if (!(layer.layout && layer.layout['icon-image'])) {
+              onApplyStyle();
+            } else {
+              olLayer.once('change', () => {
+                onApplyStyle();
+              });
             }
           });
         }
@@ -395,4 +406,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps, undefined, undefined, {withRef: true})(Legend);
+export default connect(mapStateToProps)(Legend);
