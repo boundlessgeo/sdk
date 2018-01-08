@@ -79,4 +79,54 @@ describe('Map component context documents', () => {
     expect(layers[0]).toBeInstanceOf(TileLayer);
     expect(layers[0].getSource()).toBeInstanceOf(XYZSource);
   });
+  it('should parse mapbox style json correctly', () => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+    }), applyMiddleware(thunkMiddleware));
+
+    const wrapper = mount(<ConnectedMap store={store} />);
+    const map = wrapper.instance().getWrappedInstance();
+
+    const mapboxJson = {
+      version: 8,
+      name: 'mapbox',
+      center: [-98.78906130124426, 37.92686191312036],
+      zoom: 4,
+      sources: {
+        'mapbox-streets': {
+          type: "vector",
+          url: "mapbox://mapbox.mapbox-streets-v7"
+        },
+        'mapbox://mapbox.satellite': {
+          type: 'raster',
+          tileSize: 256,
+          url: 'mapbox://mapbox.satellite'
+        }
+      },
+      layers: [
+        {
+          id: "mapbox-mapbox-satellite",
+          interactive: true,
+          paint: {},
+          source: "mapbox://mapbox.satellite",
+          type: "raster"
+        },
+        {
+          filter : ["all", ["==", "$type", "LineString"]],
+          id : "tunnel-secondary-tertiary case",
+          interactive : true,
+          layout : {'line-join': "round"},
+          metadata : {'mapbox:group': "1460127465037.9006"},
+          paint : {'line-color': "#fff", 'line-opacity': {base: 1, stops: [[13, 0], [13.5, 0.5], [16, 0.75], [18, 0.35]]}},
+          source : "mapbox-streets",
+          'source-layer': "road",
+          type : "line",
+        }
+      ],
+    };
+    store.dispatch(MapActions.setContext({json: mapboxJson}));
+    layers = map.map.getLayers().getArray();
+    expect(layers[0]).toBeInstanceOf(TileLayer);
+    expect(layers[0].getSource()).toBeInstanceOf(XYZSource);
+  });
 });
