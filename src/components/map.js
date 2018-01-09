@@ -620,6 +620,10 @@ export class Map extends React.Component {
       this.map.renderSync();
     }
 
+    if (nextProps.mapinfo && this.props.mapinfo.size !== null && (nextProps.mapinfo.size[0] !== this.props.mapinfo.size[0] || nextProps.mapinfo.size[1] !== this.props.mapinfo.size[1])) {
+      this.map.updateSize();
+    }
+
     // This should always return false to keep
     // render() from being called.
     return false;
@@ -1571,6 +1575,7 @@ function mapStateToProps(state) {
     drawing: state.drawing,
     print: state.print,
     mapbox: state.mapbox,
+    mapinfo: state.mapinfo,
   };
 }
 
