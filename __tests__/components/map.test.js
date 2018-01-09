@@ -798,6 +798,10 @@ describe('Map component', () => {
     const wrapper = mount(<ConnectedMap {...props} />);
     const sdk_map = wrapper.instance().getWrappedInstance();
 
+    sdk_map.map.getSize = function() {
+      return [100, 200];
+    };
+
     sdk_map.map.dispatchEvent({
       type: 'pointermove',
       coordinate: [0, 0],

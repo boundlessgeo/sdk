@@ -184,12 +184,18 @@ function configureTileSource(glSource, mapProjection, time) {
 /** Configures an OpenLayers TileJSONSource object from the provided
  * Mapbox GL style object.
  * @param {Object} glSource The Mapbox GL map source containing a 'url' property.
+ * @param {string} accessToken The user's Mapbox tiles access token.
  *
  * @returns {Object} Configured OpenLayers TileJSONSource.
  */
-function configureTileJSONSource(glSource) {
+function configureTileJSONSource(glSource, accessToken) {
+  let url = glSource.url;
+  if (url.indexOf(MAPBOX_PROTOCOL) === 0) {
+    const mapid = url.replace(MAPBOX_PROTOCOL, '');
+    url = `https://a.tiles.mapbox.com/v4/${mapid}.json?access_token=${accessToken}`;
+  }
   return new TileJSON({
-    url: glSource.url,
+    url: url,
     crossOrigin: 'anonymous',
   });
 }
@@ -383,7 +389,7 @@ function configureSource(glSource, mapView, accessToken, baseUrl, time, wrapX) {
     if ('tiles' in glSource) {
       return configureTileSource(glSource, mapView.getProjection(), time);
     } else if (glSource.url) {
-      return configureTileJSONSource(glSource);
+      return configureTileJSONSource(glSource, accessToken);
     }
   } else if (glSource.type === 'geojson') {
     return configureGeojsonSource(glSource, mapView, baseUrl, wrapX);
@@ -614,6 +620,10 @@ export class Map extends React.Component {
       this.map.renderSync();
     }
 
+    if (nextProps.mapinfo && this.props.mapinfo.size !== null && (nextProps.mapinfo.size[0] !== this.props.mapinfo.size[0] || nextProps.mapinfo.size[1] !== this.props.mapinfo.size[1])) {
+      this.map.updateSize();
+    }
+
     // This should always return false to keep
     // render() from being called.
     return false;
@@ -674,7 +684,14 @@ export class Map extends React.Component {
       const src = this.props.map.sources[src_name];
       if (src && src.type !== 'geojson' && !jsonEquals(src, sourcesDef[src_name])) {
         // reconfigure source and tell layers about it
-        this.sources[src_name] = configureSource(sourcesDef[src_name], map_view);
+        this.sources[src_name] = configureSource(
+          sourcesDef[src_name],
+          map_view,
+          this.props.mapbox.accessToken,
+          this.props.mapbox.baseUrl,
+          undefined,
+          this.props.wrapX
+        );
         this.updateLayerSource(src_name);
       }
 
@@ -685,7 +702,14 @@ export class Map extends React.Component {
       if (src && (src.cluster !== sourcesDef[src_name].cluster
           || src.clusterRadius !== sourcesDef[src_name].clusterRadius)) {
         // reconfigure the source for clustering.
-        this.sources[src_name] = configureSource(sourcesDef[src_name], map_view);
+        this.sources[src_name] = configureSource(
+          sourcesDef[src_name],
+          map_view,
+          this.props.mapbox.accessToken,
+          this.props.mapbox.baseUrl,
+          undefined,
+          this.props.wrapX
+        );
         // tell all the layers about it.
         this.updateLayerSource(src_name);
       }
@@ -1551,6 +1575,7 @@ function mapStateToProps(state) {
     drawing: state.drawing,
     print: state.print,
     mapbox: state.mapbox,
+    mapinfo: state.mapinfo,
   };
 }
 
