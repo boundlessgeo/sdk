@@ -535,7 +535,8 @@ export function addWfsSource(sourceId, serverUrl, featureType, options = {}) {
 
   return addSource(sourceId, {
     type: 'geojson',
-    data: `${serverUrl}?${encodeQueryObject(params)}`
+    data: `${serverUrl}?${encodeQueryObject(params)}`,
+    requestHeaders: options.requestHeaders
   });
 }
 
