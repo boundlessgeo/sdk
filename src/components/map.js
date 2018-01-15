@@ -570,7 +570,10 @@ export class Map extends React.Component {
                 params.TIME = time;
                 newUrls.push(urlParts[0] + '?' + encodeQueryObject(params));
               }
+              const tileUrl = olSource.getTileUrlFunction();
+              olSource.clear();
               olSource.setUrls(newUrls);
+              olSource.setTileUrlFunction(tileUrl);
             }
           }
         }
