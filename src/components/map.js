@@ -548,16 +548,33 @@ export class Map extends React.Component {
       // find time dependent layers
       for (let i = 0, ii = nextProps.map.layers.length; i < ii; ++i) {
         const layer = nextProps.map.layers[i];
+        const time = nextProps.map.metadata[TIME_KEY];
         if (layer.metadata[TIME_ATTRIBUTE_KEY] !== undefined) {
           this.props.updateLayer(layer.id, {
-            filter: this.props.createLayerFilter(layer, nextProps.map.metadata[TIME_KEY])
+            filter: this.props.createLayerFilter(layer, time)
           });
         }
         if (layer.metadata[TIME_KEY] !== undefined) {
           const source = layer.source;
           const olSource = this.sources[source];
-          if (olSource && olSource instanceof TileWMSSource) {
-            olSource.updateParams({TIME: nextProps.map.metadata[TIME_KEY]});
+          if (olSource) {
+            if (olSource instanceof TileWMSSource) {
+              olSource.updateParams({TIME: time});
+            } else {
+              const urls = olSource.getUrls();
+              const newUrls = [];
+              for (let j = 0, jj = urls.length; j < jj; ++j) {
+                const url = urls[j];
+                const urlParts = url.split('?');
+                const params = parseQueryString(urlParts[1]);
+                params.TIME = time;
+                newUrls.push(urlParts[0] + '?' + encodeQueryObject(params));
+              }
+              const tileUrl = olSource.getTileUrlFunction();
+              olSource.clear();
+              olSource.setUrls(newUrls);
+              olSource.setTileUrlFunction(tileUrl);
+            }
           }
         }
       }
