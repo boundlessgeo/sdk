@@ -36,7 +36,7 @@ node {
                                          -Dsonar.host.url=https://sonar-ciapi.boundlessgeo.io \
                                          -Dsonar.login=$SONAR_TOKEN \
                                          -Dsonar.projectKey=web-sdk \
-                                         -Dsonar.sources=src/'
+                                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info'
             """
       }
 
@@ -52,3 +52,4 @@ node {
 
   }
 }
+
