@@ -31,8 +31,8 @@ node {
       stage('SonarQube Analysis') {
           sh """
             docker run -v \$(pwd -P):/web \
-                       -w /web node:8.9.4 \
-                       bash -c 'npm i -g sonarqube-scanner && sonar-scanner \
+                       -w /web quay.io/boundlessgeo/node-yarn-sonar \
+                       bash -c 'sonar-scanner \
                                          -Dsonar.host.url=https://sonar-ciapi.boundlessgeo.io \
                                          -Dsonar.login=$SONAR_TOKEN \
                                          -Dsonar.projectKey=web-sdk \
