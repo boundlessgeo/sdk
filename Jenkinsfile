@@ -10,13 +10,12 @@ node {
       }
 
 
-      stage('Package'){
+      stage('Test'){
         // make build
         sh """
           docker run -v \$(pwd -P):/web \
-                     -w /web node:8.9.4 sh \
-                     -c 'bash -c "npm install" &&
-                         bash -c "npm run test"'
+                     -w /web node:8.9.4 bash \
+                     -c 'npm install && npm run test'
           """
       }
 
@@ -24,7 +23,8 @@ node {
         // make lint
         sh """
           docker run -v \$(pwd -P):/web \
-                     -w /web node:8.9.4 sh -c 'bash -c "npm run cover"'
+                     -w /web node:8.9.4 bash \
+                     -c 'npm run cover'
           """
       }
 
@@ -36,6 +36,7 @@ node {
                                          -Dsonar.host.url=https://sonar-ciapi.boundlessgeo.io \
                                          -Dsonar.login=$SONAR_TOKEN \
                                          -Dsonar.projectKey=web-sdk \
+                                         -Dsonar.sources=src \
                                          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info'
             """
       }
