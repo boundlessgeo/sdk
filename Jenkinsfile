@@ -14,8 +14,8 @@ node {
         // make build
         sh """
           docker run -v \$(pwd -P):/web \
-                     -w /web node:8.9.4 bash \
-                     -c 'npm install && npm run test'
+                     -w /web quay.io/boundlessgeo/node-yarn-sonar bash \
+                     -c 'yarn install && yarn test'
           """
       }
 
@@ -23,8 +23,8 @@ node {
         // make lint
         sh """
           docker run -v \$(pwd -P):/web \
-                     -w /web node:8.9.4 bash \
-                     -c 'npm run cover'
+                     -w /web quay.io/boundlessgeo/node-yarn-sonar bash \
+                     -c 'yarn cover'
           """
       }
 
