@@ -835,10 +835,11 @@ export class Map extends React.Component {
    *  @param {Object[]} layers Array of Mapbox GL layer objects.
    *  @param {string} sprite The sprite of the map.
    *  @param {boolean} declutter Should we declutter labels and symbols?
+   *  @param {number} idx The index in the layer stack.
    *
    *  @returns {(Object|null)} Configured OpenLayers layer object, or null.
    */
-  configureLayer(sourceName, glSource, layers, sprite, declutter) {
+  configureLayer(sourceName, glSource, layers, sprite, declutter, idx) {
     const source = this.sources[sourceName];
     let layer = null;
     switch (glSource.type) {
@@ -862,6 +863,7 @@ export class Map extends React.Component {
         }
         layer = new VectorTileLayer({
           declutter: declutter,
+          zIndex: idx,
           source,
         });
         this.applyStyle(layer, layers, sprite);
@@ -927,7 +929,6 @@ export class Map extends React.Component {
   configureLayers(sourcesDef, layersDef, layerVersion, sprite, declutter) {
     // update the internal version counter.
     this.layersVersion = layerVersion;
-
     // bin layers into groups based on their source.
     const layer_groups = [];
 
@@ -974,7 +975,7 @@ export class Map extends React.Component {
           applyBackground(this.map, {layers: lyr_group});
         } else {
           const hydrated_group = hydrateLayerGroup(layersDef, lyr_group);
-          const new_layer = this.configureLayer(source_name, source, hydrated_group, sprite, declutter);
+          const new_layer = this.configureLayer(source_name, source, hydrated_group, sprite, declutter, i);
 
           // if the new layer has been defined, add it to the map.
           if (new_layer !== null) {
@@ -1269,7 +1270,6 @@ export class Map extends React.Component {
         projection: map_proj,
       }),
     });
-
     if (this.props.hover) {
       this.map.on('pointermove', (evt) => {
         const lngLat = Proj.toLonLat(evt.coordinate);

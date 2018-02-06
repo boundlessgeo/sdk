@@ -171,6 +171,7 @@ describe('Map component', () => {
     expect(map.getLayers().item(1).getSource().getParams().REQUEST).toBe(undefined);
     expect(map.getLayers().item(2)).toBeInstanceOf(VectorLayer);
     expect(map.getLayers().item(3)).toBeInstanceOf(VectorTileLayer);
+    expect(map.getLayers().item(3).getZIndex()).toBe(3);
     const expected = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${apiKey}`;
     expect(map.getLayers().item(4).getSource().getUrls()[0]).toBe(expected);
     expect(map.getLayers().item(4).getSource().getUrls()[1]).toBe(expected.replace('a.', 'b.'));
