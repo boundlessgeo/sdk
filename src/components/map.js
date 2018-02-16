@@ -50,6 +50,7 @@ import VectorTileSource from 'ol/source/vectortile';
 
 import MvtFormat from 'ol/format/mvt';
 import RenderFeature from 'ol/render/feature';
+import Feature from 'ol/feature';
 
 import ImageLayer from 'ol/layer/image';
 import ImageStaticSource from 'ol/source/imagestatic';
@@ -233,10 +234,11 @@ function configureImageSource(glSource) {
  * Mapbox GL style object.
  * @param {Object} glSource The Mapbox GL map source of type 'vector'.
  * @param {string} accessToken The user's Mapbox tiles access token .
+ * @param {boolean} interactive Should we use real features instead of render features?
  *
  * @returns {Object} Configured OpenLayers VectorTileSource.
  */
-function configureMvtSource(glSource, accessToken) {
+function configureMvtSource(glSource, accessToken, interactive) {
   if (glSource.tiles) {
     return new Promise((resolve, reject) => {
       // predefine the source in-case since it's needed for the tile_url_fn
@@ -257,7 +259,7 @@ function configureMvtSource(glSource, accessToken) {
           minZoom: glSource.minzoom,
         }),
         attributions: glSource.attribution,
-        format: new MvtFormat(),
+        format: new MvtFormat({featureClass: interactive ? Feature : RenderFeature}),
         crossOrigin: 'crossOrigin' in glSource ? glSource.crossOrigin : 'anonymous',
         tileUrlFunction: tile_url_fn,
       });
@@ -274,7 +276,7 @@ function configureMvtSource(glSource, accessToken) {
         return new VectorTileSource({
           crossOrigin: 'crossOrigin' in glSource ? glSource.crossOrigin : 'anonymous',
           attributions: json.attribution,
-          format: new MvtFormat(),
+          format: new MvtFormat({featureClass: interactive ? Feature : RenderFeature}),
           tileGrid: TileGrid.createXYZ({
             minZoom: json.minzoom,
             maxZoom: json.maxzoom,
@@ -402,10 +404,11 @@ function configureGeojsonSource(glSource, mapView, baseUrl, wrapX) {
  * @param {string} baseUrl A baseUrl provided by this.props.mapbox.baseUrl.
  * @param {string} time The current time if time-enabled.
  * @param {boolean} wrapX Should we wrap the world?
+ * @param {boolean} interactive Should we use real features instead of render features?
  *
  * @returns {(Object|null)} Callback to the applicable configure source method.
  */
-function configureSource(glSource, mapView, accessToken, baseUrl, time, wrapX) {
+function configureSource(glSource, mapView, accessToken, baseUrl, time, wrapX, interactive) {
   let src;
   // tiled raster layer.
   if (glSource.type === 'raster') {
@@ -419,7 +422,7 @@ function configureSource(glSource, mapView, accessToken, baseUrl, time, wrapX) {
   } else if (glSource.type === 'image') {
     src = configureImageSource(glSource);
   } else if (glSource.type === 'vector') {
-    return configureMvtSource(glSource, accessToken);
+    return configureMvtSource(glSource, accessToken, interactive);
   }
   return new Promise((resolve, reject) => {
     resolve(src);
@@ -714,7 +717,7 @@ export class Map extends React.Component {
       if (!(src_name in this.sources)) {
         const time = getKey(this.props.map.metadata, TIME_KEY);
         promises.push(configureSource(sourcesDef[src_name], map_view,
-          this.props.mapbox.accessToken, this.props.mapbox.baseUrl, time, this.props.wrapX)
+          this.props.mapbox.accessToken, this.props.mapbox.baseUrl, time, this.props.wrapX, this.props.interactive)
           .then(addSource.bind(this, src_name)));
       }
       const src = this.props.map.sources[src_name];
@@ -726,7 +729,8 @@ export class Map extends React.Component {
           this.props.mapbox.accessToken,
           this.props.mapbox.baseUrl,
           undefined,
-          this.props.wrapX
+          this.props.wrapX,
+          this.props.interactive,
         )
           .then(addAndUpdateSource.bind(this, src_name)));
       }
@@ -744,7 +748,8 @@ export class Map extends React.Component {
           this.props.mapbox.accessToken,
           this.props.mapbox.baseUrl,
           undefined,
-          this.props.wrapX
+          this.props.wrapX,
+          this.props.interactive,
         ).then(addAndUpdateSource.bind(this, src_name)));
       }
     }
@@ -1518,6 +1523,8 @@ export class Map extends React.Component {
 }
 
 Map.propTypes = {
+  /** When querying vector tile features, should we be able to give back real features? */
+  interactive: PropTypes.bool,
   /** Should we declutter labels and symbols? */
   declutter: PropTypes.bool,
   /** Should we wrap the world? If yes, data will be repeated in all worlds. */
@@ -1601,6 +1608,7 @@ Map.propTypes = {
 };
 
 Map.defaultProps = {
+  interactive: false,
   declutter: false,
   wrapX: true,
   hover: true,
