@@ -407,7 +407,7 @@ function removeSource(state, action) {
 function changeData(state, sourceName, data) {
   const source = state.sources[sourceName];
   if (!source) {
-    return;
+    return state;
   }
   const src_mixin = {};
 
@@ -431,7 +431,7 @@ function changeData(state, sourceName, data) {
 function addFeatures(state, action) {
   const source = state.sources[action.sourceName];
   if (!source) {
-    return;
+    return state;
   }
   const data = source.data;
 
@@ -492,7 +492,7 @@ function addFeatures(state, action) {
 function clusterPoints(state, action) {
   const source = state.sources[action.sourceName];
   if (!source) {
-    return;
+    return state;
   }
   const src_mixin = [];
   const cluster_settings = {};
@@ -528,7 +528,7 @@ function removeFeatures(state, action) {
   // short hand the source source and the data
   const source = state.sources[action.sourceName];
   if (!source) {
-    return;
+    return state;
   }
   const data = source.data;
 
