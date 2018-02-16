@@ -96,6 +96,20 @@ function main() {
   }));
   store.dispatch(drawingActions.setEditStyle([
     {
+      'id': 'gl-draw-line',
+      'type': 'line',
+      'filter': ['all', ['==', '$type', 'LineString'], ['!=', 'mode', 'static']],
+      'layout': {
+        'line-cap': 'round',
+        'line-join': 'round'
+      },
+      'paint': {
+        'line-color': '#D20C0C',
+        'line-dasharray': [0.2, 2],
+        'line-width': 2
+      }
+    },
+    {
       'id': 'gl-draw-polygon-fill-inactive',
       'type': 'fill',
       'filter': ['all',
@@ -229,7 +243,9 @@ function main() {
     if (drawing_tool === 'none') {
       store.dispatch(drawingActions.endDrawing());
     } else if (drawing_layer !== null) {
-      store.dispatch(drawingActions.startDrawing(drawing_layer, drawing_tool, 'direct_select'));
+      // direct_select mode doesn't handle point features
+      const mode = drawing_layer !== 'points' ? 'direct_select' : undefined;
+      store.dispatch(drawingActions.startDrawing(drawing_layer, drawing_tool, mode));
     }
   };
 

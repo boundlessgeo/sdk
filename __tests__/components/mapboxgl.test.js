@@ -107,6 +107,8 @@ describe('MapboxGL component', () => {
     const map = wrapper.instance();
     // mock up our GL map
     map.map = createMapMock();
+    map.map.on = () => {};
+    map.map.off = () => {};
     map.draw = createMapDrawMock();
     spyOn(map.map, 'setStyle');
     spyOn(map.map, 'setCenter');
@@ -264,10 +266,13 @@ describe('MapboxGL component', () => {
     spyOn(props, 'onFeatureDrawn');
     const wrapper = mount(<MapboxGL {...props} />);
     const map = wrapper.instance();
-    const feature = {
-      type: 'Feature',
+    const collection = {
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+      }],
     };
-    map.onFeatureEvent('drawn', 'foo', feature);
+    map.onFeatureEvent('drawn', 'foo', collection);
     expect(props.onFeatureDrawn).toHaveBeenCalled();
   });
 
@@ -279,26 +284,14 @@ describe('MapboxGL component', () => {
     spyOn(props, 'onFeatureModified');
     const wrapper = mount(<MapboxGL {...props} />);
     const map = wrapper.instance();
-    const feature = {
-      type: 'Feature',
+    const collection = {
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+      }],
     };
-    map.onFeatureEvent('modified', 'foo', feature);
+    map.onFeatureEvent('modified', 'foo', collection);
     expect(props.onFeatureModified).toHaveBeenCalled();
-  });
-
-  it('selected event should be triggered', () => {
-    const onFeatureSelected = () => {};
-    const props = {
-      onFeatureSelected,
-    };
-    spyOn(props, 'onFeatureSelected');
-    const wrapper = mount(<MapboxGL {...props} />);
-    const map = wrapper.instance();
-    const feature = {
-      type: 'Feature',
-    };
-    map.onFeatureEvent('selected', 'foo', feature);
-    expect(props.onFeatureSelected).toHaveBeenCalled();
   });
 
   it('configureMap sets listeners', () => {
@@ -740,14 +733,18 @@ describe('MapboxGL component', () => {
     const map = wrapper.instance();
     // mock up our GL map
     map.map = createMapMock();
+    map.map.on = () => {};
+    map.map.off = () => {};
     spyOn(props, 'onFeatureDrawn');
     const draw = {
       changeMode: (mode) => {}
     };
     spyOn(draw, 'changeMode');
+    map.draw = draw;
+    map.componentWillReceiveProps({map: {sources: {}, metadata: {}, layers: []}, drawing: {sourceName: 'geosjon'}});
     map.onDrawCreate({
       features: [{}]
-    }, {sourceName: 'geosjon'}, draw, 'draw_polygon');
+    }, 'draw_polygon');
     window.setTimeout(function() {
       expect(draw.changeMode).toHaveBeenCalled();
       done();
@@ -823,6 +820,8 @@ describe('MapboxGL component', () => {
     const map = wrapper.instance();
     // mock up our GL map
     map.map = createMapMock();
+    map.map.on = () => {};
+    map.map.off = () => {};
     map.draw = createMapDrawMock();
     map.addedDrawListener = true;
     const drawingProps = {

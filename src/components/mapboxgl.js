@@ -79,8 +79,6 @@ export class MapboxGL extends React.Component {
 
     this.draw = null;
     this.drawMode = StaticMode;
-    this.addedDrawListener = false;
-    this.addedMeasurementListener = false;
     this.currentMode = STATIC_MODE;
     this.afterMode = STATIC_MODE;
 
@@ -113,6 +111,9 @@ export class MapboxGL extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    if (nextProps.drawing && nextProps.drawing.interaction) {
+      this.addDrawIfNeeded();
+    }
     // check if the sources or layers diff
     const next_sources_version = getVersion(nextProps.map, SOURCE_VERSION_KEY);
     const next_layer_version = getVersion(nextProps.map, LAYER_VERSION_KEY);
@@ -207,6 +208,21 @@ export class MapboxGL extends React.Component {
     this.map.off('click', this.onMapLoad);
   }
 
+  addDrawIfNeeded() {
+    if (!this.draw) {
+      const modes = MapboxDraw.modes;
+      if (this.props.drawingModes && this.props.drawingModes.length > 0) {
+        this.props.drawingModes.forEach((mode) => {
+          modes[mode.name] = mode.mode;
+        });
+      }
+      modes.static = StaticMode;
+      const drawOptions = {displayControlsDefault: false, modes: modes, defaultMode: STATIC_MODE};
+      this.draw = new MapboxDraw(drawOptions);
+      this.map.addControl(this.draw);
+    }
+  }
+
   /** Initialize the map */
   configureMap() {
     // initialize the map.
@@ -248,45 +264,31 @@ export class MapboxGL extends React.Component {
       if (this.props.initialPopups.length > 0) {
         this.map.on('load', this.onMapLoad);
       }
-      if (!this.draw) {
-        const modes = MapboxDraw.modes;
-        if (this.props.drawingModes && this.props.drawingModes.length > 0) {
-          this.props.drawingModes.forEach((mode) => {
-            modes[mode.name] = mode.mode;
-          });
-        }
-        modes.static = StaticMode;
-        const drawOptions = {displayControlsDefault: false, modes: modes, defaultMode: STATIC_MODE};
-        this.draw = new MapboxDraw(drawOptions);
-        this.map.addControl(this.draw);
-      }
     }
     // check for any interactions
     if (this.props.drawing && this.props.drawing.interaction && this.map) {
+      this.addDrawIfNeeded();
       this.updateInteraction(this.props.drawing);
     }
   }
 
   /** Callback for finished drawings, converts the event's feature
    *  to GeoJSON and then passes the relevant information on to
-   *  this.props.onFeatureDrawn, this.props.onFeatureModified,
-   *  or this.props.onFeatureSelected.
+   *  this.props.onFeatureDrawn, this.props.onFeatureModified.
    *
-   *  @param {string} eventType One of 'drawn', 'modified', or 'selected'.
+   *  @param {string} eventType One of 'drawn', 'modified'.
    *  @param {string} sourceName Name of the geojson source.
-   *  @param {Object} feature OpenLayers feature object.
+   *  @param {Object} collection GeoJSON feature collection.
    *
    */
-  onFeatureEvent(eventType, sourceName, feature) {
-    if (feature !== undefined) {
+  onFeatureEvent(eventType, sourceName, collection) {
+    if (collection !== undefined) {
       // Pass on feature drawn this map object, the target source,
       //  and the drawn feature.
       if (eventType === 'drawn') {
-        this.props.onFeatureDrawn(this, sourceName, feature);
+        this.props.onFeatureDrawn(this, sourceName, collection);
       } else if (eventType === 'modified') {
-        this.props.onFeatureModified(this, sourceName, feature);
-      } else if (eventType === 'selected') {
-        this.props.onFeatureSelected(this, sourceName, feature);
+        this.props.onFeatureModified(this, sourceName, collection);
       }
     }
   }
@@ -301,15 +303,17 @@ export class MapboxGL extends React.Component {
     }
   }
 
-  onDrawCreate(evt, drawingProps, draw, mode, options = {}) {
-    this.onFeatureEvent('drawn', drawingProps.sourceName, evt.features[0]);
+  onDrawCreate(evt, mode, options = {}) {
+    this.onFeatureEvent('drawn', this.props.drawing.sourceName, {type: 'FeatureCollection', features: evt.features});
+    const draw = this.draw;
     window.setTimeout(function() {
       // allow to draw more features
       draw.changeMode(mode, options);
     }, 0);
   }
-  onDrawModify(evt, drawingProps, draw, mode, options = {}) {
-    this.onFeatureEvent('modified', drawingProps.sourceName, evt.features[0]);
+  onDrawModify(evt, mode, options = {}) {
+    this.onFeatureEvent('modified', this.props.drawing.sourceName, {type: 'FeatureCollection', features: evt.features});
+    const draw = this.draw;
     window.setTimeout(function() {
       draw.changeMode(mode, options);
     }, 0);
@@ -371,18 +375,17 @@ export class MapboxGL extends React.Component {
     } else {
       this.draw.changeMode(STATIC_MODE);
     }
-    if (!this.addedDrawListener) {
-      if (drawingProps.sourceName) {
-        const drawCreate = (evt) => {
-          this.onDrawCreate(evt, drawingProps, this.draw, this.afterMode, this.optionsForMode(this.afterMode, evt));
-        };
-        const drawModify =  (evt) => {
-          this.onDrawModify(evt, drawingProps, this.draw, this.afterMode, this.optionsForMode(this.afterMode, evt));
-        };
-        this.map.on('draw.create', drawCreate);
-        this.map.on('draw.update', drawModify);
-        this.addedDrawListener = true;
-      }
+    if (drawingProps.sourceName) {
+      const drawCreate = (evt) => {
+        this.onDrawCreate(evt, this.afterMode, this.optionsForMode(this.afterMode, evt));
+      };
+      const drawModify =  (evt) => {
+        this.onDrawModify(evt, this.afterMode, this.optionsForMode(this.afterMode, evt));
+      };
+      this.map.off('draw.create', drawCreate);
+      this.map.on('draw.create', drawCreate);
+      this.map.off('draw.update', drawModify);
+      this.map.on('draw.update', drawModify);
     }
 
     if (this.activeInteractions) {
@@ -527,8 +530,6 @@ MapboxGL.propTypes = {
   onFeatureDrawn: PropTypes.func,
   /** onFeatureModified callback, triggered on modifyend of the modify interaction. */
   onFeatureModified: PropTypes.func,
-  /** onFeatureSelected callback, triggered on select event of the select interaction. */
-  onFeatureSelected: PropTypes.func,
   /** setMeasureGeometry callback, called when the measure geometry changes. */
   setMeasureGeometry: PropTypes.func,
   /** clearMeasureFeature callback, called when the measure feature is cleared. */
@@ -570,8 +571,6 @@ MapboxGL.defaultProps = {
   onFeatureDrawn: () => {
   },
   onFeatureModified: () => {
-  },
-  onFeatureSelected: () => {
   },
   setMeasureGeometry: () => {
   },
