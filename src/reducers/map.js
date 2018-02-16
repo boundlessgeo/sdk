@@ -406,6 +406,9 @@ function removeSource(state, action) {
  */
 function changeData(state, sourceName, data) {
   const source = state.sources[sourceName];
+  if (!source) {
+    return;
+  }
   const src_mixin = {};
 
   // update the individual source.
@@ -427,6 +430,9 @@ function changeData(state, sourceName, data) {
  */
 function addFeatures(state, action) {
   const source = state.sources[action.sourceName];
+  if (!source) {
+    return;
+  }
   const data = source.data;
 
   // placeholder for the new data
@@ -485,6 +491,9 @@ function addFeatures(state, action) {
  */
 function clusterPoints(state, action) {
   const source = state.sources[action.sourceName];
+  if (!source) {
+    return;
+  }
   const src_mixin = [];
   const cluster_settings = {};
 
@@ -518,6 +527,9 @@ function clusterPoints(state, action) {
 function removeFeatures(state, action) {
   // short hand the source source and the data
   const source = state.sources[action.sourceName];
+  if (!source) {
+    return;
+  }
   const data = source.data;
 
   // filter function, features which MATCH this function will be REMOVED.
