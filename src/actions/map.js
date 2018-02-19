@@ -235,15 +235,17 @@ export function setClusterRadius(sourceName, radius) {
  *  @param {Object} sourceName Name of the source on which the features will be added.
  *  @param {Object[]} features An array of features to add.
  *  @param {number} position The position at which to add the features.
+ *  @param {boolean} clear Should we clear the existing features?
  *
  *  @returns {Object} Action object to pass to reducer.
  */
-export function addFeatures(sourceName, features, position = -1) {
+export function addFeatures(sourceName, features, position = -1, clear = false) {
   return {
     type: MAP.ADD_FEATURES,
     sourceName,
     features,
     position,
+    clear,
   };
 }
 

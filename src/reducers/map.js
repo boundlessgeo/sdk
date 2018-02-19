@@ -427,7 +427,7 @@ function changeData(state, sourceName, data) {
  */
 function addFeatures(state, action) {
   const source = state.sources[action.sourceName];
-  const data = source.data;
+  const data = action.clear ? undefined : source.data;
 
   // placeholder for the new data
   let new_data = null;
