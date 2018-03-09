@@ -860,6 +860,12 @@ export class Map extends React.Component {
       applyStyle(olLayer, fake_style, layers[0].source);
     }
 
+    if (layers.length === 1 && layers[0].type === 'raster') {
+      if (layers[0].paint && layers[0].paint['raster-opacity']) {
+        olLayer.setOpacity(layers[0].paint['raster-opacity']);
+      }
+    }
+
     // handle toggling the layer on or off
     olLayer.setVisible(render_layers.length > 0);
   }
@@ -881,6 +887,7 @@ export class Map extends React.Component {
       case 'raster':
         layer = new TileLayer({
           source,
+          opacity: layers[0].paint ? layers[0].paint['raster-opacity'] : undefined,
         });
         this.applyStyle(layer, layers, sprite);
         return layer;
