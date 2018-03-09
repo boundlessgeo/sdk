@@ -283,7 +283,7 @@ export function getLayersByGroup(layers, groupId) {
  *
  *  @param {Object} state - Current state.
  *  @param {Object} nextState - Next state.
- *  @param {Object} reducerName - The "subtree" that may or may not exist.
+ *  @param {String} reducerName - The "subtree" that may or may not exist.
  *  @param {String} prop - The name of the prop to compare between states.
  *
  *  @returns {Boolean} true if equal and false if values differ.
@@ -293,7 +293,7 @@ export function optionalEquals(state, nextState, reducerName, prop) {
   const next_subtree = nextState[reducerName];
 
   if (subtree === undefined && next_subtree === undefined) {
-    return false;
+    return true;
   }
 
   const value = (subtree === undefined) ? undefined : subtree[prop];

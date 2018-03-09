@@ -932,7 +932,7 @@ describe('Map component', () => {
     expect(sdk_map.map.updateSize).toHaveBeenCalled();
   });
 
-  it('should trigger updateSize with requestRedraw', () => {
+  it('should trigger updateSize with requestRedraw', (done) => {
     const store = createStore(combineReducers({
       map: MapReducer,
       mapinfo: MapInfoReducer,
@@ -941,12 +941,34 @@ describe('Map component', () => {
     const props = {
       store,
     };
+
+    nock('http://dummy')
+      .get(/^.*?SERVICE=WFS&VERSION=1.1.0&SRSNAME=EPSG%3A4326&REQUEST=GetFeature&TYPENAME=dummy&OUTPUTFORMAT=JSON.*$/)
+      .times(4)
+      .reply(200, {
+        type: 'FeatureCollection',
+        features: [],
+      });
+
+    // setup a reasonable set of sources that may throw errors
+    //  when refreshed.
+    store.dispatch(MapActions.addOsmSource('foo'));
+    store.dispatch(MapActions.addWmsSource('wms', 'http://dummy/wms', 'dummy', {asVector: false}));
+    store.dispatch(MapActions.addWfsSource('wfs', 'http://dummy/wfs', 'dummy'));
+
     const wrapper = mount(<ConnectedMap {...props} />);
+
     const sdk_map = wrapper.instance().getWrappedInstance();
 
-    spyOn(sdk_map.map, 'updateSize');
-    store.dispatch(MapInfoActions.requestRedraw());
-    expect(sdk_map.map.updateSize).toHaveBeenCalled();
+    setTimeout(() => {
+      store.dispatch(MapInfoActions.requestRedraw());
+      spyOn(sdk_map.map, 'updateSize');
+
+      setTimeout(() => {
+        expect(sdk_map.map.updateSize).toHaveBeenCalled();
+        done();
+      }, 250);
+    }, 200);
   });
 
 

@@ -158,7 +158,7 @@ export class MapboxGL extends React.Component {
         }
       }
     }
-    // trigger a resie event when the size has changed or a redraw is requested.
+    // trigger a resize event when the size has changed or a redraw is requested.
     if (!optionalEquals(this.props, nextProps, 'mapinfo', 'size')
         || !optionalEquals(this.props, nextProps, 'mapinfo', 'requestedRedraws')) {
       this.map.resize();

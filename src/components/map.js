@@ -162,13 +162,20 @@ function configureTileSource(glSource, mapProjection, time) {
     const source = new XyzSource(Object.assign({
       urls: glSource.tiles,
     }, commonProps));
-    source.setTileLoadFunction((tile, src) => {
+    source.setTileLoadFunction(function(tile, src) {
       // copy the src string.
       let img_src = src.slice();
       if (src.indexOf(BBOX_STRING) !== -1) {
         const bbox = source.getTileGrid().getTileCoordExtent(tile.getTileCoord());
         img_src = src.replace(BBOX_STRING, bbox.toString());
       }
+
+      // check to see if a cache invalidation has been requested.
+      const ck = source.get('_ck');
+      if (ck !== undefined) {
+        img_src = addParam(img_src, '_ck', ck);
+      }
+
       // disabled the linter below as this is how
       //  OpenLayers documents this operation.
       // eslint-disable-next-line
@@ -182,7 +189,15 @@ function configureTileSource(glSource, mapProjection, time) {
         const z = tileCoord[0];
         const x = tileCoord[1];
         const y = tileCoord[2] + (1 << z);
-        return glSource.tiles[idx].replace('{z}', z).replace('{y}', y).replace('{x}', x);
+
+        let url = glSource.tiles[idx].replace('{z}', z).replace('{y}', y).replace('{x}', x);
+
+        // add cache invalidation as requested.
+        const ck = source.get('_ck');
+        if (ck !== undefined) {
+          url = addParam(url, '_ck', ck);
+        }
+        return url;
       });
     }
     return source;
@@ -290,6 +305,18 @@ function configureMvtSource(glSource, accessToken) {
   }
 }
 
+function addParam(url, paramName, paramValue) {
+  let new_url = '' + url;
+  if (new_url.indexOf('?') >= 0) {
+    new_url += '&';
+  } else {
+    new_url += '?';
+  }
+  new_url += paramName + '=' + paramValue;
+
+  return new_url;
+}
+
 function getLoaderFunction(glSource, mapProjection, baseUrl) {
   return function(bbox, resolution, projection) {
     // setup a feature promise to handle async loading
@@ -312,6 +339,12 @@ function getLoaderFunction(glSource, mapProjection, baseUrl) {
       //  for this source.
       if (url.indexOf(BBOX_STRING) >= 0) {
         url = url.replace(BBOX_STRING, bbox.toString());
+      }
+
+      // check to see if a cache invalidation has been requested.
+      const ck = this.get('_ck');
+      if (ck !== undefined) {
+        url = addParam(url, '_ck', ck);
       }
       features_promise = fetch(url).then(response => response.json());
     } else if (typeof glSource.data === 'object'
@@ -562,6 +595,8 @@ export class Map extends React.Component {
 
     const new_time = getKey(nextProps.map.metadata, TIME_KEY);
 
+    const force_redraw = !optionalEquals(this.props, nextProps, 'mapinfo', 'requestedRedraws');
+
     if (old_time !== new_time) {
       // find time dependent layers
       for (let i = 0, ii = nextProps.map.layers.length; i < ii; ++i) {
@@ -580,6 +615,23 @@ export class Map extends React.Component {
         }
       }
     }
+
+    // Force WMS-type layers to refresh.
+    if (force_redraw) {
+      const timestamp = (new Date()).getTime();
+      for (const key in this.sources) {
+        const src = this.sources[key];
+        if (typeof src.updateParams === 'function') {
+          src.updateParams({'_CK': timestamp});
+        } else {
+          // set the time stamp for other loaders which
+          //  check for the _ck attribute.
+          src.set('_ck', timestamp);
+          src.refresh();
+        }
+      }
+    }
+
     const map_view = this.map.getView();
     const map_proj = map_view.getProjection();
 
@@ -607,7 +659,7 @@ export class Map extends React.Component {
     // check the sources diff
     const next_sources_version = getVersion(nextProps.map, SOURCE_VERSION_KEY);
     const next_layer_version = getVersion(nextProps.map, LAYER_VERSION_KEY);
-    if (this.sourcesVersion !== next_sources_version) {
+    if (this.sourcesVersion !== next_sources_version || force_redraw) {
       this.configureSources(nextProps.map.sources, next_sources_version)
         .then(() => {
           this.configureLayers(nextProps.map.sources, nextProps.map.layers, next_layer_version, nextProps.map.sprite, this.props.declutter);
@@ -626,8 +678,8 @@ export class Map extends React.Component {
         const version_key = dataVersionKey(src_name);
 
 
-        if (this.props.map.metadata !== undefined &&
-            this.props.map.metadata[version_key] !== nextProps.map.metadata[version_key]) {
+        if (force_redraw || (this.props.map.metadata !== undefined &&
+            this.props.map.metadata[version_key] !== nextProps.map.metadata[version_key])) {
           const next_src = nextProps.map.sources[src_name];
           updateGeojsonSource(this.sources[src_name], next_src, map_view, this.props.mapbox.baseUrl);
         }
@@ -652,10 +704,30 @@ export class Map extends React.Component {
       this.map.renderSync();
     }
 
-    if (!optionalEquals(this.props, nextProps, 'mapinfo', 'size')
-        || !optionalEquals(this.props, nextProps, 'mapinfo', 'requestedRedraws')) {
+    if (force_redraw || !optionalEquals(this.props, nextProps, 'mapinfo', 'size')) {
       this.map.updateSize();
     }
+
+    /*
+    if (force_redraw) {
+      this.map.set('requestedRedraw', (new Date()).getTime());
+      // force a cache busting redraw...
+      const timestamp = (new Date()).getTime();
+      for (const key in this.sources) {
+        const src = this.sources[key];
+        console.log('update layer', key, src.updateParams);
+        if (typeof src.updateParams === 'function') {
+          src.updateParams({'_ck': timestamp});
+        } else {
+          src.set('_ck', timestamp);
+          src.refresh({force: true});
+        }
+      }
+      // ensure the redraw happens.
+      // this.map.updateSize();
+    }
+    */
+
 
     // This should always return false to keep
     // render() from being called.
