@@ -961,13 +961,10 @@ describe('Map component', () => {
     const sdk_map = wrapper.instance().getWrappedInstance();
 
     setTimeout(() => {
-      store.dispatch(MapInfoActions.requestRedraw());
       spyOn(sdk_map.map, 'updateSize');
-
-      setTimeout(() => {
-        expect(sdk_map.map.updateSize).toHaveBeenCalled();
-        done();
-      }, 100);
+      store.dispatch(MapInfoActions.requestRedraw());
+      expect(sdk_map.map.updateSize).toHaveBeenCalled();
+      done();
     }, 100);
   });
 

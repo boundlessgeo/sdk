@@ -708,27 +708,6 @@ export class Map extends React.Component {
       this.map.updateSize();
     }
 
-    /*
-    if (force_redraw) {
-      this.map.set('requestedRedraw', (new Date()).getTime());
-      // force a cache busting redraw...
-      const timestamp = (new Date()).getTime();
-      for (const key in this.sources) {
-        const src = this.sources[key];
-        console.log('update layer', key, src.updateParams);
-        if (typeof src.updateParams === 'function') {
-          src.updateParams({'_ck': timestamp});
-        } else {
-          src.set('_ck', timestamp);
-          src.refresh({force: true});
-        }
-      }
-      // ensure the redraw happens.
-      // this.map.updateSize();
-    }
-    */
-
-
     // This should always return false to keep
     // render() from being called.
     return false;
