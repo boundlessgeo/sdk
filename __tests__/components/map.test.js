@@ -967,8 +967,8 @@ describe('Map component', () => {
       setTimeout(() => {
         expect(sdk_map.map.updateSize).toHaveBeenCalled();
         done();
-      }, 250);
-    }, 200);
+      }, 100);
+    }, 100);
   });
 
 
