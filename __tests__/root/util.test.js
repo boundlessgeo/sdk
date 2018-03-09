@@ -233,4 +233,44 @@ describe('util', () => {
     // check to see the first two layers were found.
     expect(matches).toEqual(layers.slice(0, 2));
   });
+
+  describe('optionalEquals tests', function() {
+    function makeTree(value) {
+      return {
+        element: {
+          name: value,
+        },
+      };
+    }
+    it('finds equal values between two fully defined trees', function() {
+      const state = makeTree('A');
+      const next_state = makeTree('A');
+      expect(util.optionalEquals(state, next_state, 'element', 'name')).toEqual(true);
+    });
+
+    it('finds unequal values between two fully defined trees', function() {
+      const state = makeTree('A');
+      const next_state = makeTree('B');
+      expect(util.optionalEquals(state, next_state, 'element', 'name')).toEqual(false);
+    });
+
+    it('finds unequal values between a tree with an undefined value', function() {
+      const state = makeTree('A');
+      const next_state = makeTree(undefined);
+      expect(util.optionalEquals(state, next_state, 'element', 'name')).toEqual(false);
+    });
+
+    it('is false when either tree is undefined;', function() {
+      let state = makeTree('A');
+      let next_state = {};
+      expect(util.optionalEquals(state, next_state, 'element', 'name')).toEqual(false);
+
+      state = {};
+      next_state = makeTree('B');
+      expect(util.optionalEquals(state, next_state, 'element', 'name')).toEqual(false);
+    });
+
+
+  });
+
 });

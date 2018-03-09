@@ -36,6 +36,7 @@ const createMapMock = () => {
     addControl: () => {},
     on: () => {},
     off: () => {},
+    resize: () => {},
     queryRenderedFeatures: () => {
       return [{
         layer: {

@@ -86,7 +86,7 @@ import {finalizeMeasureFeature, setMeasureFeature, clearMeasureFeature} from '..
 
 import ClusterSource from '../source/cluster';
 
-import {parseQueryString, jsonClone, jsonEquals, getLayerById, degreesToRadians, radiansToDegrees, getKey, encodeQueryObject, isLayerVisible} from '../util';
+import {parseQueryString, jsonClone, jsonEquals, getLayerById, degreesToRadians, radiansToDegrees, getKey, encodeQueryObject, isLayerVisible, optionalEquals} from '../util';
 
 import fetchJsonp from 'fetch-jsonp';
 
@@ -652,9 +652,8 @@ export class Map extends React.Component {
       this.map.renderSync();
     }
 
-    const size = this.props.mapinfo !== undefined ? this.props.mapinfo.size : null;
-    const next_size = nextProps.mapinfo !== undefined ? nextProps.mapinfo.size : null;
-    if (size && next_size && (size[0] !== next_size[0] || size[1] !== next_size[1])) {
+    if (!optionalEquals(this.props, nextProps, 'mapinfo', 'size')
+        || !optionalEquals(this.props, nextProps, 'mapinfo', 'requestedRedraws')) {
       this.map.updateSize();
     }
 

@@ -31,5 +31,11 @@ describe('test that mapinfo actions are properly created', () => {
     });
   });
 
+  it('should issue an action to request a map redraw', () => {
+    expect(actions.requestRedraw()).toEqual({
+      type: MAPINFO.REQUEST_REDRAW,
+    });
+  });
+
 });
 

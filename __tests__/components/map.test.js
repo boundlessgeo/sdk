@@ -932,6 +932,24 @@ describe('Map component', () => {
     expect(sdk_map.map.updateSize).toHaveBeenCalled();
   });
 
+  it('should trigger updateSize with requestRedraw', () => {
+    const store = createStore(combineReducers({
+      map: MapReducer,
+      mapinfo: MapInfoReducer,
+    }));
+
+    const props = {
+      store,
+    };
+    const wrapper = mount(<ConnectedMap {...props} />);
+    const sdk_map = wrapper.instance().getWrappedInstance();
+
+    spyOn(sdk_map.map, 'updateSize');
+    store.dispatch(MapInfoActions.requestRedraw());
+    expect(sdk_map.map.updateSize).toHaveBeenCalled();
+  });
+
+
   it('should update the source url', (done) => {
     const store = createStore(combineReducers({
       map: MapReducer,

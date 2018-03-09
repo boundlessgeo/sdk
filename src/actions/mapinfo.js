@@ -78,3 +78,13 @@ export function setProjection(projection) {
     projection,
   };
 }
+
+/** Request that the map redraws.
+ *
+ *  @returns {Object} Action object to request a map redraw.
+ */
+export function requestRedraw() {
+  return {
+    type: MAPINFO.REQUEST_REDRAW,
+  };
+}

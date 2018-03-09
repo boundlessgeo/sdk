@@ -278,3 +278,26 @@ export function getLayersByGroup(layers, groupId) {
   }
   return group_layers;
 }
+
+/** Compare the value of a prop from an optional state-tree.
+ *
+ *  @param {Object} state - Current state.
+ *  @param {Object} nextState - Next state.
+ *  @param {Object} reducerName - The "subtree" that may or may not exist.
+ *  @param {String} prop - The name of the prop to compare between states.
+ *
+ *  @returns {Boolean} true if equal and false if values differ.
+ */
+export function optionalEquals(state, nextState, reducerName, prop) {
+  const subtree = state[reducerName];
+  const next_subtree = nextState[reducerName];
+
+  if (subtree === undefined && next_subtree === undefined) {
+    return false;
+  }
+
+  const value = (subtree === undefined) ? undefined : subtree[prop];
+  const nextValue = (next_subtree === undefined) ? undefined : next_subtree[prop];
+
+  return jsonEquals(value, nextValue);
+}
