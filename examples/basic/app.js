@@ -192,11 +192,11 @@ function main() {
           <button
             className="sdk-btn"
             onClick={() => {
-              const v = this.opacityInput.value / 100;
+              const new_opacity = this.opacityInput.value / 100;
 
               store.dispatch(mapActions.updateLayer('osm', {
                 paint: Object.assign({}, layer.paint, {
-                  'raster-opacity': v,
+                  'raster-opacity': new_opacity,
                 })
               }));
             }}
