@@ -23,10 +23,18 @@ const defaultState = {
     lngLat: null,
     coordinate: null,
   },
+  requestedRedraws: 0,
   extent: null,
   resolution: null,
   projection: 'EPSG:3857',
 };
+
+function requestRedraw(state) {
+  const next_redraw = state.requestedRedraws + 1;
+  return Object.assign({}, state, {
+    requestedRedraws: next_redraw,
+  });
+}
 
 /** Map info reducer.
  *  @param {Object} state The redux state.
@@ -46,6 +54,8 @@ export default function mapInfoReducer(state = defaultState, action) {
       return Object.assign({}, state, {resolution: action.resolution});
     case MAPINFO.SET_PROJECTION:
       return Object.assign({}, state, {projection: action.projection});
+    case MAPINFO.REQUEST_REDRAW:
+      return requestRedraw(state);
     default:
       return state;
   }

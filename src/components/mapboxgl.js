@@ -18,7 +18,7 @@ import uuid from 'uuid';
 import {connect} from 'react-redux';
 import {setView, setBearing} from '../actions/map';
 import {setMapSize, setMousePosition, setMapExtent, setResolution, setProjection} from '../actions/mapinfo';
-import {getResolutionForZoom, getKey} from '../util';
+import {getResolutionForZoom, getKey, optionalEquals} from '../util';
 import MapCommon, {MapRender} from './map-common';
 
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
@@ -158,6 +158,12 @@ export class MapboxGL extends React.Component {
         }
       }
     }
+    // trigger a resize event when the size has changed or a redraw is requested.
+    if (!optionalEquals(this.props, nextProps, 'mapinfo', 'size')
+        || !optionalEquals(this.props, nextProps, 'mapinfo', 'requestedRedraws')) {
+      this.map.resize();
+    }
+
     // change the current interaction as needed
     if (nextProps.drawing && (nextProps.drawing.interaction !== this.props.drawing.interaction
         || nextProps.drawing.sourceName !== this.props.drawing.sourceName)) {

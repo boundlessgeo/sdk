@@ -14,6 +14,7 @@ describe('mapinfo reducer', () => {
         lngLat: null,
         coordinate: null,
       },
+      requestedRedraws: 0,
       extent: null,
       projection: 'EPSG:3857',
       resolution: null,
@@ -64,6 +65,21 @@ describe('mapinfo reducer', () => {
         lngLat: {lng: 50, lat: 45},
         coordinate: [100000, 80000],
       },
+    });
+  });
+
+  it('should increment the requested redraws', () => {
+    let state = {
+      requestedRedraws: 0,
+    };
+    deepFreeze(state);
+
+    const action = {
+      type: MAPINFO.REQUEST_REDRAW,
+    };
+
+    expect(reducer(state, action)).toEqual({
+      requestedRedraws: 1,
     });
   });
 });
