@@ -659,8 +659,14 @@ export class Map extends React.Component {
     // check the sources diff
     const next_sources_version = getVersion(nextProps.map, SOURCE_VERSION_KEY);
     const next_layer_version = getVersion(nextProps.map, LAYER_VERSION_KEY);
+
+    // defeault to the source-configureation promise to being resolved.
+    let sources_promise = new Promise((resolve, reject) => {
+      resolve(true);
+    });
+
     if (this.sourcesVersion !== next_sources_version || force_redraw) {
-      this.configureSources(nextProps.map.sources, next_sources_version)
+      sources_promise = this.configureSources(nextProps.map.sources, next_sources_version)
         .then(() => {
           this.configureLayers(nextProps.map.sources, nextProps.map.layers, next_layer_version, nextProps.map.sprite, this.props.declutter);
         }).catch((error) => {
@@ -669,22 +675,30 @@ export class Map extends React.Component {
     } else if (this.layersVersion !== next_layer_version) {
       this.configureLayers(nextProps.map.sources, nextProps.map.layers, next_layer_version, nextProps.map.sprite, this.props.declutter);
     }
-    // check the vector sources for data changes
-    const src_names = Object.keys(nextProps.map.sources);
-    for (let i = 0, ii = src_names.length; i < ii; i++) {
-      const src_name = src_names[i];
-      const src = this.props.map.sources[src_name];
-      if (src && src.type === 'geojson') {
-        const version_key = dataVersionKey(src_name);
+
+    // wait for the sources to be ready.
+    sources_promise
+      .then(() => {
+        // check the vector sources for data changes
+        const src_names = Object.keys(nextProps.map.sources);
+        for (let i = 0, ii = src_names.length; i < ii; i++) {
+          const src_name = src_names[i];
+          const src = this.props.map.sources[src_name];
+          if (src && src.type === 'geojson') {
+            const version_key = dataVersionKey(src_name);
 
 
-        if (force_redraw || (this.props.map.metadata !== undefined &&
-            this.props.map.metadata[version_key] !== nextProps.map.metadata[version_key])) {
-          const next_src = nextProps.map.sources[src_name];
-          updateGeojsonSource(this.sources[src_name], next_src, map_view, this.props.mapbox.baseUrl);
+            if (force_redraw || (this.props.map.metadata !== undefined &&
+                this.props.map.metadata[version_key] !== nextProps.map.metadata[version_key])) {
+              const next_src = nextProps.map.sources[src_name];
+              updateGeojsonSource(this.sources[src_name], next_src, map_view, this.props.mapbox.baseUrl);
+            }
+          }
         }
-      }
-    }
+      })
+      .catch((error) => {
+        console.error('An error occured.', error);
+      });
 
     // do a quick sweep to remove any popups
     //  that have been closed.
