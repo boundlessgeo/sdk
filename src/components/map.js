@@ -660,7 +660,7 @@ export class Map extends React.Component {
     const next_sources_version = getVersion(nextProps.map, SOURCE_VERSION_KEY);
     const next_layer_version = getVersion(nextProps.map, LAYER_VERSION_KEY);
 
-    // defeault to the source-configureation promise to being resolved.
+    // default to the source-configuration promise to being resolved.
     let sources_promise = new Promise((resolve, reject) => {
       resolve(true);
     });
