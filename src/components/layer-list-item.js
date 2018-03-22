@@ -119,8 +119,9 @@ export default class SdkLayerListItem extends React.Component {
   render() {
     const layer = this.props.layer;
     const checkbox = this.getVisibilityControl();
+    const error_class = this.props.error ? ' sdk-layer-error' : '';
     const markup = (
-      <li className="sdk-layer" key={layer.id}>
+      <li className={`sdk-layer${error_class}`} key={layer.id}>
         <span className="sdk-checkbox">{checkbox}</span>
         <span className="sdk-name">{getLayerTitle(this.props.layer)}</span>
       </li>
@@ -167,6 +168,15 @@ SdkLayerListItem.propTypes = {
      */
     id: PropTypes.string,
   }).isRequired,
+  /**
+   * If the layer's source has an error, display
+   *  the layer as "errored".
+   */
+  error: PropTypes.bool,
+};
+
+SdkLayerListItem.defaultProps = {
+  error: false,
 };
 
 export const types = 'layerlistitem';

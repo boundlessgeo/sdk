@@ -9,6 +9,10 @@ import {Provider} from 'react-redux';
 
 import MapReducer from '@boundlessgeo/sdk/reducers/map';
 import * as MapActions from '@boundlessgeo/sdk/actions/map';
+
+import MapInfoReducer from '@boundlessgeo/sdk/reducers/mapinfo';
+import {setSourceError} from '@boundlessgeo/sdk/actions/mapinfo';
+
 import {isLayerVisible} from '@boundlessgeo/sdk/util';
 
 import SdkLayerList from '@boundlessgeo/sdk/components/layer-list';
@@ -80,6 +84,7 @@ describe('test the LayerList component', () => {
   beforeEach(() => {
     store = createStore(combineReducers({
       map: MapReducer,
+      mapinfo: MapInfoReducer,
     }), {
       map: {
         version: 8,
@@ -219,7 +224,7 @@ describe('test the LayerList component', () => {
     expect(isLayerVisible(store.getState().map.layers[0])).toBe(true);
   });
 
-  it('should handle basic grouping', () => {
+  function setupGroups() {
     store.dispatch(MapActions.updateMetadata({
       'mapbox:groups': {
         'background': {
@@ -245,8 +250,22 @@ describe('test the LayerList component', () => {
         'mapbox:group': 'overlays'
       }
     }));
+
+  }
+
+  it('should handle basic grouping', () => {
+    setupGroups();
     const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
+  });
+
+  it('should handle rendering an error on a group', () => {
+    setupGroups();
+
+    // add chaos to the wms layer.
+    store.dispatch(setSourceError('wms'));
+    const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} /></Provider>);
+    expect(wrapper.html().indexOf('sdk-layer-error') > 0).toBe(true);
   });
 
   it('should handle hiding layers', () => {
@@ -257,6 +276,12 @@ describe('test the LayerList component', () => {
     }));
     const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} /></Provider>);
     expect(wrapper.html()).toMatchSnapshot();
+  });
+
+  it('should handle rendering a layer with an error', () => {
+    store.dispatch(setSourceError('wms'));
+    const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} /></Provider>);
+    expect(wrapper.html().indexOf('sdk-layer-error') > 0).toBe(true);
   });
 
   it('should handle a custom list class', () => {

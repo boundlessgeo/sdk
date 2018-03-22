@@ -301,3 +301,16 @@ export function optionalEquals(state, nextState, reducerName, prop) {
 
   return jsonEquals(value, nextValue);
 }
+
+/** Check if the layer's source has an error set.
+ *  This requires the MapInfo reducer for sourceErrors to
+ *  be set.
+ *
+ *  @param {Object} layerDef The definition of the layer from the state.
+ *  @param {Object} sourceErrors The sourceErrors object from the mapinfo reducer.
+ *
+ * @returns {Boolean} true when an error, false otherwise.
+ */
+export function hasSourceError(layerDef, sourceErrors) {
+  return (sourceErrors && sourceErrors[layerDef.source] === true);
+}

@@ -17,7 +17,7 @@ import PropTypes from 'prop-types';
 import HTML5Backend from 'react-dnd-html5-backend';
 import {DragDropContext} from 'react-dnd';
 import {LAYERLIST_HIDE_KEY, GROUP_KEY, GROUPS_KEY} from '../constants';
-import {getLayerIndexById} from '../util';
+import {getLayerIndexById, hasSourceError} from '../util';
 import {SdkLayerListItemDD} from './layer-list-item';
 
 export class SdkList extends React.Component {
@@ -54,11 +54,14 @@ export class SdkLayerListGroup extends React.Component {
           layers={this.props.layers}
           layer={this.props.childLayers[i]}
           groupId={this.props.groupId}
+          error={this.props.error}
         />
       );
     }
 
-    return (<li>{this.props.group.name}<ul>{children}</ul></li>);
+    const errors = this.props.error ? ' sdk-layer-error' : '';
+
+    return (<li className={`sdk-layer-group${errors}`}>{this.props.group.name}<ul>{children}</ul></li>);
   }
 }
 
@@ -91,6 +94,12 @@ class SdkLayerList extends React.Component {
   }
 
   addGroup(layers, groupName, groups, group_layers) {
+    // show an error if any of the layers in the group have an error.
+    let has_error = false;
+    for (let i = 0, ii = group_layers.length; i < ii; i++) {
+      has_error = has_error || hasSourceError(group_layers[i], this.props.sourceErrors);
+    }
+
     const group_props = Object.assign({}, this.props.groupProps, {
       enableDD: this.props.enableDD,
       key: groupName,
@@ -99,6 +108,7 @@ class SdkLayerList extends React.Component {
       childLayers: group_layers,
       layers: this.props.layers,
       layerClass: this.layerClass,
+      error: has_error,
     });
 
     layers.unshift(<this.groupClass {...group_props} />);
@@ -136,7 +146,16 @@ class SdkLayerList extends React.Component {
         }
       } else if (!item.metadata || item.metadata[LAYERLIST_HIDE_KEY] !== true) {
         group_layers = this.handlePendingGroup(layers, group_layers, groupName, groups);
-        layers.unshift(<this.layerClass enableDD={this.props.enableDD} index={i} key={i} layers={this.props.layers} layer={item} />);
+        layers.unshift(
+          <this.layerClass
+            enableDD={this.props.enableDD}
+            index={i}
+            key={i}
+            layers={this.props.layers}
+            layer={item}
+            error={hasSourceError(item, this.props.sourceErrors)}
+          />
+        );
       }
     }
     this.handlePendingGroup(layers, group_layers, groupName, groups);
@@ -197,6 +216,7 @@ function mapStateToProps(state) {
   return {
     layers: state.map.layers,
     metadata: state.map.metadata,
+    sourceErrors: state.mapinfo ? state.mapinfo.sourceErrors : {},
   };
 }
 

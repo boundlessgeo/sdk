@@ -2,7 +2,7 @@
  *
  */
 
-/* global xit, it, describe, expect, beforeEach, afterEach */
+/* global it, it, describe, expect, beforeEach, afterEach */
 
 import React from 'react';
 import {createStore, combineReducers} from 'redux';
@@ -45,7 +45,14 @@ describe('tests for the geojson-type map sources', () => {
     expect(map).not.toBe(undefined);
   });
 
-  function testGeojsonData(done, data, nFeatures) {
+  function testGeojsonData(done, data, nFeatures, silence = false) {
+    // when expecting console.errror to show something in the library,
+    //  silence it from reporting.
+    let error;
+    if (silence) {
+      error = global.console.error;
+      global.console.error = () => {};
+    }
     const src_name = 'test-source';
     store.dispatch(MapActions.addSource(src_name, {
       type: 'geojson',
@@ -53,6 +60,9 @@ describe('tests for the geojson-type map sources', () => {
     }));
 
     window.setTimeout(() => {
+      if (silence) {
+        global.console.error = error;
+      }
       // check to see if the map source is now defined.
       expect(map.sources[src_name]).not.toBe(undefined);
 
@@ -141,7 +151,11 @@ describe('tests for the geojson-type map sources', () => {
   });
 
   it('tries to fetch a geojson file that does not exist', (done) => {
-    testGeojsonData(done, 'http://example.com/no-where.geojson', 0);
+    nock('http://example.com')
+      .get('/no-where.geojson')
+      .reply(404, 'alphabet soup');
+
+    testGeojsonData(done, 'http://example.com/no-where.geojson', 0, true);
   });
 
   it('fetches a bad geojson file', (done) => {
@@ -149,7 +163,7 @@ describe('tests for the geojson-type map sources', () => {
       .get('/bad.geojson')
       .reply(200, 'alphabet soup');
 
-    testGeojsonData(done, 'http://example.com/bad.geojson', 0);
+    testGeojsonData(done, 'http://example.com/bad.geojson', 0, true);
   });
 
   it('fetches by bbox then by relative url', (done) => {
@@ -188,6 +202,6 @@ describe('tests for the geojson-type map sources', () => {
       done();
     };
 
-    testGeojsonData(follow_up, 'http://dummy/missing.geojson', 0);
+    testGeojsonData(follow_up, 'http://dummy/missing.geojson', 0, true);
   });
 });
