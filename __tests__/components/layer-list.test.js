@@ -265,7 +265,7 @@ describe('test the LayerList component', () => {
     // add chaos to the wms layer.
     store.dispatch(setSourceError('wms'));
     const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} /></Provider>);
-    expect(wrapper.html().indexOf('sdk-layer-error') > 0).toBe(true);
+    expect(wrapper.find('.sdk-layer-error').length).toBe(3);
   });
 
   it('should handle hiding layers', () => {
@@ -281,7 +281,7 @@ describe('test the LayerList component', () => {
   it('should handle rendering a layer with an error', () => {
     store.dispatch(setSourceError('wms'));
     const wrapper = mount(<Provider store={store}><SdkLayerList enableDD={false} /></Provider>);
-    expect(wrapper.html().indexOf('sdk-layer-error') > 0).toBe(true);
+    expect(wrapper.find('.sdk-layer-error').length).toBe(1);
   });
 
   it('should handle a custom list class', () => {
