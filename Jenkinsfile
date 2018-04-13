@@ -36,6 +36,7 @@ node {
                      && npm run bundle-examples \
                      && npm run jsdoc \
                      && npm run create:archive \
+                     && ls -las $SDK_PEM \
                      && ssh -i $SDK_PEM root@sdk.boundlessgeo.com 'rm -rf /var/www/*' \
                      && scp -i $SDK_PEM build/sdk-examples.tgz root@sdk.boundlessgeo.com:/tmp \
                      && ssh -i $SDK_PEM root@sdk.boundlessgeo.com 'tar -xzpf /tmp/sdk-examples.tgz -C /var/www/''
