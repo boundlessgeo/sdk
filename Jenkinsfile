@@ -4,6 +4,7 @@ node {
     string(credentialsId: 'sq-boundlessgeo-token', variable: 'SONAR_TOKEN'),
     string(credentialsId: 'sonarqube-github-token', variable: 'SONAR_GITHUB_TOKEN'),
     string(credentialsId: 'NPM_TOKEN', variable: 'NPM_TOKEN'),
+    file(credentialsId: 'ssh_sdk_docs', variable: 'SDK_PEM'),
   ]) {
     try {
       stage('Checkout'){
@@ -28,17 +29,17 @@ node {
       }
 
       stage('Publish online examples and docs'){
-          sh """
-            docker run -v \$(pwd -P):/web \
+        sh """
+          docker run -v \$(pwd -P):/web \
                      -w /web quay.io/boundlessgeo/node-yarn-sonar bash \
                      -c 'npm i \
-                       && npm run bundle-examples \
-                       && npm run jsdoc \
-                       && npm run create:archive \
-                       && ssh root@sdk.boundlessgeo.com 'rm -rf /var/www/*' \
-                       && scp build/sdk-examples.tgz root@sdk.boundlessgeo.com:/tmp \
-                       && ssh root@sdk.boundlessgeo.com 'tar -xzpf /tmp/sdk-examples.tgz -C /var/www/''
-          """
+                     && npm run bundle-examples \
+                     && npm run jsdoc \
+                     && npm run create:archive \
+                     && ssh -i $SDK_PEM root@sdk.boundlessgeo.com 'rm -rf /var/www/*' \
+                     && scp -i $SDK_PEM build/sdk-examples.tgz root@sdk.boundlessgeo.com:/tmp \
+                     && ssh -i $SDK_PEM root@sdk.boundlessgeo.com 'tar -xzpf /tmp/sdk-examples.tgz -C /var/www/''
+              """
       }
 
       if (env.CHANGE_ID != null) {
