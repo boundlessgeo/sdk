@@ -37,7 +37,7 @@ node {
                        && npm run create:archive \
                        && ssh root@sdk.boundlessgeo.com 'rm -rf /var/www/*' \
                        && scp build/sdk-examples.tgz root@sdk.boundlessgeo.com:/tmp \
-                       && ssh root@sdk.boundlessgeo.com 'tar -xzpf /tmp/sdk-examples.tgz -C /var/www/'
+                       && ssh root@sdk.boundlessgeo.com 'tar -xzpf /tmp/sdk-examples.tgz -C /var/www/''
           """
       }
 
