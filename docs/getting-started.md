@@ -148,6 +148,7 @@ After `class App extends Component {`, add the following lines:
 componentDidMount() {
   // add the OSM source
   store.dispatch(SdkMapActions.addSource('osm', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.',
     type: 'raster',
     tileSize: 256,
     tiles: [
