@@ -4,7 +4,6 @@ node {
     string(credentialsId: 'sq-boundlessgeo-token', variable: 'SONAR_TOKEN'),
     string(credentialsId: 'sonarqube-github-token', variable: 'SONAR_GITHUB_TOKEN'),
     string(credentialsId: 'NPM_TOKEN', variable: 'NPM_TOKEN'),
-    file(credentialsId: 'ssh_sdk_docs', variable: 'SDK_PEM'),
   ]) {
     try {
       stage('Checkout'){
@@ -36,10 +35,9 @@ node {
                      && npm run bundle-examples \
                      && npm run jsdoc \
                      && npm run create:archive \
-                     && echo $SDK_PEM > sdk.pem && chmod 400 sdk.pem \
-                     && ssh -i sdk.pem root@sdk.boundlessgeo.com 'rm -rf /var/www/*' \
-                     && scp -i sdk.pem build/sdk-examples.tgz root@sdk.boundlessgeo.com:/tmp \
-                     && ssh -i sdk.pem root@sdk.boundlessgeo.com 'tar -xzpf /tmp/sdk-examples.tgz -C /var/www/''
+                     && ssh root@sdk.boundlessgeo.com 'rm -rf /var/www/*' \
+                     && scp build/sdk-examples.tgz root@sdk.boundlessgeo.com:/tmp \
+                     && ssh root@sdk.boundlessgeo.com 'tar -xzpf /tmp/sdk-examples.tgz -C /var/www/''
               """
       }
 
