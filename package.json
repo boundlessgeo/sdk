@@ -21,7 +21,8 @@
     "dist:copy": "node tasks/dist-copy.js && node tasks/create-package-json.js",
     "dist": "npm run build:js && npm run dist:copy && npm run sass -- -o ./dist",
     "build:doc-css": "npm run sass -- -o ./docs",
-    "build:jsdoc": "jsdoc -r ./src -R docs/getting-started.md -d docs/out -c docs/conf.json",
+    "build:jsdoc": "jsdoc -r ./src -R docs/getting-started.md -d build/hosted/examples/docs -c docs/conf.json",
+    "create:archive": "cd build/hosted && tar -czpf ../sdk-examples.tgz *",
     "jsdoc": "npm run build:doc-css && npm run build:jsdoc",
     "check-docs": "cd docs && ./doc_checker.sh"
   },
