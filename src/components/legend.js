@@ -349,6 +349,10 @@ export class Legend extends React.Component {
     }
     const layer_src = this.props.sources[source_name];
 
+    if (!layer_src) {
+      return null;
+    }
+
     switch (layer_src.type) {
       case 'raster':
         return getRasterLegend(layer, layer_src, this.props.async, this.props.fetchOptions);

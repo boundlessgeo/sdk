@@ -3,7 +3,7 @@
 import React from 'react';
 import {mount, configure} from 'enzyme';
 import nock from 'nock';
-import  Adapter from 'enzyme-adapter-react-16';
+import Adapter from 'enzyme-adapter-react-16';
 
 import {createStore, combineReducers} from 'redux';
 import MapReducer from '@boundlessgeo/sdk/reducers/map';
@@ -141,6 +141,9 @@ describe('test the Legend component', () => {
               'bnd:legend-type': 'image',
               'bnd:legend-content': TEST_IMAGE,
             },
+          }, {
+            id: 'null-layer-source',
+            source: null,
           },
         ],
       },
@@ -187,6 +190,11 @@ describe('test the Legend component', () => {
   it('should render an image legend if unknown source type', () => {
     const wrapper = mount(<SdkLegend layerId="unknown-layer" store={store} />);
     expect(wrapper.html().indexOf(TEST_IMAGE)).toBeGreaterThan(-1);
+  });
+
+  it('should return empty element if no layer source is present', () => {
+    const wrapper = mount(<SdkLegend layerId="null-layer-source" store={store} />);
+    expect(wrapper.html()).toBe('<div class="sdk-legend"></div>');
   });
 
   it('should render an href legend', (done) => {
