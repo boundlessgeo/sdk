@@ -1380,7 +1380,7 @@ export class Map extends React.Component {
     const view = map.getView();
     const map_prj = view.getProjection();
     let url, features_by_layer, layer_name;
-    if (layer.metadata[QUERYABLE_KEY] && isLayerVisible(layer)) {
+    if (layer.metadata && layer.metadata[QUERYABLE_KEY] && isLayerVisible(layer)) {
       const map_resolution = view.getResolution();
       const source = this.sources[layer.source];
       if (source instanceof TileWMSSource) {
