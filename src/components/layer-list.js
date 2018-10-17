@@ -14,8 +14,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
-import HTML5Backend from 'react-dnd-html5-backend';
-import {DragDropContext} from 'react-dnd';
 import {LAYERLIST_HIDE_KEY, GROUP_KEY, GROUPS_KEY} from '../constants';
 import {getLayerIndexById, hasSourceError} from '../util';
 import {SdkLayerListItemDD} from './layer-list-item';
@@ -219,7 +217,5 @@ function mapStateToProps(state) {
     sourceErrors: state.mapinfo ? state.mapinfo.sourceErrors : {},
   };
 }
-
-SdkLayerList = DragDropContext(HTML5Backend)(SdkLayerList);
 
 export default connect(mapStateToProps)(SdkLayerList);

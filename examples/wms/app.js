@@ -9,6 +9,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
 import WMSCapabilitiesFormat from 'ol/format/WMSCapabilities';
+import {DragDropContext} from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 import RendererSwitch from '../rendererswitch';
 import SdkZoomControl from '@boundlessgeo/sdk/components/map/zoom-control';
@@ -112,13 +114,16 @@ function main() {
     </RendererSwitch>
   </Provider>, document.getElementById('map'));
 
+  // Add DND to the LayerList
+  const DragDropLayerList = DragDropContext(HTML5Backend)(SdkLayerList);
+
   // add some buttons to demo some actions.
   ReactDOM.render((
     <div>
       <h3>Try it out</h3>
       <h4>Layers</h4>
       <Provider store={store}>
-        <SdkLayerList />
+        <DragDropLayerList />
       </Provider>
       <button onClick={addWMS}>Add WMS Layer</button>
     </div>

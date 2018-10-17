@@ -4,6 +4,9 @@ import React from 'react';
 import {mount, configure} from 'enzyme';
 import  Adapter from 'enzyme-adapter-react-16';
 
+import {DragDropContext} from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+
 import {createStore, combineReducers} from 'redux';
 import {Provider} from 'react-redux';
 
@@ -15,11 +18,13 @@ import {setSourceError} from '@boundlessgeo/sdk/actions/mapinfo';
 
 import {isLayerVisible} from '@boundlessgeo/sdk/util';
 
-import SdkLayerList from '@boundlessgeo/sdk/components/layer-list';
+import LayerList from '@boundlessgeo/sdk/components/layer-list';
 import SdkLayerListItem from  '@boundlessgeo/sdk/components/layer-list-item';
 import {layerListItemTarget} from '@boundlessgeo/sdk/components/layer-list-item';
 
 configure({adapter: new Adapter()});
+
+const SdkLayerList = DragDropContext(HTML5Backend)(LayerList);
 
 class TestLayerListItem extends SdkLayerListItem {
   render() {

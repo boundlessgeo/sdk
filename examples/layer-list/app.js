@@ -9,7 +9,8 @@ import {createStore, combineReducers} from 'redux';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {DragSource, DropTarget} from 'react-dnd';
+import {DragDropContext, DragSource, DropTarget} from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 import {types, layerListItemSource, layerListItemTarget, collect, collectDrop} from '@boundlessgeo/sdk/components/layer-list-item';
 import SdkMap from '@boundlessgeo/sdk/components/map';
 import SdkZoomControl from '@boundlessgeo/sdk/components/map/zoom-control';
@@ -226,13 +227,15 @@ function main() {
     </SdkMap>
   </Provider>, document.getElementById('map'));
 
-  // add some buttons to demo some actions.
+  // Add DND to the LayerList
+  const DragDropLayerList = DragDropContext(HTML5Backend)(SdkLayerList);
+
   ReactDOM.render((
     <div>
       <h3>Try it out</h3>
       <div className='sdk-layerlist'>
         <Provider store={store}>
-          <SdkLayerList layerClass={LayerListItem} />
+          <DragDropLayerList layerClass={LayerListItem} />
         </Provider>
       </div>
     </div>
