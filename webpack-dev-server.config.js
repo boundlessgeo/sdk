@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 const common  = require('./webpack-common');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const Config = require('dotenv').config();
 
 const entry = common.getEntries(true);
@@ -36,7 +36,9 @@ const config = {
     filename: 'build/examples/[name]/[name].bundle.js',
   },
   plugins: [
-    new ExtractTextPlugin('build/examples/sdk.css'),
+    new MiniCssExtractPlugin({
+      filename: "build/examples/[name]/[name].bundle.css",
+    }),
     // Enables Hot Modules Replacement
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
@@ -54,16 +56,12 @@ const config = {
         },
       }, {
         test: /\.s?css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: ['css-loader', {
-            loader: 'sass-loader',
-            options: {
-              includePaths: ['node_modules'],
-            }
-          }],
-        }),
-
+        use: [MiniCssExtractPlugin.loader, 'css-loader', {
+          loader: 'sass-loader',
+          options: {
+            includePaths: ['node_modules'],
+          }
+        }],
       }
     ],
   },

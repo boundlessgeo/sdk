@@ -27,8 +27,6 @@ After this, run the following commands:
 
 `npm install` - install libraries
 
-`npm run build:examples` - build examples from templates
-
 `npm start` - start webpack-dev-server
 
 The last command should open your browser to a page of examples: http://localhost:3000/build/examples

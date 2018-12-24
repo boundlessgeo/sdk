@@ -3,8 +3,8 @@
   "version": "2.7.4",
   "description": "Boundless Web SDK",
   "scripts": {
-    "start": "webpack-dev-server --config webpack-dev-server.config.js --open --open-page 'build/examples'",
-    "serve": "webpack-dev-server --config webpack-dev-server.config.js",
+    "start": "npm run build:examples && webpack-dev-server --config webpack-dev-server.config.js --open --open-page 'build/examples'",
+    "serve": "npm run build:examples && webpack-dev-server --config webpack-dev-server.config.js --mode development --watch",
     "pretest": "npm run check-docs ; npm run lint",
     "test": "jest",
     "test:watch": "npm test -- --watch",
@@ -26,7 +26,7 @@
     "check-docs": "cd docs && ./doc_checker.sh"
   },
   "devDependencies": {
-    "@mapbox/mapbox-gl-draw": "^1.0.4",
+    "@mapbox/mapbox-gl-draw": "1.0.9",
     "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",
     "@turf/area": "^5.0.4",
     "@turf/distance": "^5.0.4",
@@ -57,7 +57,6 @@
     "eslint-plugin-jsx-a11y": "^5.0.2",
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-react": "^7.1.0",
-    "extract-text-webpack-plugin": "3.0.2",
     "fs-extra": "^4.0.2",
     "handlebars": "^4.0.10",
     "jest": "^20.0.4",
@@ -69,6 +68,7 @@
     "metalsmith": "^2.3.0",
     "metalsmith-layouts": "^1.8.1",
     "metalsmith-rootpath": "^1.0.4",
+    "mini-css-extract-plugin": "^0.5.0",
     "mixin": "^0.2.0",
     "nock": "^9.0.13",
     "node-sass": "^4.5.3",
@@ -85,9 +85,9 @@
     "redux-mock-store": "^1.2.3",
     "sass-loader": "6.0.6",
     "style-loader": "0.19.0",
-    "uglifyjs-webpack-plugin": "1.0.1",
-    "webpack": "3.8.1",
-    "webpack-dev-server": "2.9.3",
+    "terser-webpack-plugin": "^1.2.0",
+    "webpack": "4.28.0",
+    "webpack-dev-server": "^3.1.10",
     "xmldom": "^0.1.27"
   },
   "dependencies": {
@@ -97,7 +97,8 @@
     "prop-types": "^15.5.10",
     "react-docgen": "^2.19.0",
     "redux-saga": "^0.16.0",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "webpack-cli": "^3.1.2"
   },
   "peerDependencies": {
     "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",

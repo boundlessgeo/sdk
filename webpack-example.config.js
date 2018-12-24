@@ -2,8 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const common  = require('./webpack-common');
 const Config = require('dotenv').config();
-
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const entry = common.getEntries(false);
 
@@ -22,9 +21,9 @@ module.exports = {
     filename: 'build/hosted/examples/[name]/[name].bundle.js',
   },
   plugins: [
-    new UglifyJSPlugin({
+    new TerserPlugin({
       sourceMap: false,
-      uglifyOptions: {
+      terserOptions: {
         compress: {
           warnings: false,
           comparisons: false,  // don't optimize comparisons

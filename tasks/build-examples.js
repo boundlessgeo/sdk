@@ -58,6 +58,9 @@ function augmentExamples(files, metalsmith, done) {
       file.js = {
         tag: `<script src="./${id}.bundle.js"></script>`,
       };
+      file.sdkCss = {
+        tag: `<link rel="stylesheet" href="./${id}.bundle.css">`,
+      };
       const cssFilename = `${id}/app.css`;
       if (cssFilename in files) {
         file.css = {
